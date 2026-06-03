@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v0.55.0 — Đi tới đặc biệt
+
+- **Chọn nhanh các ô theo loại** (menu **Sửa → Đi tới đặc biệt**): chọn để tô sáng toàn bộ ô **trống / công thức / số / văn bản / có dữ liệu** trong trang — tiện rà soát và thao tác hàng loạt.
+
 ## v0.54.0 — Kiểu ô dựng sẵn
 
 - **Áp kiểu ô nhanh** (ô **Kiểu ô** trên thanh định dạng): chọn vùng rồi chọn kiểu **Tốt / Xấu / Trung tính / Tiêu đề / Tựa đề** để tô màu + chữ theo bộ có sẵn; chọn **Bình thường** để xóa định dạng.

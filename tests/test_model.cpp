@@ -8,6 +8,7 @@
 #include "model/AutoSum.h"
 #include "model/Validation.h"
 #include "model/CellStyles.h"
+#include "model/GotoSpecial.h"
 #include <QGuiApplication>
 #include <QFont>
 #include <QColor>
@@ -377,6 +378,19 @@ int main(int argc, char **argv) {
         ok(normal.contains("bg") && !normal.value("bg").isValid(), "kieu Binh thuong -> bg null (xoa)");
         ok(cellstyles::names().size() >= 5, "co >=5 kieu");
         ok(cellstyles::style("KhongCo").isEmpty(), "kieu la -> rong");
+    }
+
+    // --- di toi dac biet (goto special) ---
+    {
+        QVector<QVector<QString>> grid = {{"10", "", "=A1+1"}, {"text", "20", ""}};
+        using K = gotospecial::Kind;
+        ok(gotospecial::find(grid, K::Blanks).size() == 2, "2 o trong");
+        ok(gotospecial::find(grid, K::Formulas).size() == 1, "1 o cong thuc");
+        ok(gotospecial::find(grid, K::Numbers).size() == 2, "2 o so (10,20)");
+        ok(gotospecial::find(grid, K::Text).size() == 1, "1 o van ban");
+        ok(gotospecial::find(grid, K::Constants).size() == 3, "3 o hang (10,text,20)");
+        auto f = gotospecial::find(grid, K::Formulas);
+        ok(f.first().first == 0 && f.first().second == 2, "o cong thuc tai (0,2)");
     }
 
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);

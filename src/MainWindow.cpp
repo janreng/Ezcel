@@ -7,6 +7,7 @@
 #include "view/Visibility.h"
 #include "model/Filter.h"
 #include "model/PasteOps.h"
+#include "model/GotoSpecial.h"
 #include "ui/I18n.h"
 #include "update/Updater.h"
 #include "ui/Theme.h"
@@ -320,6 +321,26 @@ void MainWindow::buildMenus()
     edit->addAction(QStringLiteral("Xóa ghi chú ô"), this, [this] {
         QModelIndex idx = m_view->currentIndex();
         if (idx.isValid()) m_model->setNote(idx.row(), idx.column(), QString());
+    });
+    edit->addAction(QStringLiteral("Đi tới đặc biệt..."), this, [this] {
+        QStringList kinds{QStringLiteral("Ô trống"), QStringLiteral("Ô công thức"),
+                          QStringLiteral("Ô số"), QStringLiteral("Ô văn bản"),
+                          QStringLiteral("Ô có dữ liệu (hằng)")};
+        bool ok = false;
+        QString pick = QInputDialog::getItem(this, QStringLiteral("Đi tới đặc biệt"),
+            QStringLiteral("Chọn loại ô:"), kinds, 0, false, &ok);
+        if (!ok) return;
+        gotospecial::Kind k = gotospecial::Kind(kinds.indexOf(pick));
+        auto cells = gotospecial::find(m_model->grid(), k);
+        if (cells.isEmpty()) { statusBar()->showMessage(QStringLiteral("Không có ô nào khớp"), 3000); return; }
+        QItemSelection sel;
+        for (const auto &p : cells) {
+            QModelIndex idx = m_model->index(p.first, p.second);
+            sel.select(idx, idx);
+        }
+        m_view->selectionModel()->select(sel, QItemSelectionModel::ClearAndSelect);
+        m_view->setCurrentIndex(m_model->index(cells.first().first, cells.first().second));
+        statusBar()->showMessage(QStringLiteral("Đã chọn %1 ô").arg(cells.size()), 3000);
     });
 
     QMenu *st = menuBar()->addMenu(i18n::tr("menu_struct"));
