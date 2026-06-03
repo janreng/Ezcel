@@ -222,6 +222,34 @@ QHash<QString, Fn> &fnMap() {
         // PHI(x): mật độ phân phối chuẩn tắc. GAUSS(x): P(0<Z<x) = Φ(x) - 0.5.
         r["PHI"] = [need](const Args &a) { need(a,1,"PHI"); double x = toNumber(a[0]); return Value::number(std::exp(-x*x/2.0) / std::sqrt(2.0*M_PI)); };
         r["GAUSS"] = [need](const Args &a) { need(a,1,"GAUSS"); double x = toNumber(a[0]); return Value::number(0.5 * std::erf(x / std::sqrt(2.0))); };
+        // PERCENTRANK(array, x, [sig=3]): hạng của x theo tỉ lệ phần trăm trong tập (phương pháp INC).
+        r["PERCENTRANK"] = [](const Args &a) {
+            if (a.size() < 2 || a.size() > 3) argErr("PERCENTRANK");
+            auto v = numbers(std::vector<Value>{a[0]});
+            if (v.empty()) throw FormulaError(QStringLiteral("PERCENTRANK: vùng rỗng"), ERR_NUM);
+            std::sort(v.begin(), v.end());
+            double x = toNumber(a[1]);
+            if (x < v.front() || x > v.back()) throw FormulaError(QStringLiteral("PERCENTRANK: ngoài khoảng"), ERR_NA);
+            int sig = a.size() == 3 ? toInt(a[2]) : 3;
+            if (sig < 1) throw FormulaError(QStringLiteral("PERCENTRANK: significance>=1"), ERR_NUM);
+            int n = int(v.size());
+            double rank = 0;
+            for (int i = 0; i < n; ++i) {
+                if (v[i] == x) { rank = double(i) / (n - 1); break; }
+                if (v[i] < x && i + 1 < n && x < v[i+1]) { rank = (i + (x - v[i]) / (v[i+1] - v[i])) / (n - 1); break; }
+            }
+            double f = std::pow(10.0, sig);
+            return Value::number(std::floor(rank * f) / f); // cắt theo significance
+        };
+        // SERIESSUM(x, n, m, hệ_số): Σ coef[i] * x^(n + i*m).
+        r["SERIESSUM"] = [need](const Args &a) {
+            need(a,4,"SERIESSUM");
+            double x = toNumber(a[0]), n = toNumber(a[1]), m = toNumber(a[2]);
+            auto coef = numbers(std::vector<Value>{a[3]});
+            double s = 0;
+            for (int i = 0; i < int(coef.size()); ++i) s += coef[i] * std::pow(x, n + i*m);
+            return Value::number(s);
+        };
         // TEXTBEFORE/TEXTAFTER(text, delim, [instance=1], [match_mode=0]): lấy phần trước/sau dấu phân cách.
         // instance âm -> đếm từ cuối; match_mode 1 -> không phân biệt hoa thường.
         auto matchPositions = [](const QString &s, const QString &d, Qt::CaseSensitivity cs) {

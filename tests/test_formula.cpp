@@ -171,6 +171,13 @@ int main() {
     checkNum("=STANDARDIZE(40,40,2)", 0);
     checkNum("=MULTINOMIAL(2,3,4)", 1260);  // 9!/(2!3!4!)
     checkNum("=MULTINOMIAL(1,2,3)", 60);    // 6!/(1!2!3!)
+    // PERCENTRANK / SERIESSUM (Spec 12): A1:A3 = {10,20,30}
+    checkNum("=PERCENTRANK(A1:A3,10)", 0);
+    checkNum("=PERCENTRANK(A1:A3,30)", 1);
+    checkNum("=PERCENTRANK(A1:A3,20)", 0.5);
+    checkNum("=PERCENTRANK(A1:A3,15)", 0.25); // noi suy
+    checkNum("=SERIESSUM(2,0,1,A1:A3)", 170); // 10*1+20*2+30*4
+    checkNum("=SERIESSUM(1,0,1,A1:A3)", 60);  // 10+20+30
     checkStr("=A1/0", "#DIV/0!");
     checkStr("=IFERROR(A1/0,\"err\")", "err");
     checkStr("=AND(A1>5,A2>5)", "true");

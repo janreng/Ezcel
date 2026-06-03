@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v0.79.0 — Hàm PERCENTRANK & SERIESSUM (Spec 12)
+
+- **Thêm hàm `PERCENTRANK`** — xác định thứ hạng của một giá trị theo tỉ lệ phần trăm trong tập dữ liệu.
+- **Thêm hàm `SERIESSUM`** — tính tổng của một chuỗi lũy thừa theo các hệ số cho trước.
+
 ## v0.78.0 — Hàm STANDARDIZE & MULTINOMIAL (Spec 12)
 
 - **Thêm hàm `STANDARDIZE`** — chuẩn hóa một giá trị về điểm z dựa trên trung bình và độ lệch chuẩn.
