@@ -28,10 +28,15 @@ add_library(ezcel_model STATIC src/model/SpreadsheetModel.cpp src/model/Spreadsh
 target_include_directories(ezcel_model PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(ezcel_model PUBLIC ezcel_formula Qt6::Core Qt6::Gui)
 
+# --- I/O file (CSV; XLSX sau) — không phụ thuộc GUI -> static lib.
+add_library(ezcel_io STATIC src/io/Csv.cpp src/io/Csv.h)
+target_include_directories(ezcel_io PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_link_libraries(ezcel_io PUBLIC Qt6::Core)
+
 # --- App GUI ---
 qt_add_executable(Ezcel WIN32 src/main.cpp src/MainWindow.cpp src/MainWindow.h)
 target_include_directories(Ezcel PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
-target_link_libraries(Ezcel PRIVATE ezcel_model ezcel_formula Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Svg)
+target_link_libraries(Ezcel PRIVATE ezcel_model ezcel_io ezcel_formula Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Svg)
 
 # --- Tests (console, headless) ---
 add_executable(test_formula tests/test_formula.cpp)
@@ -40,6 +45,10 @@ target_link_libraries(test_formula PRIVATE ezcel_formula Qt6::Core)
 add_executable(test_model tests/test_model.cpp)
 target_link_libraries(test_model PRIVATE ezcel_model Qt6::Core Qt6::Gui)
 
+add_executable(test_io tests/test_io.cpp)
+target_link_libraries(test_io PRIVATE ezcel_io Qt6::Core)
+
 enable_testing()
 add_test(NAME formula COMMAND test_formula)
 add_test(NAME model COMMAND test_model)
+add_test(NAME io COMMAND test_io)

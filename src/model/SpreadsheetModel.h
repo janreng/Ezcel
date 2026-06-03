@@ -29,6 +29,10 @@ public:
     Qt::ItemFlags flags(const QModelIndex &index) const override;
 
     void resizeGrid(int rows, int cols);
+    // Nạp toàn bộ lưới từ file (CSV/XLSX): thay dữ liệu, dựng lại deps, xóa undo.
+    void loadGrid(const QVector<QVector<QString>> &rows);
+    // Toàn bộ ô thô (để lưu file). Hàng/cột rỗng vẫn giữ nguyên kích thước lưới.
+    const QVector<QVector<QString>> &grid() const { return m_data; }
     static QString columnLabel(int col);
 
     // Giá trị ĐÃ TÍNH của ô (resolver cho engine; chống vòng tham chiếu).

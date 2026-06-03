@@ -1,8 +1,10 @@
 #include "MainWindow.h"
 #include "model/SpreadsheetModel.h"
+#include "io/Csv.h"
 
 #include <QTableView>
 #include <QHeaderView>
+#include <QFileInfo>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -23,6 +25,14 @@ MainWindow::~MainWindow() = default;
 
 void MainWindow::openPath(const QString &path)
 {
-    // P4: đọc CSV/XLSX vào model. Tạm thời chưa làm gì.
-    Q_UNUSED(path);
+    const QString suffix = QFileInfo(path).suffix().toLower();
+    // XLSX/XLSM sẽ thêm sau (cần thư viện OOXML). Hiện hỗ trợ CSV/TXT/TSV.
+    if (suffix == "csv" || suffix == "txt" || suffix == "tsv") {
+        bool ok = false;
+        csvio::Grid rows = csvio::loadCsv(path, &ok);
+        if (ok) {
+            m_model->loadGrid(rows);
+            setWindowTitle(QStringLiteral("Ezcel — %1").arg(QFileInfo(path).fileName()));
+        }
+    }
 }

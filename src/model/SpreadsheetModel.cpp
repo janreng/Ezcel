@@ -502,6 +502,26 @@ void SpreadsheetModel::resizeGrid(int rows, int cols) {
     endResetModel();
 }
 
+void SpreadsheetModel::loadGrid(const QVector<QVector<QString>> &rows) {
+    beginResetModel();
+    m_data = rows;
+    // Bảo đảm lưới chữ nhật (đề phòng nguồn không chuẩn).
+    int width = 0;
+    for (const auto &r : m_data) width = qMax(width, int(r.size()));
+    width = qMax(width, 1);
+    if (m_data.isEmpty()) m_data.push_back(QVector<QString>(width));
+    for (auto &r : m_data) while (r.size() < width) r.push_back(QString());
+
+    m_evalCache.clear();
+    m_evaluating.clear();
+    m_fmt.clear();
+    m_undo.clear();
+    m_redo.clear();
+    rebuildDeps();
+    endResetModel();
+    emit contentChanged();
+}
+
 QString SpreadsheetModel::columnLabel(int col) {
     QString s; int n = col;
     do { s.prepend(QChar('A' + (n % 26))); n = n / 26 - 1; } while (n >= 0);
