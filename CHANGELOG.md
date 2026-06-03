@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v0.75.0 — Hàm biến đổi Fisher FISHER & FISHERINV (Spec 12)
+
+- **Thêm hàm `FISHER`** — biến đổi Fisher một giá trị (trong khoảng -1 đến 1), thường dùng để chuẩn hóa hệ số tương quan.
+- **Thêm hàm `FISHERINV`** — biến đổi Fisher nghịch đảo, đưa giá trị về dạng ban đầu.
+
 ## v0.74.0 — Hàm hình dạng phân phối SKEW & KURT (Spec 12)
 
 - **Thêm hàm `SKEW`** — tính độ lệch (skewness) của tập dữ liệu mẫu, cho biết phân phối nghiêng về bên nào.

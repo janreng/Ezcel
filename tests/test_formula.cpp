@@ -148,6 +148,12 @@ int main() {
     checkNum("=SKEW(1,2,3,4,5)", 0);        // doi xung -> 0
     checkNum("=SKEW(1,1,2)", 1.7320508075688772); // = can(3)
     checkNum("=KURT(1,2,3,4,5)", -1.2);     // gia tri Excel
+    // FISHER / FISHERINV (Spec 12) — cap nghich dao
+    checkNum("=FISHER(0)", 0);
+    checkNum("=FISHER(0.5)", 0.5493061443340548); // atanh(0.5)
+    checkNum("=FISHERINV(0)", 0);
+    checkNum("=FISHERINV(FISHER(0.5))", 0.5);      // khu hoi
+    checkNum("=FISHER(FISHERINV(1.2))", 1.2);
     checkStr("=A1/0", "#DIV/0!");
     checkStr("=IFERROR(A1/0,\"err\")", "err");
     checkStr("=AND(A1>5,A2>5)", "true");
