@@ -27,6 +27,8 @@
 #include <QFileInfo>
 #include <QKeySequence>
 #include <QItemSelectionModel>
+#include <QItemSelection>
+#include <QPoint>
 
 // Bộ lọc file dùng chung cho mở/lưu.
 static const char *kFileFilter =
@@ -87,22 +89,70 @@ void MainWindow::buildFormulaBar()
     auto *h = new QHBoxLayout(bar);
     h->setContentsMargins(4, 2, 4, 2);
     h->setSpacing(6);
+    // Name Box (ô địa chỉ A1) bên trái — giống Excel.
+    m_nameBox = new QLineEdit(bar);
+    m_nameBox->setFixedWidth(80);
+    m_nameBox->setToolTip(QStringLiteral("Ô tên: gõ địa chỉ (vd A1, B2:C5) rồi Enter để nhảy"));
     auto *fx = new QLabel(QStringLiteral("fx"), bar);
     fx->setStyleSheet("font-style: italic; color: #666;");
     m_formulaBar = new QLineEdit(bar);
     m_formulaBar->setPlaceholderText(QStringLiteral("Nội dung / công thức ô đang chọn"));
+    h->addWidget(m_nameBox);
     h->addWidget(fx);
     h->addWidget(m_formulaBar, 1);
     connect(m_formulaBar, &QLineEdit::returnPressed, this, &MainWindow::onFormulaBarCommitted);
+    connect(m_nameBox, &QLineEdit::returnPressed, this, &MainWindow::onNameBoxCommitted);
 }
 
 void MainWindow::onCurrentCellChanged(const QModelIndex &cur, const QModelIndex &)
 {
+    if (cur.isValid() && m_nameBox && !m_nameBox->hasFocus())
+        m_nameBox->setText(SpreadsheetModel::columnLabel(cur.column()) + QString::number(cur.row() + 1));
     if (m_formulaBar->hasFocus()) return; // đang gõ, đừng đè
     if (cur.isValid())
         m_formulaBar->setText(m_model->data(cur, Qt::EditRole).toString());
     else
         m_formulaBar->clear();
+}
+
+// "A1" -> (row,col) 0-based; trả {-1,-1} nếu sai. Phần chữ = cột, phần số = dòng.
+static QPoint parseCellRef(const QString &ref)
+{
+    QString s = ref.trimmed().toUpper();
+    int i = 0, col = 0;
+    while (i < s.size() && s[i].isLetter()) { col = col * 26 + (s[i].unicode() - 'A' + 1); ++i; }
+    if (i == 0 || i >= s.size()) return {-1, -1};
+    bool ok = false; int row = s.mid(i).toInt(&ok);
+    if (!ok || row < 1) return {-1, -1};
+    return {col - 1, row - 1}; // x=col, y=row
+}
+
+void MainWindow::onNameBoxCommitted()
+{
+    const QString text = m_nameBox->text().trimmed();
+    QString first = text.section(':', 0, 0), last = text.section(':', 1, 1);
+    QPoint a = parseCellRef(first);
+    if (a.x() < 0) { m_view->setFocus(); return; }
+    int rows = m_model->rowCount(), cols = m_model->columnCount();
+    if (a.y() >= rows || a.x() >= cols) { m_view->setFocus(); return; }
+
+    QModelIndex anchor = m_model->index(a.y(), a.x());
+    if (!last.isEmpty()) {
+        QPoint b = parseCellRef(last);
+        if (b.x() >= 0 && b.y() < rows && b.x() < cols) {
+            // Chọn vùng A:B.
+            QModelIndex c2 = m_model->index(qMin(b.y(), rows - 1), qMin(b.x(), cols - 1));
+            m_view->setCurrentIndex(anchor);
+            m_view->selectionModel()->select(QItemSelection(anchor, c2),
+                                             QItemSelectionModel::ClearAndSelect);
+            m_view->scrollTo(anchor);
+            m_view->setFocus();
+            return;
+        }
+    }
+    m_view->setCurrentIndex(anchor);
+    m_view->scrollTo(anchor);
+    m_view->setFocus();
 }
 
 void MainWindow::onFormulaBarCommitted()

@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v0.28.0 — Ô địa chỉ (Name Box)
+
+- **Ô địa chỉ bên trái thanh công thức** (giống Excel): luôn hiện vị trí ô đang chọn (vd `A1`). Gõ một địa chỉ (`B10`) hoặc một vùng (`A1:C5`) rồi Enter để **nhảy/chọn nhanh** tới đó.
+
 ## v0.27.0 — Viền ô đang chọn kiểu Excel
 
 - **Ô đang chọn có viền xanh đậm** (màu xanh Excel) bao quanh — giống hệt con trỏ ô của Excel, dễ nhìn thấy mình đang ở ô nào.

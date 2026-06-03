@@ -41,6 +41,7 @@ private slots:
     void replaceAllFromDialog();
     void onCurrentCellChanged(const QModelIndex &cur, const QModelIndex &prev);
     void onFormulaBarCommitted();
+    void onNameBoxCommitted();   // gõ ref ô (A1 / A1:B3) -> nhảy/chọn
 
 private:
     void buildMenus();
@@ -61,6 +62,7 @@ private:
     QTableView *m_view = nullptr;
     SpreadsheetModel *m_model = nullptr;
     QLineEdit *m_formulaBar = nullptr;
+    QLineEdit *m_nameBox = nullptr; // ô địa chỉ (A1) cạnh thanh công thức
     QString m_currentPath; // rỗng = chưa lưu lần nào
 
     // Hộp thoại Tìm & Thay thế (modeless, dựng lười).
