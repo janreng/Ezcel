@@ -10,6 +10,7 @@
 #include "ui/I18n.h"
 #include "update/Updater.h"
 #include "ui/Theme.h"
+#include "model/Stats.h"
 
 #include <QTableView>
 #include <QHeaderView>
@@ -72,10 +73,13 @@ MainWindow::MainWindow(QWidget *parent)
     buildMenus();
     buildToolbar();
     buildFormatToolbar();
-    statusBar();
+    m_statsLabel = new QLabel(this);
+    statusBar()->addPermanentWidget(m_statsLabel);
 
     connect(m_view->selectionModel(), &QItemSelectionModel::currentChanged,
             this, &MainWindow::onCurrentCellChanged);
+    connect(m_view->selectionModel(), &QItemSelectionModel::selectionChanged,
+            this, [this] { updateStats(); });
     connect(m_model, &SpreadsheetModel::contentChanged, this, [this] {
         // Cập nhật thanh công thức khi nội dung ô hiện tại đổi (vd undo/redo).
         onCurrentCellChanged(m_view->currentIndex(), QModelIndex());
@@ -562,6 +566,24 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *ev)
         }
     }
     return QMainWindow::eventFilter(obj, ev);
+}
+
+// ---------------------------------------------------------------- thống kê vùng chọn
+void MainWindow::updateStats()
+{
+    auto idxs = m_view->selectionModel()->selectedIndexes();
+    if (idxs.size() < 2) { m_statsLabel->clear(); return; } // 1 ô thì khỏi hiện
+    QVector<QString> vals;
+    vals.reserve(idxs.size());
+    for (const QModelIndex &i : idxs)
+        vals.push_back(m_model->data(i, Qt::DisplayRole).toString());
+    stats::Result r = stats::compute(vals);
+    if (r.count == 0) { m_statsLabel->clear(); return; }
+    QString s = QStringLiteral("Đếm: %1").arg(r.count);
+    if (r.numCount > 0)
+        s += QStringLiteral("   Tổng: %1   TB: %2")
+                 .arg(r.sum, 0, 'g', 10).arg(r.avg, 0, 'g', 10);
+    m_statsLabel->setText(s);
 }
 
 // ---------------------------------------------------------------- tiêu đề

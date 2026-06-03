@@ -4,6 +4,7 @@
 #include "model/CondFormat.h"
 #include "model/Filter.h"
 #include "model/PasteOps.h"
+#include "model/Stats.h"
 #include <QGuiApplication>
 #include <QFont>
 #include <QColor>
@@ -295,6 +296,17 @@ int main(int argc, char **argv) {
         ok(t.size() == 3 && t[0].size() == 2, "transpose 2x3 -> 3x2");
         ok(t[0][0] == "a" && t[0][1] == "1" && t[2][1] == "3", "transpose dung vi tri");
         ok(pasteops::transpose({}).isEmpty(), "transpose rong -> rong");
+    }
+
+    // --- thong ke vung chon ---
+    {
+        stats::Result r = stats::compute({"10", "20", "abc", "", "30"});
+        ok(r.count == 4, "dem 4 o khac rong");
+        ok(r.numCount == 3, "3 o so");
+        ok(r.sum == 60.0, "tong 60");
+        ok(r.avg == 20.0, "trung binh 20");
+        stats::Result e = stats::compute({"x", "y"});
+        ok(e.count == 2 && e.numCount == 0 && e.avg == 0, "khong co so -> avg 0");
     }
 
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);

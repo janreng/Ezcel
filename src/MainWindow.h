@@ -4,6 +4,7 @@
 
 class QTableView;
 class QLineEdit;
+class QLabel;
 class QCheckBox;
 class QDialog;
 class QModelIndex;
@@ -69,6 +70,8 @@ private:
     SpreadsheetModel *m_model = nullptr;
     QLineEdit *m_formulaBar = nullptr;
     QLineEdit *m_nameBox = nullptr; // ô địa chỉ (A1) cạnh thanh công thức
+    QLabel *m_statsLabel = nullptr; // thống kê vùng chọn ở thanh trạng thái
+    void updateStats();             // tính lại thống kê vùng chọn
     QString m_currentPath; // rỗng = chưa lưu lần nào
     int m_zoom = 100;      // mức thu phóng (%)
 

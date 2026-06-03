@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v0.38.0 — Thống kê vùng chọn
+
+- **Xem nhanh tổng / trung bình / số ô**: khi bôi đen nhiều ô, góc phải thanh trạng thái hiện ngay **Đếm**, **Tổng** và **Trung bình** của vùng chọn — không cần gõ công thức.
+
 ## v0.37.0 — Thanh công cụ kiểu dải lệnh
 
 - **Thanh công cụ gọn và chuyên nghiệp hơn**: nền xám nhạt, nút bo góc và sáng lên khi rê chuột, có vạch ngăn nhóm — nhìn giống dải lệnh (ribbon) quen thuộc.
