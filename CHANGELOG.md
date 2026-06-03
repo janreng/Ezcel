@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v0.24.0 — Biểu tượng ứng dụng
+
+- **Ezcel đã có icon riêng**: hiển thị trên thanh tiêu đề cửa sổ, thanh tác vụ và bộ cài đặt (giống biểu tượng quen thuộc của bản trước).
+
 ## v0.23.0 — Lưu định dạng vào file XLSX
 
 - **Định dạng giờ được lưu vào file `.xlsx`**: phông chữ, cỡ chữ, in đậm/nghiêng/gạch, màu chữ, màu nền, căn lề, xuống dòng và định dạng số (số nghìn, phần trăm…) đều được giữ khi lưu và mở lại — không còn mất định dạng sau khi đóng file.

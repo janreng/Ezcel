@@ -4,7 +4,7 @@
 
 #define MyAppName "Ezcel"
 #ifndef MyAppVersion
-  #define MyAppVersion "0.23.0"
+  #define MyAppVersion "0.24.0"
 #endif
 #define MyAppPublisher "EZG"
 #define MyAppExeName "Ezcel.exe"
@@ -22,6 +22,7 @@ DisableProgramGroupPage=yes
 PrivilegesRequired=lowest
 OutputDir=installer
 OutputBaseFilename=Ezcel-Setup-{#MyAppVersion}
+SetupIconFile=assets\icon.ico
 UninstallDisplayIcon={app}\{#MyAppExeName}
 Compression=lzma2
 SolidCompression=yes

@@ -1,5 +1,6 @@
 // Điểm vào — tạo QApplication, mở MainWindow. Tương đương main.py/__main__.py bản Python.
 #include <QApplication>
+#include <QIcon>
 #include "MainWindow.h"
 
 int main(int argc, char *argv[])
@@ -10,6 +11,7 @@ int main(int argc, char *argv[])
     QApplication::setApplicationName("Ezcel");
     QApplication::setOrganizationName("PyExcel"); // giữ QSettings org cũ
     QApplication::setApplicationDisplayName("Ezcel");
+    QApplication::setWindowIcon(QIcon(QStringLiteral(":/icon.png"))); // icon app (nhúng qua .qrc)
 
     MainWindow w;
     // Mở kèm file nếu truyền qua CLI (port dần ở P4).
