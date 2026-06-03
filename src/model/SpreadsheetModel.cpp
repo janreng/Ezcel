@@ -4,6 +4,7 @@
 #include "model/Sort.h"
 #include "model/Validation.h"
 #include "model/NumberFormat.h"
+#include "model/SeriesFill.h"
 
 #include <QColor>
 #include <QDate>
@@ -537,8 +538,10 @@ void SpreadsheetModel::autofillVertical(int col, int srcTop, int srcBottom, int 
             int idx = (r - srcTop) % srcLen;
             QString base = src[idx];
             if (srcLen == 1) {
+                auto cal = seriesfill::next(base, r - srcBottom);
                 auto inc = incrementTrailing(base, r - srcBottom);
-                if (inc) val = *inc;
+                if (cal) val = *cal;
+                else if (inc) val = *inc;
                 else if (formula::isFormula(base)) val = formula::offsetFormula(base, r - srcTop, 0);
                 else val = base;
             } else {
@@ -565,8 +568,10 @@ void SpreadsheetModel::autofillHorizontal(int row, int srcLeft, int srcRight, in
             int idx = (c - srcLeft) % srcLen;
             QString base = src[idx];
             if (srcLen == 1) {
+                auto cal = seriesfill::next(base, c - srcRight);
                 auto inc = incrementTrailing(base, c - srcRight);
-                if (inc) val = *inc;
+                if (cal) val = *cal;
+                else if (inc) val = *inc;
                 else if (formula::isFormula(base)) val = formula::offsetFormula(base, 0, c - srcLeft);
                 else val = base;
             } else {

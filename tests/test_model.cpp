@@ -94,6 +94,14 @@ int main(int argc, char **argv) {
     m.autofillHorizontal(7, 0, 1, 3);
     ok(disp(m, 7, 2) == "15" && disp(m, 7, 3) == "20", "autofill ngang 15,20");
 
+    // --- autofill chuoi lich (Spec 05): Jan -> Feb/Mar, Mon -> Tue ---
+    put(m, 0, 4, "Jan"); // E1
+    m.autofillVertical(4, 0, 0, 2);
+    ok(disp(m, 1, 4) == "Feb" && disp(m, 2, 4) == "Mar", "autofill Jan->Feb/Mar");
+    put(m, 5, 4, "Mon"); // E6
+    m.autofillVertical(4, 5, 5, 6);
+    ok(disp(m, 6, 4) == "Tue", "autofill Mon->Tue");
+
     // --- paste block voi offset cong thuc ---
     QVector<QVector<QString>> block = {{"=A1+A2"}};
     m.pasteBlock(5, 1, block, 2, 0); // anchor (2,0) -> (5,1): drow=3 dcol=1

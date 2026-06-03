@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v1.17.0 — Tự điền chuỗi lịch & quý (Spec 05)
+
+- **Kéo để tự điền chuỗi thứ, tháng và quý**: từ `Mon` ra `Tue, Wed…`, `Jan` ra `Feb, Mar…`, `Q1` ra `Q2, Q3, Q4` (tự xoay vòng), giữ nguyên kiểu chữ hoa/thường — bổ sung cho tự điền dãy số và chuỗi có số sẵn có.
+
 ## v1.16.0 — Thống kê bảng tính (Spec 57)
 
 - **Thêm hộp thoại "Thống kê bảng tính"** trong menu Trợ giúp: hiển thị số ô có dữ liệu, số công thức, số ô là số và số từ — cho cả trang hiện tại và toàn bộ bảng tính (tất cả các trang). Tiện kiểm tra nhanh độ phức tạp của tệp.
