@@ -957,6 +957,38 @@ QHash<QString, Fn> &fnMap() {
         r["IMREAL"]      = [need, parseComplex](const Args &a) { need(a,1,"IMREAL"); return Value::number(parseComplex(toText(a[0])).first); };
         r["IMAGINARY"]   = [need, parseComplex](const Args &a) { need(a,1,"IMAGINARY"); return Value::number(parseComplex(toText(a[0])).second); };
         r["IMABS"]       = [need, parseComplex](const Args &a) { need(a,1,"IMABS"); auto c = parseComplex(toText(a[0])); return Value::number(std::hypot(c.first, c.second)); };
+        // Dựng chuỗi "a+bi" từ phần thực/ảo (dùng cho phép toán số phức).
+        auto formatComplex = [](double re, double im) {
+            auto numS = [](double d) { return QString::number(d, 'g', 15); };
+            if (im == 0) return numS(re);
+            QString imCoef = im == 1 ? QString() : im == -1 ? QStringLiteral("-") : numS(im);
+            QString imagPart = imCoef + QStringLiteral("i");
+            if (re == 0) return imagPart;
+            return numS(re) + (im > 0 ? QStringLiteral("+") : QString()) + imagPart;
+        };
+        // Phép toán số phức: tổng, hiệu, liên hợp, góc (argument).
+        r["IMSUM"] = [parseComplex, formatComplex](const Args &a) {
+            if (a.empty()) argErr("IMSUM");
+            double re = 0, im = 0;
+            for (const Value &v : a) { auto c = parseComplex(toText(v)); re += c.first; im += c.second; }
+            return Value::str(formatComplex(re, im));
+        };
+        r["IMSUB"] = [need, parseComplex, formatComplex](const Args &a) {
+            need(a,2,"IMSUB");
+            auto c1 = parseComplex(toText(a[0])), c2 = parseComplex(toText(a[1]));
+            return Value::str(formatComplex(c1.first - c2.first, c1.second - c2.second));
+        };
+        r["IMCONJUGATE"] = [need, parseComplex, formatComplex](const Args &a) {
+            need(a,1,"IMCONJUGATE");
+            auto c = parseComplex(toText(a[0]));
+            return Value::str(formatComplex(c.first, -c.second));
+        };
+        r["IMARGUMENT"] = [need, parseComplex](const Args &a) {
+            need(a,1,"IMARGUMENT");
+            auto c = parseComplex(toText(a[0]));
+            if (c.first == 0 && c.second == 0) throw FormulaError(QStringLiteral("IMARGUMENT: số phức 0"), ERR_DIV0);
+            return Value::number(std::atan2(c.second, c.first));
+        };
 
         // --- thống kê ---
         r["MEDIAN"] = [](const Args &a) { auto n = numbers(a); if (n.empty()) throw FormulaError(QStringLiteral("MEDIAN cần ít nhất một số")); std::sort(n.begin(), n.end()); size_t m = n.size(); return Value::number(m%2 ? n[m/2] : (n[m/2-1]+n[m/2])/2.0); };

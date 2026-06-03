@@ -401,6 +401,12 @@ int main() {
     checkNum("=IMAGINARY(\"-i\")", -1);
     checkNum("=IMAGINARY(\"5\")", 0);
     checkNum("=IMABS(\"3+4i\")", 5);
+    // Phep toan so phuc (Spec 12)
+    checkStr("=IMSUM(\"3+4i\",\"1+2i\")", "4+6i");
+    checkStr("=IMSUB(\"3+4i\",\"1+2i\")", "2+2i");
+    checkStr("=IMCONJUGATE(\"3+4i\")", "3-4i");
+    checkNum("=IMARGUMENT(\"1+i\")", 0.7853981633974483);  // pi/4
+    checkNum("=IMARGUMENT(\"3+4i\")", 0.9272952180016122);
 
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);
     return g_fail == 0 ? 0 : 1;

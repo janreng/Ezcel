@@ -1,5 +1,11 @@
 # Lịch sử thay đổi
 
+## v1.1.0 — Phép toán số phức (Spec 12)
+
+- **Thêm hàm `IMSUM` và `IMSUB`** — cộng và trừ các số phức.
+- **Thêm hàm `IMCONJUGATE`** — tính số phức liên hợp.
+- **Thêm hàm `IMARGUMENT`** — tính góc (argument) của số phức theo radian.
+
 ## v1.0.0 — Phiên bản 1.0 🎉
 
 **Cột mốc lớn:** đây là bản viết lại hoàn chỉnh bằng C++/Qt6 — khởi động nhanh hơn, thao tác mượt hơn và đầy đủ tính năng so với bản cũ. Ứng dụng đã có:
