@@ -41,6 +41,11 @@ public:
     Qt::ItemFlags flags(const QModelIndex &index) const override;
 
     void resizeGrid(int rows, int cols);
+    // Chèn/xóa hàng-cột (đều undoable, dời định dạng + ô gộp theo). Port insert/removeRows/Columns.
+    void insertRows(int row, int count = 1);
+    void removeRows(int row, int count = 1);
+    void insertColumns(int col, int count = 1);
+    void removeColumns(int col, int count = 1);
     // Nạp toàn bộ lưới từ file (CSV/XLSX): thay dữ liệu, dựng lại deps, xóa undo.
     void loadGrid(const QVector<QVector<QString>> &rows);
     // Toàn bộ ô thô (để lưu file). Hàng/cột rỗng vẫn giữ nguyên kích thước lưới.
@@ -89,9 +94,12 @@ signals:
 private:
     struct CellChange { int row, col; QString oldVal, newVal; };
     struct FmtChange  { int row, col; Format oldFmt, newFmt; };
+    // Ảnh chụp toàn lưới cho thao tác cấu trúc (chèn/xóa hàng-cột).
+    struct Snapshot { QVector<QVector<QString>> data; QHash<qint64, Format> fmt; QVector<MergeRange> merges; };
     struct UndoEntry  {
         QVector<CellChange> cells; QVector<FmtChange> fmts;
         bool hasMerges = false; QVector<MergeRange> mergesOld, mergesNew;
+        std::optional<Snapshot> snapBefore, snapAfter; // có giá trị -> thao tác cấu trúc
     };
 
     QVector<QVector<QString>> m_data;            // lưới thô (chuỗi/công thức)
@@ -129,5 +137,9 @@ private:
     bool mergeBoxInto(const MergeRange &box, UndoEntry &e);
     bool unmergeBoxInto(const MergeRange &box);
     void toggleMergeRangesImpl(const QVector<MergeRange> &boxes, bool forceMerge);
+    Snapshot snapshot() const;                 // chụp toàn bộ data+fmt+merges
+    void restoreSnapshot(const Snapshot &s);   // khôi phục (reset model)
+    void shiftFmtRows(int row, int count);     // dời khóa _fmt khi chèn/xóa hàng
+    void shiftFmtCols(int col, int count);     // dời khóa _fmt khi chèn/xóa cột
     void applyCellChanges(QVector<CellChange> changes); // batch: undo + set + deps + recalc
 };

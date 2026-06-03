@@ -158,6 +158,48 @@ int main(int argc, char **argv) {
         ok(!mm.formatAt(0, 0).contains("number_format"), "xoa number_format khi value null");
     }
 
+    // --- chen/xoa hang-cot ---
+    {
+        SpreadsheetModel mm;
+        mm.resizeGrid(5, 4);
+        put(mm, 0, 0, "A1"); put(mm, 1, 0, "A2"); put(mm, 2, 0, "A3");
+        SpreadsheetModel::Format bold; bold.insert("bold", true);
+        mm.setFormat(2, 0, 2, 0, bold);          // dinh dang o A3
+
+        mm.insertRows(1, 1);                      // chen 1 hang truoc hang index 1
+        ok(mm.rowCount() == 6, "insertRows tang so hang");
+        ok(disp(mm, 0, 0) == "A1" && disp(mm, 1, 0) == "" && disp(mm, 2, 0) == "A2",
+           "insertRows doi du lieu xuong");
+        QVariant fv2 = mm.data(mm.index(3, 0), Qt::FontRole); // A3 doi xuong hang 3
+        ok(fv2.canConvert<QFont>() && fv2.value<QFont>().bold(), "insertRows doi dinh dang theo");
+
+        mm.undo();
+        ok(mm.rowCount() == 5 && disp(mm, 1, 0) == "A2", "undo insertRows");
+        mm.redo();
+        ok(mm.rowCount() == 6 && disp(mm, 2, 0) == "A2", "redo insertRows");
+
+        mm.removeRows(1, 1);                       // xoa lai hang vua chen
+        ok(mm.rowCount() == 5 && disp(mm, 1, 0) == "A2", "removeRows xoa hang");
+
+        // cot
+        put(mm, 0, 1, "B1");
+        mm.insertColumns(1, 2);
+        ok(mm.columnCount() == 6 && disp(mm, 0, 3) == "B1", "insertColumns doi cot phai");
+        mm.removeColumns(1, 2);
+        ok(mm.columnCount() == 4 && disp(mm, 0, 1) == "B1", "removeColumns xoa cot");
+
+        // merge doi theo khi chen hang
+        SpreadsheetModel mm2;
+        mm2.resizeGrid(6, 6);
+        mm2.mergeCells(2, 1, 3, 2);                // C3:B4 vung [2,1]-[3,2]
+        mm2.insertRows(0, 1);                       // chen 1 hang dau -> vung tut xuong
+        auto at = mm2.mergeAt(3, 1);
+        ok(at.has_value() && at->top == 3 && at->bottom == 4, "insertRows doi vung gop xuong");
+        mm2.removeRows(0, 1);
+        auto at2 = mm2.mergeAt(2, 1);
+        ok(at2.has_value() && at2->top == 2, "removeRows doi vung gop len lai");
+    }
+
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);
     return g_fail == 0 ? 0 : 1;
 }

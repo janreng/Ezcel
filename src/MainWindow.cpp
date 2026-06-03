@@ -133,6 +133,21 @@ void MainWindow::buildMenus()
     edit->addAction(QStringLiteral("Điền phải"), QKeySequence(QStringLiteral("Ctrl+R")), this, &MainWindow::fillRight);
     edit->addAction(QStringLiteral("Gộp / bỏ gộp ô"), this, &MainWindow::toggleMergeSelection);
 
+    QMenu *st = menuBar()->addMenu(QStringLiteral("&Cấu trúc"));
+    st->addAction(QStringLiteral("Chèn hàng trên"), this, [this] {
+        int t, l, b, r; if (selectionBox(t, l, b, r)) m_model->insertRows(t, b - t + 1);
+    });
+    st->addAction(QStringLiteral("Chèn cột trái"), this, [this] {
+        int t, l, b, r; if (selectionBox(t, l, b, r)) m_model->insertColumns(l, r - l + 1);
+    });
+    st->addSeparator();
+    st->addAction(QStringLiteral("Xóa hàng"), this, [this] {
+        int t, l, b, r; if (selectionBox(t, l, b, r)) m_model->removeRows(t, b - t + 1);
+    });
+    st->addAction(QStringLiteral("Xóa cột"), this, [this] {
+        int t, l, b, r; if (selectionBox(t, l, b, r)) m_model->removeColumns(l, r - l + 1);
+    });
+
     QMenu *view = menuBar()->addMenu(QStringLiteral("&Xem"));
     QAction *sf = view->addAction(QStringLiteral("Hiện công thức"));
     sf->setCheckable(true);

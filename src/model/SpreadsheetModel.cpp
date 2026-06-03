@@ -359,6 +359,10 @@ void SpreadsheetModel::pushUndo(UndoEntry entry) {
 }
 
 void SpreadsheetModel::applyEntry(const UndoEntry &e, bool useOld) {
+    if (e.snapBefore.has_value()) {            // thao tác cấu trúc -> khôi phục toàn lưới
+        restoreSnapshot(useOld ? *e.snapBefore : *e.snapAfter);
+        return;
+    }
     for (const auto &cc : e.cells) {
         m_data[cc.row][cc.col] = useOld ? cc.oldVal : cc.newVal;
         updateDeps(cc.row, cc.col);
@@ -573,6 +577,126 @@ void SpreadsheetModel::toggleMergeRangesImpl(const QVector<MergeRange> &boxes, b
     pushUndo(std::move(e));
     recalculateAll();
     emit mergesChanged();
+}
+
+// ---------------------------------------------------------------- chèn/xóa hàng-cột
+SpreadsheetModel::Snapshot SpreadsheetModel::snapshot() const {
+    return Snapshot{m_data, m_fmt, m_merges};
+}
+
+void SpreadsheetModel::restoreSnapshot(const Snapshot &s) {
+    beginResetModel();
+    m_data = s.data; m_fmt = s.fmt; m_merges = s.merges;
+    m_evalCache.clear(); m_evaluating.clear(); m_fontCache.clear();
+    rebuildDeps();
+    endResetModel();
+    emit mergesChanged();
+    emit contentChanged();
+}
+
+void SpreadsheetModel::shiftFmtRows(int row, int count) {
+    QHash<qint64, Format> nf;
+    for (auto it = m_fmt.constBegin(); it != m_fmt.constEnd(); ++it) {
+        int r = keyRow(it.key()), c = keyCol(it.key());
+        if (count < 0 && r >= row && r < row - count) continue; // ô bị xóa
+        if (r >= row) r += count;
+        nf.insert(key(r, c), it.value());
+    }
+    m_fmt = nf;
+}
+
+void SpreadsheetModel::shiftFmtCols(int col, int count) {
+    QHash<qint64, Format> nf;
+    for (auto it = m_fmt.constBegin(); it != m_fmt.constEnd(); ++it) {
+        int r = keyRow(it.key()), c = keyCol(it.key());
+        if (count < 0 && c >= col && c < col - count) continue; // ô bị xóa
+        if (c >= col) c += count;
+        nf.insert(key(r, c), it.value());
+    }
+    m_fmt = nf;
+}
+
+namespace {
+// Dời/co vùng gộp theo trục: chèn (count>0) hoặc xóa (count<0) tại pivot.
+// Trả false nếu vùng nằm trọn trong dải bị xóa (cần loại bỏ).
+bool shiftBand(int &lo, int &hi, int pivot, int count) {
+    if (count > 0) {                 // chèn
+        if (lo >= pivot) lo += count;
+        if (hi >= pivot) hi += count;
+    } else {                          // xóa [pivot, pivot-count)
+        int del = -count, end = pivot + del;
+        if (lo >= pivot && hi < end) return false;       // trọn trong dải xóa
+        if (lo >= end) lo -= del; else if (lo >= pivot) lo = pivot;
+        if (hi >= end) hi -= del; else if (hi >= pivot) hi = pivot - 1;
+        if (hi < lo) return false;
+    }
+    return true;
+}
+} // namespace
+
+void SpreadsheetModel::insertRows(int row, int count) {
+    if (count <= 0) return;
+    Snapshot before = snapshot();
+    int width = columnCount() ? columnCount() : 1;
+    beginInsertRows(QModelIndex(), row, row + count - 1);
+    for (int i = 0; i < count; ++i) m_data.insert(row, QVector<QString>(width));
+    shiftFmtRows(row, count);
+    QVector<MergeRange> nm;
+    for (auto m : m_merges) if (shiftBand(m.top, m.bottom, row, count)) nm.push_back(m);
+    m_merges = nm;
+    endInsertRows();
+    m_evalCache.clear(); rebuildDeps();
+    UndoEntry e; e.snapBefore = before; e.snapAfter = snapshot();
+    pushUndo(std::move(e));
+    recalculateAll(); emit mergesChanged();
+}
+
+void SpreadsheetModel::removeRows(int row, int count) {
+    if (count <= 0 || rowCount() - count < 1) return;
+    Snapshot before = snapshot();
+    beginRemoveRows(QModelIndex(), row, row + count - 1);
+    m_data.remove(row, count);
+    shiftFmtRows(row, -count);
+    QVector<MergeRange> nm;
+    for (auto m : m_merges) if (shiftBand(m.top, m.bottom, row, -count)) nm.push_back(m);
+    m_merges = nm;
+    endRemoveRows();
+    m_evalCache.clear(); rebuildDeps();
+    UndoEntry e; e.snapBefore = before; e.snapAfter = snapshot();
+    pushUndo(std::move(e));
+    recalculateAll(); emit mergesChanged();
+}
+
+void SpreadsheetModel::insertColumns(int col, int count) {
+    if (count <= 0) return;
+    Snapshot before = snapshot();
+    beginInsertColumns(QModelIndex(), col, col + count - 1);
+    for (auto &r : m_data) for (int i = 0; i < count; ++i) r.insert(col, QString());
+    shiftFmtCols(col, count);
+    QVector<MergeRange> nm;
+    for (auto m : m_merges) if (shiftBand(m.left, m.right, col, count)) nm.push_back(m);
+    m_merges = nm;
+    endInsertColumns();
+    m_evalCache.clear(); rebuildDeps();
+    UndoEntry e; e.snapBefore = before; e.snapAfter = snapshot();
+    pushUndo(std::move(e));
+    recalculateAll(); emit mergesChanged();
+}
+
+void SpreadsheetModel::removeColumns(int col, int count) {
+    if (count <= 0 || columnCount() - count < 1) return;
+    Snapshot before = snapshot();
+    beginRemoveColumns(QModelIndex(), col, col + count - 1);
+    for (auto &r : m_data) r.remove(col, count);
+    shiftFmtCols(col, -count);
+    QVector<MergeRange> nm;
+    for (auto m : m_merges) if (shiftBand(m.left, m.right, col, -count)) nm.push_back(m);
+    m_merges = nm;
+    endRemoveColumns();
+    m_evalCache.clear(); rebuildDeps();
+    UndoEntry e; e.snapBefore = before; e.snapAfter = snapshot();
+    pushUndo(std::move(e));
+    recalculateAll(); emit mergesChanged();
 }
 
 // ---------------------------------------------------------------- header / flags / kích thước
