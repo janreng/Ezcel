@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v0.59.0 — Thanh trượt thu phóng (Spec 11)
+
+- **Thêm thanh trượt thu phóng** ở góc phải thanh trạng thái: nút **−** / **+** đổi 10% mỗi nấc, kéo trượt từ 10% đến 400%, bấm vào số **%** để chọn nhanh mức dựng sẵn (25, 50, 75, 100, 150, 200, 400). Cuộn **Ctrl + lăn chuột** vẫn thu phóng như cũ.
+
 ## v0.58.0 — Thanh trạng thái hiện thêm thống kê
 
 - **Thanh trạng thái hiện thêm Nhỏ nhất, Lớn nhất và Đếm số** khi chọn nhiều ô: ngoài Đếm, Tổng và Trung bình đã có, nay xem nhanh được giá trị nhỏ nhất, lớn nhất và số lượng ô chứa số trong vùng chọn.

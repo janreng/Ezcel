@@ -14,6 +14,7 @@
 #include "model/Stats.h"
 #include "model/AutoSum.h"
 #include "ui/Shortcuts.h"
+#include "ui/Zoom.h"
 
 #include <QTableView>
 #include <QHeaderView>
@@ -35,6 +36,8 @@
 #include <QTableWidgetItem>
 #include <QDialogButtonBox>
 #include <QAbstractItemView>
+#include <QSlider>
+#include <QToolButton>
 #include <QInputDialog>
 #include <QApplication>
 #include <QClipboard>
@@ -126,6 +129,7 @@ MainWindow::MainWindow(QWidget *parent)
     buildFormatToolbar();
     m_statsLabel = new QLabel(this);
     statusBar()->addPermanentWidget(m_statsLabel);
+    buildStatusBarZoom();
 
     bindActiveModel();
     updateTitle();
@@ -823,7 +827,7 @@ void MainWindow::toggleShowFormulas(bool on)
 // ---------------------------------------------------------------- thu phóng
 void MainWindow::applyZoom()
 {
-    m_zoom = qBound(50, m_zoom, 400);
+    m_zoom = zoom::clamp(m_zoom);
     QFont f = theme::cellFont();
     f.setPointSizeF(11.0 * m_zoom / 100.0);
     m_view->setFont(f);
@@ -832,7 +836,52 @@ void MainWindow::applyZoom()
     m_view->horizontalHeader()->setDefaultSectionSize(cw);
     for (int r = 0; r < m_model->rowCount(); ++r) m_view->setRowHeight(r, rh);
     for (int c = 0; c < m_model->columnCount(); ++c) m_view->setColumnWidth(c, cw);
-    statusBar()->showMessage(QStringLiteral("Thu phóng: %1%").arg(m_zoom), 1500);
+    syncZoomWidgets();
+}
+
+// Cụm thu phóng bên phải thanh trạng thái: nút −, thanh trượt, nút +, nhãn %.
+void MainWindow::buildStatusBarZoom()
+{
+    auto *minus = new QToolButton(this);
+    minus->setText(QStringLiteral("−"));
+    minus->setAutoRaise(true);
+    connect(minus, &QToolButton::clicked, this, [this] { m_zoom = zoom::stepped(m_zoom, -zoom::kStep); applyZoom(); });
+
+    m_zoomSlider = new QSlider(Qt::Horizontal, this);
+    m_zoomSlider->setRange(zoom::kMin, zoom::kMax);
+    m_zoomSlider->setValue(m_zoom);
+    m_zoomSlider->setFixedWidth(120);
+    connect(m_zoomSlider, &QSlider::valueChanged, this, [this](int v) {
+        if (v == m_zoom) return;
+        m_zoom = zoom::clamp(v); applyZoom();
+    });
+
+    auto *plus = new QToolButton(this);
+    plus->setText(QStringLiteral("+"));
+    plus->setAutoRaise(true);
+    connect(plus, &QToolButton::clicked, this, [this] { m_zoom = zoom::stepped(m_zoom, zoom::kStep); applyZoom(); });
+
+    m_zoomLabel = new QLabel(this);
+    m_zoomLabel->setMinimumWidth(44);
+    m_zoomLabel->setAlignment(Qt::AlignCenter);
+    m_zoomLabel->setCursor(Qt::PointingHandCursor);
+    m_zoomLabel->setToolTip(QStringLiteral("Bấm để chọn mức thu phóng"));
+    m_zoomLabel->installEventFilter(this); // bấm nhãn -> hộp thoại chọn mức
+
+    statusBar()->addPermanentWidget(minus);
+    statusBar()->addPermanentWidget(m_zoomSlider);
+    statusBar()->addPermanentWidget(plus);
+    statusBar()->addPermanentWidget(m_zoomLabel);
+    syncZoomWidgets();
+}
+
+void MainWindow::syncZoomWidgets()
+{
+    if (m_zoomSlider) {
+        QSignalBlocker block(m_zoomSlider); // tránh vòng lặp valueChanged
+        m_zoomSlider->setValue(m_zoom);
+    }
+    if (m_zoomLabel) m_zoomLabel->setText(QStringLiteral("%1%").arg(m_zoom));
 }
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *ev)
@@ -840,10 +889,23 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *ev)
     if (obj == m_view->viewport() && ev->type() == QEvent::Wheel) {
         auto *we = static_cast<QWheelEvent *>(ev);
         if (we->modifiers() & Qt::ControlModifier) {
-            m_zoom += (we->angleDelta().y() > 0 ? 10 : -10);
+            m_zoom = zoom::stepped(m_zoom, we->angleDelta().y() > 0 ? zoom::kStep : -zoom::kStep);
             applyZoom();
             return true; // nuốt sự kiện, không cuộn
         }
+    }
+    if (obj == m_zoomLabel && ev->type() == QEvent::MouseButtonRelease) {
+        QStringList items;
+        for (int p : zoom::presets()) items << QStringLiteral("%1%").arg(p);
+        bool ok = false;
+        int idx = zoom::presets().indexOf(m_zoom);
+        QString pick = QInputDialog::getItem(this, QStringLiteral("Thu phóng"),
+            QStringLiteral("Chọn mức thu phóng:"), items, idx < 0 ? 3 : idx, false, &ok);
+        if (ok && !pick.isEmpty()) {
+            m_zoom = zoom::clamp(pick.left(pick.size() - 1).toInt());
+            applyZoom();
+        }
+        return true;
     }
     return QMainWindow::eventFilter(obj, ev);
 }

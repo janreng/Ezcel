@@ -7,6 +7,7 @@
 class QTableView;
 class QLineEdit;
 class QLabel;
+class QSlider;
 class QCheckBox;
 class QDialog;
 class QTabBar;
@@ -83,6 +84,10 @@ private:
     void updateStats();             // tính lại thống kê vùng chọn
     QString m_currentPath; // rỗng = chưa lưu lần nào
     int m_zoom = 100;      // mức thu phóng (%)
+    QSlider *m_zoomSlider = nullptr; // thanh trượt thu phóng (thanh trạng thái)
+    QLabel *m_zoomLabel = nullptr;   // nhãn % thu phóng, bấm được
+    void buildStatusBarZoom();       // dựng cụm zoom phải thanh trạng thái
+    void syncZoomWidgets();          // đồng bộ slider + nhãn theo m_zoom
     QVector<SpreadsheetModel *> m_sheets;      // các trang tính
     QTabBar *m_sheetTabs = nullptr;            // thanh tab trang tính
     QVector<QMetaObject::Connection> m_modelConns; // kết nối tín hiệu model đang hoạt động
