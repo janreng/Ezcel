@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v1.11.0 — Hàm VARPA & STDEVPA (Spec 12)
+
+- **Thêm hàm `VARPA` và `STDEVPA`** — tính phương sai và độ lệch chuẩn của toàn bộ tổng thể, có tính cả ô chứa chữ và giá trị logic.
+
 ## v1.10.0 — Hàm VARA & STDEVA (Spec 12)
 
 - **Thêm hàm `VARA` và `STDEVA`** — tính phương sai và độ lệch chuẩn mẫu, có tính cả ô chứa chữ (coi là 0) và giá trị logic, phù hợp khi vùng dữ liệu lẫn nhiều kiểu.

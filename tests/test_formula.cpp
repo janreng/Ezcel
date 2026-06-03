@@ -260,6 +260,9 @@ int main() {
     checkNum("=STDEVA(A1:A3)", 10);
     checkNum("=VARA(A1:B1)", 50);    // {10, "hello"->0}
     checkNum("=STDEVA(A1:B1)", 7.0710678118654755);
+    // VARPA / STDEVPA (Spec 12) — tong the (chia n)
+    checkNum("=VARPA(A1:A3)", 200.0/3.0);    // {10,20,30}
+    checkNum("=STDEVPA(A1:A3)", 8.16496580927726);
     // IPMT / PPMT (Spec 12): vay 8000, lai 10%/nam, 36 ky
     checkNum("=IPMT(0.1/12,1,36,8000)", -66.6666666666667); // ky 1: -pv*rate
     checkNum("=IPMT(0.1/12,2,36,8000)", -65.0710764092997);

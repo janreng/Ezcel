@@ -161,6 +161,16 @@ QHash<QString, Fn> &fnMap() {
         };
         r["VARA"]   = [varaCore](const Args &a) { return Value::number(varaCore(a, "VARA")); };
         r["STDEVA"] = [varaCore](const Args &a) { return Value::number(std::sqrt(varaCore(a, "STDEVA"))); };
+        // VARPA/STDEVPA: phương sai / độ lệch chuẩn TỔNG THỂ (chia n), tính cả text=0.
+        auto varpaCore = [valuesA](const Args &a, const char *fn) {
+            auto v = valuesA(a);
+            if (v.empty()) throw FormulaError(QString::fromUtf8(fn) + QStringLiteral(": vùng rỗng"), ERR_DIV0);
+            double m = sumv(v) / v.size(), s = 0;
+            for (double x : v) s += (x - m) * (x - m);
+            return s / v.size();
+        };
+        r["VARPA"]   = [varpaCore](const Args &a) { return Value::number(varpaCore(a, "VARPA")); };
+        r["STDEVPA"] = [varpaCore](const Args &a) { return Value::number(std::sqrt(varpaCore(a, "STDEVPA"))); };
         // PERCENTILE/QUARTILE: phân vị theo nội suy tuyến tính (phương pháp INC, gồm cả hai đầu).
         auto percentileInc = [](std::vector<double> v, double k) {
             std::sort(v.begin(), v.end());
