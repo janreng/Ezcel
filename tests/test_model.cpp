@@ -1,5 +1,6 @@
 // Test headless cho SpreadsheetModel (offscreen). CHI in ASCII.
 #include "model/SpreadsheetModel.h"
+#include "model/TextSearch.h"
 #include <QGuiApplication>
 #include <QFont>
 #include <QColor>
@@ -198,6 +199,36 @@ int main(int argc, char **argv) {
         mm2.removeRows(0, 1);
         auto at2 = mm2.mergeAt(2, 1);
         ok(at2.has_value() && at2->top == 2, "removeRows doi vung gop len lai");
+    }
+
+    // --- tim & thay the ---
+    {
+        // replaceSubstr
+        ok(textsearch::replaceSubstr("aXaXa", "X", "-", true) == "a-a-a", "replaceSubstr case");
+        ok(textsearch::replaceSubstr("aXxa", "x", "-", false) == "a--a", "replaceSubstr ci");
+        ok(textsearch::replaceSubstr("aXxa", "x", "-", true) == "aX-a", "replaceSubstr case-sensitive");
+
+        // findNext wrap-around
+        QVector<QVector<QString>> grid = {{"foo", "bar"}, {"baz", "Foo"}};
+        auto cell = [&](int r, int c) { return grid[r][c]; };
+        auto h1 = textsearch::findNext(2, 2, 0, 0, "foo", false, cell); // sau (0,0): tim Foo o (1,1)
+        ok(h1.has_value() && h1->first == 1 && h1->second == 1, "findNext ci -> (1,1)");
+        auto h2 = textsearch::findNext(2, 2, 0, 0, "foo", true, cell);  // case: bo qua Foo, vong lai (0,0)
+        ok(h2.has_value() && h2->first == 0 && h2->second == 0, "findNext case wrap -> (0,0)");
+        auto h3 = textsearch::findNext(2, 2, 0, -1, "zzz", false, cell);
+        ok(!h3.has_value(), "findNext khong thay -> rong");
+
+        // model.replaceAll undoable
+        SpreadsheetModel mm;
+        mm.resizeGrid(3, 3);
+        put(mm, 0, 0, "cat"); put(mm, 0, 1, "CAT"); put(mm, 1, 0, "dog");
+        int n = mm.replaceAll("cat", "cow", false);   // ci: doi 2 o
+        ok(n == 2, "replaceAll ci doi 2 o");
+        ok(disp(mm, 0, 0) == "cow" && disp(mm, 0, 1) == "cow", "replaceAll thay dung");
+        mm.undo();
+        ok(disp(mm, 0, 0) == "cat" && disp(mm, 0, 1) == "CAT", "undo replaceAll");
+        int n2 = mm.replaceAll("cat", "cow", true);    // case: chi 1 o
+        ok(n2 == 1 && disp(mm, 0, 1) == "CAT", "replaceAll case-sensitive 1 o");
     }
 
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);

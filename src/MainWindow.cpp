@@ -132,6 +132,9 @@ void MainWindow::buildMenus()
     edit->addAction(QStringLiteral("Điền xuống"), QKeySequence(QStringLiteral("Ctrl+D")), this, &MainWindow::fillDown);
     edit->addAction(QStringLiteral("Điền phải"), QKeySequence(QStringLiteral("Ctrl+R")), this, &MainWindow::fillRight);
     edit->addAction(QStringLiteral("Gộp / bỏ gộp ô"), this, &MainWindow::toggleMergeSelection);
+    edit->addSeparator();
+    edit->addAction(QStringLiteral("Tìm && Thay thế..."), QKeySequence::Find, this, &MainWindow::showFindReplace);
+    edit->addAction(QStringLiteral("Thay thế..."), QKeySequence::Replace, this, &MainWindow::showFindReplace);
 
     QMenu *st = menuBar()->addMenu(QStringLiteral("&Cấu trúc"));
     st->addAction(QStringLiteral("Chèn hàng trên"), this, [this] {

@@ -36,7 +36,8 @@ target_include_directories(ezcel_formula PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(ezcel_formula PUBLIC Qt6::Core)
 
 # --- Model (cần Qt Gui cho QColor/QFont; không cần Widgets) -> static lib.
-add_library(ezcel_model STATIC src/model/SpreadsheetModel.cpp src/model/SpreadsheetModel.h)
+add_library(ezcel_model STATIC src/model/SpreadsheetModel.cpp src/model/SpreadsheetModel.h
+    src/model/TextSearch.cpp src/model/TextSearch.h)
 target_include_directories(ezcel_model PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(ezcel_model PUBLIC ezcel_formula Qt6::Core Qt6::Gui)
 
@@ -51,7 +52,7 @@ target_include_directories(ezcel_view PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(ezcel_view PUBLIC Qt6::Core Qt6::Gui Qt6::Widgets)
 
 # --- App GUI ---
-qt_add_executable(Ezcel WIN32 src/main.cpp src/MainWindow.cpp src/MainWindowFormat.cpp src/MainWindow.h)
+qt_add_executable(Ezcel WIN32 src/main.cpp src/MainWindow.cpp src/MainWindowFormat.cpp src/MainWindowFind.cpp src/MainWindow.h)
 target_include_directories(Ezcel PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(Ezcel PRIVATE ezcel_model ezcel_io ezcel_view ezcel_formula Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Svg)
 

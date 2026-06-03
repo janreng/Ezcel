@@ -1,5 +1,6 @@
 #include "model/SpreadsheetModel.h"
 #include "formula/Formula.h"
+#include "model/TextSearch.h"
 
 #include <QColor>
 #include <QDate>
@@ -403,6 +404,20 @@ void SpreadsheetModel::applyCellChanges(QVector<CellChange> changes) {
     for (const auto &c : real) { m_data[c.row][c.col] = c.newVal; updateDeps(c.row, c.col); }
     pushUndo(std::move(e));
     recalculateAll();
+}
+
+int SpreadsheetModel::replaceAll(const QString &find, const QString &repl, bool matchCase) {
+    if (find.isEmpty()) return 0;
+    QVector<CellChange> changes;
+    for (int r = 0; r < m_data.size(); ++r)
+        for (int c = 0; c < m_data[r].size(); ++c) {
+            const QString &raw = m_data[r][c];
+            QString nw = textsearch::replaceSubstr(raw, find, repl, matchCase);
+            if (nw != raw) changes.push_back({r, c, raw, nw});
+        }
+    int n = changes.size();
+    applyCellChanges(std::move(changes));
+    return n;
 }
 
 void SpreadsheetModel::clearRange(int top, int left, int bottom, int right) {

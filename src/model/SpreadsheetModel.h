@@ -65,6 +65,9 @@ public:
     bool showFormulas() const { return m_showFormulas; }
     void setShowFormulas(bool on);
 
+    // Thay mọi lần xuất hiện find->repl trong dữ liệu thô (undoable). Trả số ô đổi.
+    int replaceAll(const QString &find, const QString &repl, bool matchCase = false);
+
     // Thao tác vùng (đều undoable theo ô).
     void clearRange(int top, int left, int bottom, int right);
     void pasteBlock(int top, int left, const QVector<QVector<QString>> &block,

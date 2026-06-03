@@ -4,6 +4,8 @@
 
 class QTableView;
 class QLineEdit;
+class QCheckBox;
+class QDialog;
 class QModelIndex;
 class SpreadsheetModel;
 
@@ -33,6 +35,10 @@ private slots:
     void fillRight();
     void toggleMergeSelection();
     void toggleShowFormulas(bool on);
+    void showFindReplace();   // định nghĩa ở MainWindowFind.cpp
+    void findNextFromDialog();
+    void replaceOne();
+    void replaceAllFromDialog();
     void onCurrentCellChanged(const QModelIndex &cur, const QModelIndex &prev);
     void onFormulaBarCommitted();
 
@@ -56,4 +62,11 @@ private:
     SpreadsheetModel *m_model = nullptr;
     QLineEdit *m_formulaBar = nullptr;
     QString m_currentPath; // rỗng = chưa lưu lần nào
+
+    // Hộp thoại Tìm & Thay thế (modeless, dựng lười).
+    QDialog *m_findDialog = nullptr;
+    QLineEdit *m_findField = nullptr;
+    QLineEdit *m_replaceField = nullptr;
+    QCheckBox *m_matchCase = nullptr;
+    bool findNext(); // nhảy tới ô khớp kế tiếp; trả false nếu không thấy
 };
