@@ -40,6 +40,8 @@
 #include <QEvent>
 #include <QDate>
 #include <QTime>
+#include <QTabBar>
+#include <QToolButton>
 
 // Bộ lọc file dùng chung cho mở/lưu.
 static const char *kFileFilter =
@@ -48,8 +50,9 @@ static const char *kFileFilter =
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
-    m_model = new SpreadsheetModel(this);
-    m_model->resizeGrid(200, 50); // lưới khởi tạo, như bản Python
+    m_sheets.push_back(new SpreadsheetModel(this));
+    m_sheets[0]->resizeGrid(200, 50); // lưới khởi tạo, như bản Python
+    m_model = m_sheets[0];
 
     m_view = new QTableView(this);
     m_view->setModel(m_model);
@@ -65,12 +68,36 @@ MainWindow::MainWindow(QWidget *parent)
 
     buildFormulaBar();
 
+    // Thanh tab trang tính ở dưới cùng + nút thêm trang.
+    auto *tabRow = new QWidget(this);
+    auto *tabLay = new QHBoxLayout(tabRow);
+    tabLay->setContentsMargins(2, 0, 2, 0);
+    tabLay->setSpacing(2);
+    m_sheetTabs = new QTabBar(tabRow);
+    m_sheetTabs->setExpanding(false);
+    m_sheetTabs->addTab(QStringLiteral("Trang 1"));
+    auto *addSheetBtn = new QToolButton(tabRow);
+    addSheetBtn->setText(QStringLiteral("+"));
+    addSheetBtn->setToolTip(QStringLiteral("Thêm trang tính"));
+    tabLay->addWidget(m_sheetTabs);
+    tabLay->addWidget(addSheetBtn);
+    tabLay->addStretch();
+    connect(addSheetBtn, &QToolButton::clicked, this, [this] { addSheet(); });
+    connect(m_sheetTabs, &QTabBar::currentChanged, this, &MainWindow::switchToSheet);
+    connect(m_sheetTabs, &QTabBar::tabBarDoubleClicked, this, [this](int i) {
+        bool ok = false;
+        QString n = QInputDialog::getText(this, QStringLiteral("Đổi tên trang"),
+            QStringLiteral("Tên trang:"), QLineEdit::Normal, m_sheetTabs->tabText(i), &ok);
+        if (ok && !n.isEmpty()) m_sheetTabs->setTabText(i, n);
+    });
+
     auto *central = new QWidget(this);
     auto *lay = new QVBoxLayout(central);
     lay->setContentsMargins(0, 0, 0, 0);
     lay->setSpacing(0);
     lay->addWidget(m_formulaBar->parentWidget()); // dải thanh công thức
     lay->addWidget(m_view);
+    lay->addWidget(tabRow);
     setCentralWidget(central);
 
     buildMenus();
@@ -79,23 +106,49 @@ MainWindow::MainWindow(QWidget *parent)
     m_statsLabel = new QLabel(this);
     statusBar()->addPermanentWidget(m_statsLabel);
 
-    connect(m_view->selectionModel(), &QItemSelectionModel::currentChanged,
-            this, &MainWindow::onCurrentCellChanged);
-    connect(m_view->selectionModel(), &QItemSelectionModel::selectionChanged,
-            this, [this] { updateStats(); });
-    connect(m_model, &SpreadsheetModel::contentChanged, this, [this] {
-        // Cập nhật thanh công thức khi nội dung ô hiện tại đổi (vd undo/redo).
-        onCurrentCellChanged(m_view->currentIndex(), QModelIndex());
-    });
-    // Ô gộp đổi -> cập nhật span của lưới (hiện gộp trực quan).
-    connect(m_model, &SpreadsheetModel::mergesChanged, this, [this] {
-        viewutil::applyMergeSpans(m_view, m_model->merges());
-    });
-
+    bindActiveModel();
     updateTitle();
 }
 
 MainWindow::~MainWindow() = default;
+
+// ---------------------------------------------------------------- nhiều trang tính
+void MainWindow::bindActiveModel()
+{
+    for (const auto &c : m_modelConns) disconnect(c);
+    m_modelConns.clear();
+    m_modelConns << connect(m_view->selectionModel(), &QItemSelectionModel::currentChanged,
+                            this, &MainWindow::onCurrentCellChanged);
+    m_modelConns << connect(m_view->selectionModel(), &QItemSelectionModel::selectionChanged,
+                            this, [this] { updateStats(); });
+    m_modelConns << connect(m_model, &SpreadsheetModel::contentChanged, this, [this] {
+        onCurrentCellChanged(m_view->currentIndex(), QModelIndex());
+    });
+    m_modelConns << connect(m_model, &SpreadsheetModel::mergesChanged, this, [this] {
+        viewutil::applyMergeSpans(m_view, m_model->merges());
+    });
+    viewutil::applyMergeSpans(m_view, m_model->merges());
+}
+
+void MainWindow::addSheet(const QString &name)
+{
+    auto *m = new SpreadsheetModel(this);
+    m->resizeGrid(200, 50);
+    m_sheets.push_back(m);
+    const QString nm = name.isEmpty() ? QStringLiteral("Trang %1").arg(m_sheets.size()) : name;
+    m_sheetTabs->addTab(nm);
+    m_sheetTabs->setCurrentIndex(m_sheets.size() - 1); // -> switchToSheet
+}
+
+void MainWindow::switchToSheet(int i)
+{
+    if (i < 0 || i >= m_sheets.size()) return;
+    m_model = m_sheets[i];
+    m_view->setModel(m_model);
+    bindActiveModel();
+    onCurrentCellChanged(m_view->currentIndex(), QModelIndex());
+    updateStats();
+}
 
 // ---------------------------------------------------------------- thanh công thức
 void MainWindow::buildFormulaBar()

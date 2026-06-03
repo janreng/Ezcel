@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v0.41.0 — Nhiều trang tính
+
+- **Làm việc với nhiều trang tính trong cùng cửa sổ**: thanh tab ở dưới cùng, bấm **+** để thêm trang, nhấp đúp vào tab để đổi tên, chuyển qua lại giữa các trang. Mỗi trang có dữ liệu riêng.
+
 ## v0.40.0 — Chèn ngày / giờ
 
 - **Chèn nhanh ngày và giờ** (menu **Dữ liệu**): Ctrl+`;` chèn ngày hôm nay, Ctrl+Shift+`;` chèn giờ hiện tại vào ô đang chọn.

@@ -2,11 +2,14 @@
 #include <QMainWindow>
 #include <QString>
 
+#include <QVector>
+
 class QTableView;
 class QLineEdit;
 class QLabel;
 class QCheckBox;
 class QDialog;
+class QTabBar;
 class QModelIndex;
 class SpreadsheetModel;
 
@@ -56,6 +59,10 @@ private:
     void buildFormulaBar();
     void updateTitle();
     void applyZoom();                          // áp mức thu phóng hiện tại
+    // --- nhiều trang tính (multi-sheet) ---
+    void addSheet(const QString &name = QString());
+    void switchToSheet(int i);
+    void bindActiveModel();                    // nối tín hiệu cho model đang hoạt động
     bool saveTo(const QString &path);          // ghi theo phần mở rộng
     void doCopy(bool cut);                      // copy/cut chung một đường
     // Vùng chọn hiện tại dạng [top,left,bottom,right]; false nếu không có.
@@ -74,6 +81,9 @@ private:
     void updateStats();             // tính lại thống kê vùng chọn
     QString m_currentPath; // rỗng = chưa lưu lần nào
     int m_zoom = 100;      // mức thu phóng (%)
+    QVector<SpreadsheetModel *> m_sheets;      // các trang tính
+    QTabBar *m_sheetTabs = nullptr;            // thanh tab trang tính
+    QVector<QMetaObject::Connection> m_modelConns; // kết nối tín hiệu model đang hoạt động
 
     // Hộp thoại Tìm & Thay thế (modeless, dựng lười).
     QDialog *m_findDialog = nullptr;
