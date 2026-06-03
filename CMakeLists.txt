@@ -14,7 +14,7 @@ endif()
 
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Svg)
 
-# --- Engine công thức (không phụ thuộc GUI) -> static lib dùng chung app + test.
+# --- Engine công thức (không phụ thuộc GUI) -> static lib dùng chung.
 add_library(ezcel_formula STATIC
     src/formula/Formula.cpp
     src/formula/Functions.cpp
@@ -23,20 +23,23 @@ add_library(ezcel_formula STATIC
 target_include_directories(ezcel_formula PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(ezcel_formula PUBLIC Qt6::Core)
 
-# --- App GUI ---
-qt_add_executable(Ezcel WIN32
-    src/main.cpp
-    src/MainWindow.cpp
-    src/MainWindow.h
-    src/model/SpreadsheetModel.cpp
-    src/model/SpreadsheetModel.h
-)
-target_include_directories(Ezcel PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
-target_link_libraries(Ezcel PRIVATE ezcel_formula Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Svg)
+# --- Model (cần Qt Gui cho QColor/QFont; không cần Widgets) -> static lib.
+add_library(ezcel_model STATIC src/model/SpreadsheetModel.cpp src/model/SpreadsheetModel.h)
+target_include_directories(ezcel_model PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_link_libraries(ezcel_model PUBLIC ezcel_formula Qt6::Core Qt6::Gui)
 
-# --- Test engine (console, headless) ---
+# --- App GUI ---
+qt_add_executable(Ezcel WIN32 src/main.cpp src/MainWindow.cpp src/MainWindow.h)
+target_include_directories(Ezcel PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_link_libraries(Ezcel PRIVATE ezcel_model ezcel_formula Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Svg)
+
+# --- Tests (console, headless) ---
 add_executable(test_formula tests/test_formula.cpp)
 target_link_libraries(test_formula PRIVATE ezcel_formula Qt6::Core)
 
+add_executable(test_model tests/test_model.cpp)
+target_link_libraries(test_model PRIVATE ezcel_model Qt6::Core Qt6::Gui)
+
 enable_testing()
 add_test(NAME formula COMMAND test_formula)
+add_test(NAME model COMMAND test_model)

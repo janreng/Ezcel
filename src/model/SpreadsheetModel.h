@@ -5,14 +5,19 @@
 #include <QHash>
 #include <QSet>
 #include <QVariant>
+#include <QFont>
 
 // Bản port của table_model.py — SpreadsheetModel(QAbstractTableModel).
-// P1 sẽ bổ sung: _eval_cache theo đồ thị phụ thuộc, _fmt định dạng ô,
-// undo/redo snapshot, copy/paste, autofill, sort, move_row/move_column.
+// P1 (đợt này): dữ liệu thô, tính công thức (cache + chống vòng), định dạng ô
+// (_fmt generic), undo/redo, recalc chọn lọc theo đồ thị phụ thuộc, các role
+// hiển thị (align/font/màu nền/màu chữ), hiện-công-thức (Ctrl+`).
+// Để sau: merge, conditional format, cross-sheet, sort, autofill, copy/paste.
 class SpreadsheetModel : public QAbstractTableModel
 {
     Q_OBJECT
 public:
+    using Format = QHash<QString, QVariant>; // định dạng 1 ô (như dict Python)
+
     explicit SpreadsheetModel(QObject *parent = nullptr);
 
     // QAbstractTableModel
@@ -24,17 +29,61 @@ public:
     Qt::ItemFlags flags(const QModelIndex &index) const override;
 
     void resizeGrid(int rows, int cols);
-
-    // Nhãn cột kiểu Excel: 0->A, 25->Z, 26->AA...
     static QString columnLabel(int col);
 
-    // Giá trị ĐÃ TÍNH của ô (resolver cho engine; chống vòng lặp tham chiếu).
+    // Giá trị ĐÃ TÍNH của ô (resolver cho engine; chống vòng tham chiếu).
     QVariant evalCell(int row, int col) const;
+    QVariant cellValue(int row, int col) const { return evalCell(row, col); } // public
+
+    // Định dạng: đặt thuộc tính cho vùng [top,left]..[bottom,right]; value null -> xóa key.
+    void setFormat(int top, int left, int bottom, int right, const Format &attrs);
+
+    // Hiện công thức gốc thay vì kết quả (Ctrl+`).
+    bool showFormulas() const { return m_showFormulas; }
+    void setShowFormulas(bool on);
+
+    // Undo/redo.
+    bool undo();
+    bool redo();
+    bool canUndo() const { return !m_undo.isEmpty(); }
+    bool canRedo() const { return !m_redo.isEmpty(); }
+
+signals:
+    void contentChanged();
 
 private:
+    struct CellChange { int row, col; QString oldVal, newVal; };
+    struct FmtChange  { int row, col; Format oldFmt, newFmt; };
+    struct UndoEntry  { QVector<CellChange> cells; QVector<FmtChange> fmts; };
+
     QVector<QVector<QString>> m_data;            // lưới thô (chuỗi/công thức)
-    mutable QHash<qint64, QVariant> m_evalCache; // giá trị công thức đã tính (P1: vô hiệu hóa chọn lọc)
-    mutable QSet<qint64> m_evaluating;           // ô đang tính (phát hiện tham chiếu vòng)
+    mutable QHash<qint64, QVariant> m_evalCache; // giá trị công thức đã tính
+    mutable QSet<qint64> m_evaluating;           // ô đang tính (vòng lặp)
+    QHash<qint64, Format> m_fmt;                 // định dạng theo ô
+    mutable QHash<QString, QFont> m_fontCache;   // QFont chia sẻ theo style
+    mutable QHash<QString, bool> m_fontCacheNull;// style không có font
+
+    // Đồ thị phụ thuộc cho recalc chọn lọc.
+    QHash<qint64, QSet<qint64>> m_deps;          // A -> các ô A tham chiếu
+    QHash<qint64, QSet<qint64>> m_dependents;    // B -> các ô tham chiếu B
+
+    bool m_showFormulas = false;
+    QVector<UndoEntry> m_undo, m_redo;
+    static constexpr int kUndoLimit = 100;
 
     static qint64 key(int row, int col) { return (qint64(row) << 32) | quint32(col); }
+    static int keyRow(qint64 k) { return int(k >> 32); }
+    static int keyCol(qint64 k) { return int(k & 0xffffffff); }
+
+    QString displayValue(int row, int col) const;
+    int alignmentFlags(int row, int col) const;
+    QVariant fontFor(int row, int col) const;
+    bool looksNumeric(int row, int col) const;
+
+    void rebuildDeps();
+    void updateDeps(int row, int col);
+    void recalculate(int row, int col);   // selective BFS từ ô đổi
+    void recalculateAll();                 // bulk: xóa toàn bộ cache, vẽ lại
+    void pushUndo(UndoEntry entry);
+    void applyEntry(const UndoEntry &e, bool useOld); // revert(useOld) hoặc reapply
 };
