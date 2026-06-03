@@ -3,6 +3,7 @@
 #include "io/Csv.h"
 #include "io/Xlsx.h"
 #include "view/MergeSpans.h"
+#include "view/CellBorderDelegate.h"
 #include "update/Updater.h"
 #include "ui/Theme.h"
 
@@ -46,6 +47,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_view->setShowGrid(true);
     m_view->horizontalHeader()->setHighlightSections(true); // header sáng khi chọn (giống Excel)
     m_view->verticalHeader()->setHighlightSections(true);
+    m_view->setItemDelegate(new CellBorderDelegate(m_view, m_view)); // viền xanh ô đang chọn
 
     buildFormulaBar();
 

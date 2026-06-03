@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v0.27.0 — Viền ô đang chọn kiểu Excel
+
+- **Ô đang chọn có viền xanh đậm** (màu xanh Excel) bao quanh — giống hệt con trỏ ô của Excel, dễ nhìn thấy mình đang ở ô nào.
+
 ## v0.26.0 — Phông chữ giống Excel
 
 - **Phông chữ đồng bộ với Excel**: giao diện dùng Segoe UI, nội dung ô dùng Aptos Narrow cỡ 11 (tự lùi về Calibri nếu máy chưa có) — chữ nhìn quen và gọn như Excel.

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
-project(Ezcel VERSION 0.26.0 LANGUAGES CXX)
+project(Ezcel VERSION 0.27.0 LANGUAGES CXX)
 
 # Bản port C++ của Ezcel (gốc Python/PySide6). Dùng Qt6 Widgets + MinGW.
 set(CMAKE_CXX_STANDARD 20)
@@ -47,7 +47,8 @@ target_include_directories(ezcel_io PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(ezcel_io PUBLIC Qt6::Core Qt6::Gui QXlsx::QXlsx)
 
 # --- Tiện ích view (span ô gộp...) — cần Widgets -> static lib (test headless được).
-add_library(ezcel_view STATIC src/view/MergeSpans.cpp src/view/MergeSpans.h)
+add_library(ezcel_view STATIC src/view/MergeSpans.cpp src/view/MergeSpans.h
+    src/view/CellBorderDelegate.cpp src/view/CellBorderDelegate.h)
 target_include_directories(ezcel_view PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(ezcel_view PUBLIC Qt6::Core Qt6::Gui Qt6::Widgets)
 
