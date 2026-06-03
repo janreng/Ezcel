@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
-project(Ezcel VERSION 0.72.0 LANGUAGES CXX)
+project(Ezcel VERSION 0.73.0 LANGUAGES CXX)
 
 # Bản port C++ của Ezcel (gốc Python/PySide6). Dùng Qt6 Widgets + MinGW.
 set(CMAKE_CXX_STANDARD 20)
@@ -70,7 +70,7 @@ target_include_directories(ezcel_update PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(ezcel_update PUBLIC Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Network)
 
 # --- App GUI ---
-qt_add_executable(Ezcel WIN32 src/main.cpp src/MainWindow.cpp src/MainWindowFormat.cpp src/MainWindowFind.cpp src/ui/I18n.cpp src/ui/Shortcuts.cpp src/ui/Zoom.cpp src/ui/SheetNav.cpp src/MainWindow.h resources.qrc)
+qt_add_executable(Ezcel WIN32 src/main.cpp src/MainWindow.cpp src/MainWindowFormat.cpp src/MainWindowFind.cpp src/ui/I18n.cpp src/ui/Shortcuts.cpp src/ui/Zoom.cpp src/ui/SheetNav.cpp src/ui/CellMode.cpp src/MainWindow.h resources.qrc)
 target_include_directories(Ezcel PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_compile_definitions(Ezcel PRIVATE EZCEL_VERSION="${PROJECT_VERSION}")
 target_link_libraries(Ezcel PRIVATE ezcel_model ezcel_io ezcel_view ezcel_update ezcel_formula Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Svg Qt6::Network)
@@ -113,6 +113,10 @@ add_executable(test_sheetnav tests/test_sheetnav.cpp src/ui/SheetNav.cpp)
 target_include_directories(test_sheetnav PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(test_sheetnav PRIVATE Qt6::Core)
 
+add_executable(test_cellmode tests/test_cellmode.cpp src/ui/CellMode.cpp)
+target_include_directories(test_cellmode PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_link_libraries(test_cellmode PRIVATE Qt6::Core)
+
 enable_testing()
 add_test(NAME formula COMMAND test_formula)
 add_test(NAME model COMMAND test_model)
@@ -124,6 +128,7 @@ add_test(NAME numfmt COMMAND test_numfmt)
 add_test(NAME shortcuts COMMAND test_shortcuts)
 add_test(NAME zoom COMMAND test_zoom)
 add_test(NAME sheetnav COMMAND test_sheetnav)
+add_test(NAME cellmode COMMAND test_cellmode)
 
 # --- Sort (sắp xếp vùng dữ liệu) — module logic thuần (Qt Core) -> static lib + test.
 add_library(ezcel_sort STATIC src/model/Sort.cpp src/model/Sort.h)

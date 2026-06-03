@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v0.73.0 — Chỉ báo chế độ ô trên thanh trạng thái (Spec 11)
+
+- **Thêm chỉ báo chế độ ô** ở góc trái thanh trạng thái: hiện **Sẵn sàng** khi đang chọn ô, chuyển sang **Nhập** khi bắt đầu gõ vào thanh công thức, trở lại **Sẵn sàng** sau khi xác nhận hoặc đổi ô — giống thói quen quen thuộc của ứng dụng bảng tính.
+
 ## v0.72.0 — Hàm độ lệch DEVSQ & AVEDEV (Spec 12)
 
 - **Thêm hàm `DEVSQ`** — tổng bình phương độ lệch của các giá trị so với trung bình.

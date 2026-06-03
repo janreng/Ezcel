@@ -16,6 +16,7 @@
 #include "ui/Shortcuts.h"
 #include "ui/Zoom.h"
 #include "ui/SheetNav.h"
+#include "ui/CellMode.h"
 
 #include <QTableView>
 #include <QHeaderView>
@@ -138,6 +139,10 @@ MainWindow::MainWindow(QWidget *parent)
     buildMenus();
     buildToolbar();
     buildFormatToolbar();
+    m_modeLabel = new QLabel(this);
+    m_modeLabel->setMinimumWidth(70);
+    statusBar()->addWidget(m_modeLabel); // bên trái thanh trạng thái
+    setCellMode(int(cellmode::Mode::Ready));
     m_statsLabel = new QLabel(this);
     statusBar()->addPermanentWidget(m_statsLabel);
     buildStatusBarZoom();
@@ -240,10 +245,18 @@ void MainWindow::buildFormulaBar()
     h->addWidget(m_formulaBar, 1);
     connect(m_formulaBar, &QLineEdit::returnPressed, this, &MainWindow::onFormulaBarCommitted);
     connect(m_nameBox, &QLineEdit::returnPressed, this, &MainWindow::onNameBoxCommitted);
+    // Chế độ ô: gõ vào thanh công thức -> "Nhập"; xong/đổi ô -> "Sẵn sàng".
+    connect(m_formulaBar, &QLineEdit::textEdited, this, [this] { setCellMode(int(cellmode::Mode::Enter)); });
+}
+
+void MainWindow::setCellMode(int mode)
+{
+    if (m_modeLabel) m_modeLabel->setText(cellmode::label(cellmode::Mode(mode)));
 }
 
 void MainWindow::onCurrentCellChanged(const QModelIndex &cur, const QModelIndex &)
 {
+    setCellMode(int(cellmode::Mode::Ready)); // đổi ô -> về trạng thái sẵn sàng
     if (cur.isValid() && m_nameBox && !m_nameBox->hasFocus())
         m_nameBox->setText(SpreadsheetModel::columnLabel(cur.column()) + QString::number(cur.row() + 1));
     if (m_formulaBar->hasFocus()) return; // đang gõ, đừng đè
@@ -325,6 +338,7 @@ void MainWindow::onFormulaBarCommitted()
     if (!idx.isValid()) return;
     m_model->setData(idx, m_formulaBar->text(), Qt::EditRole);
     m_view->setFocus();
+    setCellMode(int(cellmode::Mode::Ready)); // nhập xong -> sẵn sàng
 }
 
 // ---------------------------------------------------------------- menu / toolbar

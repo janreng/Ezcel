@@ -84,6 +84,8 @@ private:
     QLineEdit *m_formulaBar = nullptr;
     QLineEdit *m_nameBox = nullptr; // ô địa chỉ (A1) cạnh thanh công thức
     QLabel *m_statsLabel = nullptr; // thống kê vùng chọn ở thanh trạng thái
+    QLabel *m_modeLabel = nullptr;  // chỉ báo chế độ ô (Sẵn sàng/Nhập)
+    void setCellMode(int mode);     // cập nhật nhãn chế độ ô (cellmode::Mode)
     void updateStats();             // tính lại thống kê vùng chọn
     QString m_currentPath; // rỗng = chưa lưu lần nào
     int m_zoom = 100;      // mức thu phóng (%)
