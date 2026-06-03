@@ -548,6 +548,27 @@ void MainWindow::buildMenus()
         m_view->setCurrentIndex(m_model->index(cells.first().first, cells.first().second));
         statusBar()->showMessage(QStringLiteral("Đã chọn %1 ô").arg(cells.size()), 3000);
     });
+    // Chọn vùng dữ liệu liên tục quanh ô hiện hành (Ctrl+Shift+*).
+    edit->addAction(QStringLiteral("Chọn vùng dữ liệu (Ctrl+Shift+*)"),
+                    QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_Asterisk), this, [this] {
+        QModelIndex cur = m_view->currentIndex();
+        int row = cur.isValid() ? cur.row() : 0, col = cur.isValid() ? cur.column() : 0;
+        auto reg = gotospecial::currentRegion(m_model->grid(), row, col);
+        QItemSelection sel(m_model->index(reg.top, reg.left), m_model->index(reg.bottom, reg.right));
+        m_view->selectionModel()->select(sel, QItemSelectionModel::ClearAndSelect);
+        statusBar()->showMessage(QStringLiteral("Đã chọn vùng dữ liệu %1 hàng × %2 cột")
+            .arg(reg.bottom - reg.top + 1).arg(reg.right - reg.left + 1), 3000);
+    });
+    // Nhảy tới ô cuối cùng có dữ liệu.
+    edit->addAction(QStringLiteral("Đi tới ô cuối"), this, [this] {
+        auto lc = gotospecial::lastCell(m_model->grid());
+        if (lc.first < 0) { statusBar()->showMessage(QStringLiteral("Bảng chưa có dữ liệu"), 2500); return; }
+        QModelIndex idx = m_model->index(lc.first, lc.second);
+        m_view->setCurrentIndex(idx);
+        m_view->scrollTo(idx);
+        statusBar()->showMessage(QStringLiteral("Ô cuối: %1%2")
+            .arg(SpreadsheetModel::columnLabel(lc.second)).arg(lc.first + 1), 3000);
+    });
 
     QMenu *st = menuBar()->addMenu(i18n::tr("menu_struct"));
     st->addAction(i18n::tr("st_ins_row"), this, [this] {

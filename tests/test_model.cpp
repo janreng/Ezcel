@@ -541,6 +541,29 @@ int main(int argc, char **argv) {
         ok(f.first().first == 0 && f.first().second == 2, "o cong thuc tai (0,2)");
     }
 
+    // --- current region + last cell (Spec 32) ---
+    {
+        // Khoi A1:C2 lien tuc; hang 3 trong; D4 la cum roi rac khac.
+        QVector<QVector<QString>> grid = {
+            {"a", "b", "c", ""},
+            {"1", "2", "3", ""},
+            {"",  "",  "",  ""},
+            {"",  "",  "",  "z"},
+        };
+        auto reg = gotospecial::currentRegion(grid, 0, 0);
+        ok(reg.top == 0 && reg.left == 0 && reg.bottom == 1 && reg.right == 2, "current region A1:C2");
+        // bam giua khoi van ra dung vung
+        auto reg2 = gotospecial::currentRegion(grid, 1, 1);
+        ok(reg2.top == 0 && reg2.bottom == 1 && reg2.right == 2, "current region tu giua khoi");
+        // o roi rac D4 -> chinh no
+        auto reg3 = gotospecial::currentRegion(grid, 3, 3);
+        ok(reg3.top == 3 && reg3.left == 3 && reg3.bottom == 3 && reg3.right == 3, "o roi rac -> chinh no");
+        // last cell: hang lon nhat co data = 3 (z), cot lon nhat = 3 (z) -> (3,3)
+        auto lc = gotospecial::lastCell(grid);
+        ok(lc.first == 3 && lc.second == 3, "last cell (3,3)");
+        ok(gotospecial::lastCell({{"", ""}, {"", ""}}).first == -1, "luoi rong -> last cell -1");
+    }
+
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);
     return g_fail == 0 ? 0 : 1;
 }

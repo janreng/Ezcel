@@ -1,5 +1,11 @@
 # Lịch sử thay đổi
 
+## v1.31.0 — Chọn vùng dữ liệu & đi tới ô cuối (Spec 32)
+
+- **Chọn vùng dữ liệu (Ctrl+Shift+*)**: tự khoanh khối dữ liệu liên tục bao quanh ô đang chọn.
+- **Đi tới ô cuối**: nhảy nhanh tới ô cuối cùng còn dữ liệu trong bảng.
+- Bổ sung cho nhóm thao tác "Đi tới đặc biệt" đã có (ô trống, công thức, số, văn bản, hằng).
+
 ## v1.30.0 — Sắp xếp nhiều cấp (Spec 15)
 
 - **Thêm "Sắp xếp nhiều cấp..."** trong menu Dữ liệu: sắp theo tối đa 3 cột liên tiếp ("sắp theo... rồi theo...").
