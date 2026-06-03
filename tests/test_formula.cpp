@@ -86,6 +86,15 @@ int main() {
     checkStr("=UPPER(B1)", "HELLO");
     checkStr("=LEFT(B1,3)", "hel");
     checkStr("=MID(B1,2,3)", "ell");
+    // ROMAN / ARABIC (Spec 12)
+    checkStr("=ROMAN(4)", "IV");
+    checkStr("=ROMAN(1994)", "MCMXCIV");
+    checkStr("=ROMAN(2024)", "MMXXIV");
+    checkStr("=ROMAN(0)", "");
+    checkNum("=ARABIC(\"IV\")", 4);
+    checkNum("=ARABIC(\"MCMXCIV\")", 1994);
+    checkNum("=ARABIC(\"MMXXIV\")", 2024);
+    checkNum("=ARABIC(ROMAN(3888))", 3888); // khu hoi
     checkStr("=A1/0", "#DIV/0!");
     checkStr("=IFERROR(A1/0,\"err\")", "err");
     checkStr("=AND(A1>5,A2>5)", "true");

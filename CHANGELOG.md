@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v0.66.0 — Hàm chữ số La Mã ROMAN & ARABIC (Spec 12)
+
+- **Thêm hàm `ROMAN`** — đổi số (0–3999) sang chữ số La Mã, ví dụ `1994` ra `MCMXCIV`.
+- **Thêm hàm `ARABIC`** — đổi ngược chữ số La Mã về số nguyên, hiểu cả cú pháp trừ (IV, IX, XC…).
+
 ## v0.65.0 — Hàm thao tác bit (Spec 12)
 
 - **Thêm nhóm hàm thao tác bit** `BITAND`, `BITOR`, `BITXOR` (và/hoặc/hoặc-loại-trừ theo bit) cùng `BITLSHIFT`, `BITRSHIFT` (dịch bit trái/phải) — tiện cho tính toán kỹ thuật và xử lý cờ nhị phân.

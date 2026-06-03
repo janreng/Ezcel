@@ -478,6 +478,31 @@ QHash<QString, Fn> &fnMap() {
         // BITLSHIFT/BITRSHIFT: dịch trái/phải `shift` bit (shift âm -> dịch ngược). |shift| <= 53.
         r["BITLSHIFT"] = [need,bitArg](const Args &a) { need(a,2,"BITLSHIFT"); qint64 n = bitArg(a[0],"BITLSHIFT"); int s = toInt(a[1]); if (s<-53||s>53) throw FormulaError(QStringLiteral("BITLSHIFT: |shift| <= 53"), ERR_NUM); return Value::number(s>=0 ? double(n << s) : double(n >> (-s))); };
         r["BITRSHIFT"] = [need,bitArg](const Args &a) { need(a,2,"BITRSHIFT"); qint64 n = bitArg(a[0],"BITRSHIFT"); int s = toInt(a[1]); if (s<-53||s>53) throw FormulaError(QStringLiteral("BITRSHIFT: |shift| <= 53"), ERR_NUM); return Value::number(s>=0 ? double(n >> s) : double(n << (-s))); };
+        // ROMAN(số): đổi số 0..3999 sang chữ số La Mã (dạng cổ điển). 0 -> rỗng.
+        r["ROMAN"] = [](const Args &a) {
+            if (a.size() < 1 || a.size() > 2) argErr("ROMAN");
+            int n = toInt(a[0]);
+            if (n < 0 || n > 3999) throw FormulaError(QStringLiteral("ROMAN: số trong [0,3999]"), ERR_VALUE);
+            static const int vals[] = {1000,900,500,400,100,90,50,40,10,9,5,4,1};
+            static const char *syms[] = {"M","CM","D","CD","C","XC","L","XL","X","IX","V","IV","I"};
+            QString out;
+            for (int i = 0; i < 13; ++i) while (n >= vals[i]) { out += QLatin1String(syms[i]); n -= vals[i]; }
+            return Value::str(out);
+        };
+        // ARABIC(chữ La Mã): đổi ngược về số nguyên (hỗ trợ cú pháp trừ IV, IX...).
+        r["ARABIC"] = [need](const Args &a) {
+            need(a,1,"ARABIC");
+            QString s = toText(a[0]).trimmed().toUpper();
+            int sign = 1; if (s.startsWith('-')) { sign = -1; s = s.mid(1); }
+            auto rv = [](QChar c) -> int { switch (c.toLatin1()) { case 'I': return 1; case 'V': return 5; case 'X': return 10; case 'L': return 50; case 'C': return 100; case 'D': return 500; case 'M': return 1000; default: return -1; } };
+            int total = 0, prev = 0;
+            for (int i = s.size() - 1; i >= 0; --i) {
+                int v = rv(s[i]);
+                if (v < 0) throw FormulaError(QStringLiteral("ARABIC: chữ La Mã không hợp lệ"), ERR_VALUE);
+                if (v < prev) total -= v; else { total += v; prev = v; }
+            }
+            return Value::number(double(sign * total));
+        };
 
         // --- text/info mở rộng ---
         r["CHAR"]    = [need](const Args &a) { need(a,1,"CHAR"); int c = toInt(a[0]); if (c<1||c>255) throw FormulaError(QStringLiteral("CHAR mã 1..255"), ERR_VALUE); return Value::str(QString(QChar(c))); };
