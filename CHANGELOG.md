@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v1.14.0 — Hàm gamma & phân phối chuẩn (Spec 12)
+
+- **Thêm hàm `GAMMA` và `GAMMALN`** — tính hàm gamma và logarit của hàm gamma.
+- **Thêm hàm `NORMSDIST` và `NORMSINV`** — tính hàm phân phối tích lũy chuẩn tắc và hàm nghịch đảo (phân vị), rất hữu ích trong thống kê và kiểm định.
+
 ## v1.13.0 — Hàm sai số ERF & ERFC (Spec 12)
 
 - **Thêm hàm `ERF`** — tính hàm sai số (error function), hỗ trợ cả dạng tích phân giữa hai cận.

@@ -175,6 +175,16 @@ int main() {
     checkNum("=ERFC(1)", 0.1572992070502851);
     checkNum("=ERF(0,1)", 0.8427007929497149); // erf(1)-erf(0)
     checkNum("=ERF(1)+ERFC(1)", 1);            // bu nhau
+    // GAMMA / GAMMALN (Spec 12)
+    checkNum("=GAMMA(5)", 24);                  // = 4!
+    checkNum("=GAMMA(0.5)", 1.772453850905516); // = can(pi)
+    checkNum("=GAMMALN(1)", 0);                 // ln(0!)=0
+    checkNum("=GAMMALN(10)", 12.8018274800815); // ln(9!)
+    // NORMSDIST / NORMSINV (Spec 12) — phan phoi chuan tac
+    checkNum("=NORMSDIST(0)", 0.5);
+    checkNum("=NORMSDIST(1.96)", 0.9750021048517795);
+    checkNum("=NORMSINV(0.5)", 0);
+    checkNum("=NORMSDIST(NORMSINV(0.975))", 0.975); // khu hoi (xap xi)
     // COMBINA / PERMUTATIONA (Spec 12) — co lap
     checkNum("=COMBINA(4,3)", 20);   // C(6,3)
     checkNum("=COMBINA(3,2)", 6);    // C(4,2)
