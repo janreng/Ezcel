@@ -42,6 +42,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_view->horizontalHeader()->setDefaultSectionSize(theme::ColWidth);
     m_view->verticalHeader()->setDefaultSectionSize(theme::RowHeight);
     m_view->setStyleSheet(theme::tableStyle()); // bảng màu kiểu Excel
+    m_view->setFont(theme::cellFont());         // font nội dung ô (Aptos Narrow 11)
     m_view->setShowGrid(true);
     m_view->horizontalHeader()->setHighlightSections(true); // header sáng khi chọn (giống Excel)
     m_view->verticalHeader()->setHighlightSections(true);

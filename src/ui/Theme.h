@@ -1,9 +1,23 @@
 #pragma once
 #include <QString>
+#include <QFont>
 
 // Bảng màu/đo lường theo Microsoft Excel — nguồn: docs/specs/50-design-system.md.
 // KHÔNG hardcode màu ở nơi khác; lấy hằng ở đây. Header-only (chỉ hằng).
 namespace theme {
+
+// --- Font (Spec 50.2) ---
+// UI: Segoe UI (Windows). Nội dung ô: Aptos Narrow 11pt (mặc định Excel 365),
+// fallback Calibri/Segoe UI nếu máy chưa có.
+inline QFont uiFont() {
+    QFont f; f.setFamilies({QStringLiteral("Segoe UI"), QStringLiteral("Arial")});
+    f.setPointSize(9); return f;
+}
+inline QFont cellFont() {
+    QFont f; f.setFamilies({QStringLiteral("Aptos Narrow"), QStringLiteral("Calibri"),
+                            QStringLiteral("Segoe UI")});
+    f.setPointSize(11); return f;
+}
 
 // --- Excel signature green ---
 inline const QString ExcelGreen      = QStringLiteral("#107C41"); // brand primary

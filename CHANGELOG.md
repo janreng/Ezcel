@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v0.26.0 — Phông chữ giống Excel
+
+- **Phông chữ đồng bộ với Excel**: giao diện dùng Segoe UI, nội dung ô dùng Aptos Narrow cỡ 11 (tự lùi về Calibri nếu máy chưa có) — chữ nhìn quen và gọn như Excel.
+
 ## v0.25.0 — Bảng màu giống Excel
 
 - **Giao diện lưới sát Excel hơn**: đường kẻ ô màu xám nhạt, vùng chọn tô xanh nhạt với chữ xanh Excel, tiêu đề cột/dòng nền xám và sáng lên màu xanh khi đang chọn — nhìn quen mắt như Excel.

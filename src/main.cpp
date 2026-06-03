@@ -2,12 +2,14 @@
 #include <QApplication>
 #include <QIcon>
 #include "MainWindow.h"
+#include "ui/Theme.h"
 
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
     // Giữ style Fusion như bản Python (bỏ thanh accent chọn ô của Windows 11).
     QApplication::setStyle("Fusion");
+    QApplication::setFont(theme::uiFont()); // font UI Segoe UI (giống Excel)
     QApplication::setApplicationName("Ezcel");
     QApplication::setOrganizationName("PyExcel"); // giữ QSettings org cũ
     QApplication::setApplicationDisplayName("Ezcel");
