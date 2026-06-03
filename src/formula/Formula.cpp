@@ -322,8 +322,16 @@ private:
         }
         case Tk::SheetCell:
             throw FormulaError(QStringLiteral("Tham chiếu chéo sheet chưa hỗ trợ"), ERR_REF);
-        case Tk::Ident:
+        case Tk::Ident: {
+            // TRUE/FALSE viết trần (không ngoặc) -> literal boolean (kiểu Excel).
+            if (!isOp(peek(), QStringLiteral("("))) {
+                QString up = t.value.toUpper();
+                if (up == QLatin1String("TRUE")) return Value::boolv(true);
+                if (up == QLatin1String("FALSE")) return Value::boolv(false);
+                throw FormulaError(QStringLiteral("Tên không xác định: %1").arg(t.value), ERR_NAME);
+            }
             return functionCall(t.value);
+        }
         case Tk::Op:
             if (t.value == "(") {
                 Value v = comparison();

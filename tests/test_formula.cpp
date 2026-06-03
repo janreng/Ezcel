@@ -12,6 +12,9 @@ using formula::evaluate;
 static QVariant resolver(int row, int col) {
     static QHash<QString, QString> cells = {
         {"0,0", "10"}, {"1,0", "20"}, {"2,0", "30"}, {"0,1", "hello"},
+        // Bang tra cuu D1:E3 (cot 3=keys, cot 4=values)
+        {"0,3", "1"}, {"1,3", "2"}, {"2,3", "3"},
+        {"0,4", "one"}, {"1,4", "two"}, {"2,4", "three"},
     };
     auto it = cells.constFind(QString("%1,%2").arg(row).arg(col));
     return it == cells.constEnd() ? QVariant(QString()) : QVariant(it.value());
@@ -69,6 +72,17 @@ int main() {
     checkStr("=AND(A1>5,A2>5)", "true");
     checkStr("=OR(A1>50,A2>50)", "false");
     checkStr("=NOSUCHFN(1)", "#NAME?");
+
+    // --- nhom tra cuu ---
+    checkStr("=VLOOKUP(2,D1:E3,2,FALSE)", "two");
+    checkStr("=INDEX(D1:E3,3,2)", "three");
+    checkNum("=MATCH(2,D1:D3,0)", 2);
+    checkNum("=HLOOKUP(1,D1:E1,1,FALSE)", 1);
+    checkStr("=CHOOSE(2,\"a\",\"b\",\"c\")", "b");
+    checkNum("=ROWS(D1:E3)", 3);
+    checkNum("=COLUMNS(D1:E3)", 2);
+    checkStr("=XLOOKUP(3,D1:D3,E1:E3)", "three");
+    checkStr("=XLOOKUP(9,D1:D3,E1:E3,\"none\")", "none");
 
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);
     return g_fail == 0 ? 0 : 1;
