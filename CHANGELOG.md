@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v0.34.0 — Dán đặc biệt
+
+- **Dán đặc biệt** (menu **Sửa → Dán đặc biệt**, hoặc Ctrl+Alt+V): chọn kiểu dán, hỗ trợ **chuyển vị** — đổi hàng thành cột và ngược lại khi dán.
+
 ## v0.33.0 — Lọc dữ liệu
 
 - **Lọc nhanh theo cột** (menu **Dữ liệu → Lọc theo cột hiện tại**): nhập một từ khóa, chỉ giữ lại các hàng có cột đó chứa từ khóa (giữ nguyên hàng tiêu đề). Bấm "Bỏ lọc" để hiện lại tất cả.

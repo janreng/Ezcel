@@ -6,6 +6,7 @@
 #include "view/CellBorderDelegate.h"
 #include "view/Visibility.h"
 #include "model/Filter.h"
+#include "model/PasteOps.h"
 #include "update/Updater.h"
 #include "ui/Theme.h"
 
@@ -192,6 +193,7 @@ void MainWindow::buildMenus()
     edit->addAction(QStringLiteral("Cắt"), QKeySequence::Cut, this, &MainWindow::cutSelection);
     edit->addAction(QStringLiteral("Sao chép"), QKeySequence::Copy, this, &MainWindow::copySelection);
     edit->addAction(QStringLiteral("Dán"), QKeySequence::Paste, this, &MainWindow::pasteClipboard);
+    edit->addAction(QStringLiteral("Dán đặc biệt..."), QKeySequence(QStringLiteral("Ctrl+Alt+V")), this, &MainWindow::pasteSpecial);
     edit->addAction(QStringLiteral("Xóa nội dung"), QKeySequence::Delete, this, &MainWindow::clearSelection);
     edit->addSeparator();
     edit->addAction(QStringLiteral("Điền xuống"), QKeySequence(QStringLiteral("Ctrl+D")), this, &MainWindow::fillDown);
@@ -447,16 +449,14 @@ void MainWindow::doCopy(bool cut)
     }
 }
 
-void MainWindow::pasteClipboard()
+// Phân tích nội dung clipboard (TSV) thành khối ô.
+static QVector<QVector<QString>> clipboardBlock()
 {
-    QModelIndex idx = m_view->currentIndex();
-    if (!idx.isValid()) return;
     QString text = QApplication::clipboard()->text();
-    if (text.isEmpty()) return;
-    QString norm = text;
-    norm.replace(QStringLiteral("\r\n"), QStringLiteral("\n"));
-    norm.replace(QLatin1Char('\r'), QLatin1Char('\n'));
-    QStringList lines = norm.split(QLatin1Char('\n'));
+    if (text.isEmpty()) return {};
+    text.replace(QStringLiteral("\r\n"), QStringLiteral("\n"));
+    text.replace(QLatin1Char('\r'), QLatin1Char('\n'));
+    QStringList lines = text.split(QLatin1Char('\n'));
     if (!lines.isEmpty() && lines.last().isEmpty()) lines.removeLast();
     QVector<QVector<QString>> block;
     for (const QString &line : lines) {
@@ -464,9 +464,36 @@ void MainWindow::pasteClipboard()
         for (const QString &cell : line.split(QLatin1Char('\t'))) rowv.push_back(cell);
         block.push_back(rowv);
     }
+    return block;
+}
+
+void MainWindow::pasteClipboard()
+{
+    QModelIndex idx = m_view->currentIndex();
+    if (!idx.isValid()) return;
+    QVector<QVector<QString>> block = clipboardBlock();
     if (block.isEmpty()) return;
     m_model->pasteBlock(idx.row(), idx.column(), block);
     statusBar()->showMessage(QStringLiteral("Đã dán"), 2000);
+}
+
+void MainWindow::pasteSpecial()
+{
+    QModelIndex idx = m_view->currentIndex();
+    if (!idx.isValid()) return;
+    QVector<QVector<QString>> block = clipboardBlock();
+    if (block.isEmpty()) {
+        statusBar()->showMessage(QStringLiteral("Clipboard trống"), 2000);
+        return;
+    }
+    bool ok = false;
+    QStringList opts{QStringLiteral("Dán bình thường"), QStringLiteral("Chuyển vị (hàng ↔ cột)")};
+    QString choice = QInputDialog::getItem(this, QStringLiteral("Dán đặc biệt"),
+        QStringLiteral("Kiểu dán:"), opts, 0, false, &ok);
+    if (!ok) return;
+    if (choice == opts[1]) block = pasteops::transpose(block);
+    m_model->pasteBlock(idx.row(), idx.column(), block);
+    statusBar()->showMessage(QStringLiteral("Đã dán đặc biệt"), 2000);
 }
 
 void MainWindow::clearSelection()

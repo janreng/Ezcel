@@ -3,6 +3,7 @@
 #include "model/TextSearch.h"
 #include "model/CondFormat.h"
 #include "model/Filter.h"
+#include "model/PasteOps.h"
 #include <QGuiApplication>
 #include <QFont>
 #include <QColor>
@@ -285,6 +286,15 @@ int main(int argc, char **argv) {
         ok(!h.contains(0), "hang tieu de luon giu");
         ok(filterutil::rowsToHide(col, "").isEmpty(), "loc rong -> khong an");
         ok(filterutil::rowsToHide(col, "xyz").size() == 4, "loc khong khop -> an het (tru header)");
+    }
+
+    // --- dan dac biet: chuyen vi ---
+    {
+        QVector<QVector<QString>> blk{{"a", "b", "c"}, {"1", "2", "3"}};
+        auto t = pasteops::transpose(blk);
+        ok(t.size() == 3 && t[0].size() == 2, "transpose 2x3 -> 3x2");
+        ok(t[0][0] == "a" && t[0][1] == "1" && t[2][1] == "3", "transpose dung vi tri");
+        ok(pasteops::transpose({}).isEmpty(), "transpose rong -> rong");
     }
 
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);

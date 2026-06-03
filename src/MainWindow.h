@@ -33,6 +33,7 @@ private slots:
     void copySelection();
     void cutSelection();
     void pasteClipboard();
+    void pasteSpecial();      // dán đặc biệt (chuyển vị…)
     void clearSelection();
     void fillDown();
     void fillRight();
