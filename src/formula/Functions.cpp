@@ -388,6 +388,31 @@ QHash<QString, Fn> &fnMap() {
             double p = std::pow(1 + rate, n);
             return Value::number(-(fv + pmt * (1 + rate * type) * (p - 1) / rate) / p);
         };
+        // PMT(rate, nper, pv, [fv=0], [type=0]): khoản trả đều mỗi kỳ (trả góp).
+        r["PMT"] = [](const Args &a) {
+            if (a.size() < 3 || a.size() > 5) argErr("PMT");
+            double rate = toNumber(a[0]), n = toNumber(a[1]), pv = toNumber(a[2]);
+            double fv = a.size() >= 4 ? toNumber(a[3]) : 0.0;
+            int type = a.size() >= 5 ? toInt(a[4]) : 0;
+            if (rate == 0) return Value::number(-(pv + fv) / n);
+            double p = std::pow(1 + rate, n);
+            return Value::number(-(pv * p + fv) * rate / ((1 + rate * type) * (p - 1)));
+        };
+        // NPER(rate, pmt, pv, [fv=0], [type=0]): số kỳ cần để trả/tích lũy.
+        r["NPER"] = [](const Args &a) {
+            if (a.size() < 3 || a.size() > 5) argErr("NPER");
+            double rate = toNumber(a[0]), pmt = toNumber(a[1]), pv = toNumber(a[2]);
+            double fv = a.size() >= 4 ? toNumber(a[3]) : 0.0;
+            int type = a.size() >= 5 ? toInt(a[4]) : 0;
+            if (rate == 0) {
+                if (pmt == 0) throw FormulaError(QStringLiteral("NPER: pmt không được 0 khi rate 0"), ERR_NUM);
+                return Value::number(-(pv + fv) / pmt);
+            }
+            double k = pmt * (1 + rate * type);
+            double num = k - fv * rate, den = pv * rate + k;
+            if (num / den <= 0) throw FormulaError(QStringLiteral("NPER: không hội tụ"), ERR_NUM);
+            return Value::number(std::log(num / den) / std::log(1 + rate));
+        };
         // NUMBERVALUE(text, [dấu_thập_phân="."], [dấu_nhóm=","]): đổi chuỗi thành số theo dấu phân cách tùy chọn.
         r["NUMBERVALUE"] = [](const Args &a) {
             if (a.size() < 1 || a.size() > 3) argErr("NUMBERVALUE");

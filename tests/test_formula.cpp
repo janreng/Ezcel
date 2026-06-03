@@ -210,6 +210,12 @@ int main() {
     checkNum("=PV(0,5,-100,0,0)", 500);     // lai 0%
     checkNum("=PV(0.1,1,0,-110,0)", 100);   // chiet khau fv -110
     checkNum("=PV(0.05,10,-100,0,0)", 772.1734929184818); // tra gop
+    // PMT / NPER (Spec 12) — tra gop / so ky
+    checkNum("=PMT(0,10,-1000,0,0)", 100);   // lai 0%
+    checkNum("=PMT(0.01,12,-1000,0,0)", 88.8487886783417);
+    checkNum("=NPER(0,-100,1000,0,0)", 10);  // lai 0%
+    checkNum("=NPER(0.01,88.8487886783417,-1000,0,0)", 12); // khu hoi PMT
+    checkNum("=NPER(0.1,-110,100,0,0)", 1);
     checkStr("=A1/0", "#DIV/0!");
     checkStr("=IFERROR(A1/0,\"err\")", "err");
     checkStr("=AND(A1>5,A2>5)", "true");

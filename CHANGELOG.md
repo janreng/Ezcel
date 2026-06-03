@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v0.84.0 — Hàm tài chính PMT & NPER (Spec 12)
+
+- **Thêm hàm `PMT`** — tính khoản trả đều mỗi kỳ cho một khoản vay (trả góp) với lãi suất và số kỳ cố định.
+- **Thêm hàm `NPER`** — tính số kỳ cần thiết để trả hết khoản vay hoặc đạt mục tiêu tích lũy.
+
 ## v0.83.0 — Hàm tài chính FV & PV (Spec 12)
 
 - **Thêm hàm `FV`** — tính giá trị tương lai của một khoản đầu tư hoặc khoản vay với lãi suất và kỳ hạn cố định.
