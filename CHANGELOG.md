@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v0.86.0 — Hàm tài chính IPMT & PPMT (Spec 12)
+
+- **Thêm hàm `IPMT`** — tính phần tiền lãi trong khoản trả của một kỳ nhất định.
+- **Thêm hàm `PPMT`** — tính phần tiền gốc trong khoản trả của một kỳ nhất định (IPMT cộng PPMT bằng khoản trả mỗi kỳ).
+
 ## v0.85.0 — Hàm tài chính NPV & IRR (Spec 12)
 
 - **Thêm hàm `NPV`** — tính giá trị hiện tại ròng của một dãy dòng tiền theo lãi suất chiết khấu.

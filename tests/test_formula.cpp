@@ -224,6 +224,11 @@ int main() {
     checkNum("=NPV(0.1,F2:F4)", 1243.42599549211);
     checkNum("=IRR(F1:F4)", 0.233751928528259);
     checkNum("=IRR(F5:F6)", 0.1);
+    // IPMT / PPMT (Spec 12): vay 8000, lai 10%/nam, 36 ky
+    checkNum("=IPMT(0.1/12,1,36,8000)", -66.6666666666667); // ky 1: -pv*rate
+    checkNum("=IPMT(0.1/12,2,36,8000)", -65.0710764092997);
+    checkNum("=PPMT(0.1/12,1,36,8000)", -191.470830884034);
+    checkNum("=IPMT(0.1/12,1,36,8000)+PPMT(0.1/12,1,36,8000)", -258.137497550701); // = PMT
     checkStr("=A1/0", "#DIV/0!");
     checkStr("=IFERROR(A1/0,\"err\")", "err");
     checkStr("=AND(A1>5,A2>5)", "true");

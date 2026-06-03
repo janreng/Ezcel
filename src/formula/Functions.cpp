@@ -441,6 +441,52 @@ QHash<QString, Fn> &fnMap() {
             }
             throw FormulaError(QStringLiteral("IRR: không hội tụ"), ERR_NUM);
         };
+        // IPMT/PPMT(rate, per, nper, pv, [fv=0], [type=0]): phần lãi / phần gốc của kỳ trả thứ `per`.
+        // IPMT + PPMT = PMT. Dùng PMT và giá trị tương lai số dư đầu kỳ.
+        auto pmtVal = [](double rate, double n, double pv, double fv, int type) {
+            if (rate == 0) return -(pv + fv) / n;
+            double p = std::pow(1 + rate, n);
+            return -(pv * p + fv) * rate / ((1 + rate * type) * (p - 1));
+        };
+        auto fvVal = [](double rate, double n, double pmt, double pv, int type) {
+            if (rate == 0) return -(pv + pmt * n);
+            double p = std::pow(1 + rate, n);
+            return -(pv * p + pmt * (1 + rate * type) * (p - 1) / rate);
+        };
+        r["IPMT"] = [pmtVal, fvVal](const Args &a) {
+            if (a.size() < 4 || a.size() > 6) argErr("IPMT");
+            double rate = toNumber(a[0]); int per = toInt(a[1]);
+            double n = toNumber(a[2]), pv = toNumber(a[3]);
+            double fv = a.size() >= 5 ? toNumber(a[4]) : 0.0;
+            int type = a.size() >= 6 ? toInt(a[5]) : 0;
+            if (per < 1 || per > n) throw FormulaError(QStringLiteral("IPMT: per ngoài [1,nper]"), ERR_NUM);
+            double pmt = pmtVal(rate, n, pv, fv, type);
+            double ip;
+            if (type == 1 && per == 1) ip = 0;
+            else {
+                double bal = fvVal(rate, type == 1 ? per - 2 : per - 1, pmt, pv, 0);
+                ip = bal * rate;
+                if (type == 1) ip /= (1 + rate);
+            }
+            return Value::number(ip);
+        };
+        r["PPMT"] = [pmtVal, fvVal](const Args &a) {
+            if (a.size() < 4 || a.size() > 6) argErr("PPMT");
+            double rate = toNumber(a[0]); int per = toInt(a[1]);
+            double n = toNumber(a[2]), pv = toNumber(a[3]);
+            double fv = a.size() >= 5 ? toNumber(a[4]) : 0.0;
+            int type = a.size() >= 6 ? toInt(a[5]) : 0;
+            if (per < 1 || per > n) throw FormulaError(QStringLiteral("PPMT: per ngoài [1,nper]"), ERR_NUM);
+            double pmt = pmtVal(rate, n, pv, fv, type);
+            double ip;
+            if (type == 1 && per == 1) ip = 0;
+            else {
+                double bal = fvVal(rate, type == 1 ? per - 2 : per - 1, pmt, pv, 0);
+                ip = bal * rate;
+                if (type == 1) ip /= (1 + rate);
+            }
+            return Value::number(pmt - ip);
+        };
         // NUMBERVALUE(text, [dấu_thập_phân="."], [dấu_nhóm=","]): đổi chuỗi thành số theo dấu phân cách tùy chọn.
         r["NUMBERVALUE"] = [](const Args &a) {
             if (a.size() < 1 || a.size() > 3) argErr("NUMBERVALUE");
