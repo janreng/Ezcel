@@ -91,6 +91,14 @@ int main() {
     checkNum("=DATEDIF(DATE(2020,1,1),DATE(2020,12,31),\"M\")", 11);
     checkNum("=DAYS(DATE(2020,1,11),DATE(2020,1,1))", 10);
     checkNum("=WEEKDAY(DATE(2020,6,14),2)", 7); // 2020-06-14 la Chu Nhat -> type2 CN=7
+    // EOMONTH/EDATE (Spec 12 A2): don ngay cuoi thang, nam nhuan
+    checkNum("=DAY(EOMONTH(DATE(2024,2,15),0))", 29);   // thang 2 nam nhuan -> 29
+    checkNum("=DAY(EOMONTH(DATE(2024,1,15),1))", 29);   // +1 thang -> cuoi thang 2 = 29
+    checkNum("=MONTH(EOMONTH(DATE(2024,1,15),1))", 2);
+    checkNum("=DAY(EDATE(DATE(2024,1,31),1))", 29);     // 31/1 +1 thang -> 29/2 (don ngay)
+    checkNum("=MONTH(EDATE(DATE(2024,1,31),1))", 2);
+    checkNum("=YEAR(EDATE(DATE(2023,12,15),1))", 2024); // qua nam
+    checkNum("=MONTH(EDATE(DATE(2023,12,15),1))", 1);
 
     // --- thong ke ---
     checkNum("=MEDIAN(A1:A3)", 20);

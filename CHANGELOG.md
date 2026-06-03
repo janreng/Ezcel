@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v0.61.0 — Hàm ngày tháng EDATE & EOMONTH (Spec 12)
+
+- **Thêm hàm `EDATE`** — cộng/trừ số tháng vào một ngày, tự dồn về ngày cuối tháng khi cần (ví dụ 31/01 cộng 1 tháng ra 29/02).
+- **Thêm hàm `EOMONTH`** — trả về ngày cuối cùng của tháng sau khi cộng/trừ số tháng, xử lý đúng cả năm nhuận.
+
 ## v0.60.0 — Điều hướng & quản lý trang tính (Spec 10)
 
 - **Chuyển nhanh giữa các trang tính bằng Ctrl + Page Down / Page Up** (quay vòng khi tới trang cuối/đầu).

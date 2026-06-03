@@ -326,6 +326,10 @@ QHash<QString, Fn> &fnMap() {
         r["DAYS"]   = [need](const Args &a) { need(a,2,"DAYS"); return Value::number(serialToDate(toNumber(a[1])).daysTo(serialToDate(toNumber(a[0])))); };
         r["WEEKDAY"] = [](const Args &a) { if (a.size()<1||a.size()>2) argErr("WEEKDAY"); int iso = serialToDate(toNumber(a[0])).dayOfWeek(); int t = a.size()==2 ? toInt(a[1]) : 1; if (t==1) return Value::number(iso % 7 + 1); if (t==2) return Value::number(iso); if (t==3) return Value::number(iso - 1); throw FormulaError(QStringLiteral("WEEKDAY: type không hỗ trợ")); };
         r["DATEDIF"] = [need](const Args &a) { need(a,3,"DATEDIF"); QDate s = serialToDate(toNumber(a[0])), e = serialToDate(toNumber(a[1])); QString u = toText(a[2]).toUpper(); if (u=="D") return Value::number(s.daysTo(e)); if (u=="Y") return Value::number(e.year()-s.year() - ((e.month()<s.month()||(e.month()==s.month()&&e.day()<s.day()))?1:0)); if (u=="M") return Value::number((e.year()-s.year())*12 + (e.month()-s.month()) - (e.day()<s.day()?1:0)); throw FormulaError(QStringLiteral("DATEDIF: unit phải D/M/Y")); };
+        // EDATE(start, months): cộng số tháng, tự dồn ngày cuối tháng (31/1 +1 -> 29/2).
+        r["EDATE"] = [need](const Args &a) { need(a,2,"EDATE"); QDate d = serialToDate(toNumber(a[0])).addMonths(toInt(a[1])); return Value::number(dateToSerial(d)); };
+        // EOMONTH(start, months): ngày cuối cùng của tháng sau khi cộng months.
+        r["EOMONTH"] = [need](const Args &a) { need(a,2,"EOMONTH"); QDate d = serialToDate(toNumber(a[0])).addMonths(toInt(a[1])); QDate eom(d.year(), d.month(), d.daysInMonth()); return Value::number(dateToSerial(eom)); };
         // TIME(giờ,phút,giây) -> phần lẻ của ngày. T(v) -> chuỗi nếu là text. N(v) -> số.
         r["TIME"] = [need](const Args &a) { need(a,3,"TIME"); double s = toNumber(a[0])*3600 + toNumber(a[1])*60 + toNumber(a[2]); return Value::number(std::fmod(s/86400.0 + 1.0, 1.0)); };
         r["T"]    = [need](const Args &a) { need(a,1,"T"); return a[0].type == Type::Text ? a[0] : Value::str(QString()); };
