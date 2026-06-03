@@ -43,6 +43,7 @@ private slots:
     void fillDown();
     void fillRight();
     void flashFill();         // tự điền theo mẫu (Spec 05)
+    void pickFromList();      // chọn từ danh sách trong cột (Alt+Down, Spec 05)
     void toggleMergeSelection();
     void toggleShowFormulas(bool on);
     void showShortcuts();     // hộp thoại bảng phím tắt (Spec 23)

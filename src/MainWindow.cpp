@@ -19,6 +19,7 @@
 #include "ui/CellMode.h"
 #include "ui/WorkbookStats.h"
 #include "model/FlashFill.h"
+#include "model/AutoComplete.h"
 
 #include <QTableView>
 #include <QHeaderView>
@@ -128,6 +129,9 @@ MainWindow::MainWindow(QWidget *parent)
     connect(nextSh, &QShortcut::activated, this, [this] { gotoSheetRelative(1); });
     auto *prevSh = new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_PageUp), this);
     connect(prevSh, &QShortcut::activated, this, [this] { gotoSheetRelative(-1); });
+    // Alt+Down: chọn từ danh sách giá trị trong cột (Spec 05).
+    auto *pickSh = new QShortcut(QKeySequence(Qt::ALT | Qt::Key_Down), this);
+    connect(pickSh, &QShortcut::activated, this, [this] { pickFromList(); });
 
     auto *central = new QWidget(this);
     auto *lay = new QVBoxLayout(central);
@@ -960,6 +964,26 @@ void MainWindow::flashFill()
         ++filled;
     }
     statusBar()->showMessage(QStringLiteral("Flash Fill: đã điền %1 ô").arg(filled), 2500);
+}
+
+// Chọn từ danh sách (Spec 05, Alt+Down): liệt kê giá trị text duy nhất trong cột hiện tại.
+void MainWindow::pickFromList()
+{
+    QModelIndex cur = m_view->currentIndex();
+    if (!cur.isValid()) return;
+    const int col = cur.column();
+    std::vector<QString> colVals;
+    const int rows = m_model->rowCount();
+    for (int r = 0; r < rows; ++r)
+        colVals.push_back(m_model->data(m_model->index(r, col), Qt::EditRole).toString());
+    const QStringList items = autocomplete::uniqueTexts(colVals);
+    if (items.isEmpty()) { statusBar()->showMessage(QStringLiteral("Cột chưa có giá trị văn bản để chọn"), 2500); return; }
+
+    QMenu menu(this);
+    for (const QString &it : items)
+        menu.addAction(it, this, [this, cur, it] { m_model->setData(cur, it, Qt::EditRole); });
+    QRect rect = m_view->visualRect(cur);
+    menu.exec(m_view->viewport()->mapToGlobal(rect.bottomLeft()));
 }
 
 void MainWindow::toggleShowFormulas(bool on)

@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v1.19.0 — Chọn từ danh sách & gợi ý tự động (Spec 05)
+
+- **Thêm "Chọn từ danh sách" (Alt + Mũi tên xuống)**: hiện menu liệt kê các giá trị văn bản đã có trong cột, chọn để điền nhanh vào ô — đỡ phải gõ lại.
+- Bổ sung lõi **tự động hoàn thành** theo tiền tố (gợi ý khi chỉ có một giá trị trong cột khớp).
+
 ## v1.18.0 — Tự điền theo mẫu Flash Fill (Spec 05)
 
 - **Thêm Flash Fill (Ctrl + E)**: gõ 1–2 ví dụ ở đầu một cột, ứng dụng tự nhận ra quy luật tách/ghép từ cột dữ liệu bên trái và điền nốt cả cột — ví dụ tách họ ("Nguyễn Văn A" → "Nguyễn"), tách tên miền email ("user@gmail.com" → "gmail.com") hay cắt tiền tố.
