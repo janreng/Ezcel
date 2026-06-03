@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v0.63.0 — Hàm số tuần WEEKNUM & ISOWEEKNUM (Spec 12)
+
+- **Thêm hàm `WEEKNUM`** — trả về số thứ tự tuần trong năm của một ngày; chọn được tuần bắt đầu từ Chủ Nhật (mặc định) hoặc Thứ Hai.
+- **Thêm hàm `ISOWEEKNUM`** — trả về số tuần theo chuẩn ISO 8601 (tuần bắt đầu Thứ Hai, tuần 1 chứa Thứ Năm đầu tiên của năm).
+
 ## v0.62.0 — Hàm ngày làm việc WORKDAY & NETWORKDAYS (Spec 12)
 
 - **Thêm hàm `WORKDAY`** — tính ngày sau (hoặc trước) một số ngày làm việc, tự bỏ qua Thứ Bảy, Chủ Nhật và danh sách ngày nghỉ tùy chọn.

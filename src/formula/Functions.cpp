@@ -360,6 +360,18 @@ QHash<QString, Fn> &fnMap() {
             for (QDate d = s; d <= e; d = d.addDays(1)) if (isWorkday(d, hs)) ++cnt;
             return Value::number(double(sign * cnt));
         };
+        // ISOWEEKNUM(serial): tuần ISO 8601 (tuần bắt đầu Thứ Hai, tuần 1 chứa Thứ Năm đầu năm).
+        r["ISOWEEKNUM"] = [need](const Args &a) { need(a,1,"ISOWEEKNUM"); return Value::number(serialToDate(toNumber(a[0])).weekNumber()); };
+        // WEEKNUM(serial, [type]): tuần 1 chứa ngày 1/1. type 1 (mặc định) tuần bắt đầu CN, type 2 bắt đầu T2.
+        r["WEEKNUM"] = [](const Args &a) {
+            if (a.size() < 1 || a.size() > 2) argErr("WEEKNUM");
+            QDate d = serialToDate(toNumber(a[0]));
+            int type = a.size() == 2 ? toInt(a[1]) : 1;
+            QDate jan1(d.year(), 1, 1);
+            int startDow = (type == 2) ? (jan1.dayOfWeek() - 1) : (jan1.dayOfWeek() % 7); // 0-index từ ngày đầu tuần
+            int doy = int(jan1.daysTo(d)); // số ngày từ 1/1 (0-based)
+            return Value::number((doy + startDow) / 7 + 1);
+        };
         // TIME(giờ,phút,giây) -> phần lẻ của ngày. T(v) -> chuỗi nếu là text. N(v) -> số.
         r["TIME"] = [need](const Args &a) { need(a,3,"TIME"); double s = toNumber(a[0])*3600 + toNumber(a[1])*60 + toNumber(a[2]); return Value::number(std::fmod(s/86400.0 + 1.0, 1.0)); };
         r["T"]    = [need](const Args &a) { need(a,1,"T"); return a[0].type == Type::Text ? a[0] : Value::str(QString()); };

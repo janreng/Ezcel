@@ -108,6 +108,14 @@ int main() {
     checkNum("=NETWORKDAYS(DATE(2024,1,7),DATE(2024,1,1))", -5); // dao chieu -> am
     checkNum("=NETWORKDAYS(DATE(2024,1,1),DATE(2024,1,7),DATE(2024,1,3))", 4); // tru 1 ngay nghi
     checkNum("=DAY(WORKDAY(DATE(2024,1,5),1,DATE(2024,1,8)))", 9); // 8/1 nghi -> nhay 9/1
+    // WEEKNUM / ISOWEEKNUM (Spec 12)
+    checkNum("=WEEKNUM(DATE(2024,1,1))", 1);     // 1/1 -> tuan 1
+    checkNum("=WEEKNUM(DATE(2024,1,7))", 2);     // CN 7/1 -> bat dau tuan 2 (type1 CN-start)
+    checkNum("=WEEKNUM(DATE(2024,1,6))", 1);     // T7 6/1 -> con tuan 1
+    checkNum("=WEEKNUM(DATE(2024,1,8),2)", 2);   // type2 T2-start: 8/1 la T2 -> tuan 2
+    checkNum("=WEEKNUM(DATE(2024,1,7),2)", 1);   // type2: CN 7/1 con tuan 1
+    checkNum("=ISOWEEKNUM(DATE(2024,1,1))", 1);  // T2 1/1/2024 -> ISO tuan 1
+    checkNum("=ISOWEEKNUM(DATE(2023,1,1))", 52); // CN 1/1/2023 -> ISO tuan 52 (cua 2022)
 
     // --- thong ke ---
     checkNum("=MEDIAN(A1:A3)", 20);
