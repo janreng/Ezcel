@@ -39,12 +39,18 @@ private slots:
 private:
     void buildMenus();
     void buildToolbar();
+    void buildFormatToolbar();   // định nghĩa ở MainWindowFormat.cpp
     void buildFormulaBar();
     void updateTitle();
     bool saveTo(const QString &path);          // ghi theo phần mở rộng
     void doCopy(bool cut);                      // copy/cut chung một đường
     // Vùng chọn hiện tại dạng [top,left,bottom,right]; false nếu không có.
     bool selectionBox(int &top, int &left, int &bottom, int &right) const;
+
+    // --- định dạng (MainWindowFormat.cpp) ---
+    void applyFormatAttr(const QString &key, const QVariant &value); // áp 1 thuộc tính cho vùng chọn
+    void toggleFormatAttr(const QString &key);  // bật/tắt bool theo ô hiện hành
+    void pickColor(const QString &key);         // "color" (chữ) hoặc "bg" (nền)
 
     QTableView *m_view = nullptr;
     SpreadsheetModel *m_model = nullptr;

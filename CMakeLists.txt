@@ -46,7 +46,7 @@ target_include_directories(ezcel_io PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(ezcel_io PUBLIC Qt6::Core Qt6::Gui QXlsx::QXlsx)
 
 # --- App GUI ---
-qt_add_executable(Ezcel WIN32 src/main.cpp src/MainWindow.cpp src/MainWindow.h)
+qt_add_executable(Ezcel WIN32 src/main.cpp src/MainWindow.cpp src/MainWindowFormat.cpp src/MainWindow.h)
 target_include_directories(Ezcel PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(Ezcel PRIVATE ezcel_model ezcel_io ezcel_formula Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Svg)
 

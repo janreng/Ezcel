@@ -51,6 +51,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     buildMenus();
     buildToolbar();
+    buildFormatToolbar();
     statusBar();
 
     connect(m_view->selectionModel(), &QItemSelectionModel::currentChanged,

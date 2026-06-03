@@ -137,6 +137,27 @@ int main(int argc, char **argv) {
         ok(mm.merges().size() == 1 && mm.mergeAt(0, 3).has_value(), "vung moi thay vung giao");
     }
 
+    // --- formatAt + number_format presets (thanh dinh dang dung) ---
+    {
+        SpreadsheetModel mm;
+        mm.resizeGrid(5, 3);
+        put(mm, 0, 0, "1234.5");
+        SpreadsheetModel::Format nf; nf.insert("number_format", "#,##0.00");
+        mm.setFormat(0, 0, 0, 0, nf);
+        ok(mm.formatAt(0, 0).value("number_format").toString() == "#,##0.00", "formatAt tra number_format");
+        ok(disp(mm, 0, 0) == "1,234.50", "number_format #,##0.00 -> 1,234.50");
+
+        put(mm, 1, 0, "0.25");
+        SpreadsheetModel::Format pf; pf.insert("number_format", "0.00%");
+        mm.setFormat(1, 0, 1, 0, pf);
+        ok(disp(mm, 1, 0) == "25.00%", "number_format 0.00% -> 25.00%");
+
+        // bo number_format (value null) -> hien lai thuong
+        SpreadsheetModel::Format clr; clr.insert("number_format", QVariant());
+        mm.setFormat(0, 0, 0, 0, clr);
+        ok(!mm.formatAt(0, 0).contains("number_format"), "xoa number_format khi value null");
+    }
+
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);
     return g_fail == 0 ? 0 : 1;
 }

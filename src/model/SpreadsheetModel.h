@@ -53,6 +53,8 @@ public:
 
     // Định dạng: đặt thuộc tính cho vùng [top,left]..[bottom,right]; value null -> xóa key.
     void setFormat(int top, int left, int bottom, int right, const Format &attrs);
+    // Định dạng hiện tại của 1 ô (để đồng bộ nút toolbar / chọn màu sẵn).
+    Format formatAt(int row, int col) const { return m_fmt.value(key(row, col)); }
 
     // Hiện công thức gốc thay vì kết quả (Ctrl+`).
     bool showFormulas() const { return m_showFormulas; }
