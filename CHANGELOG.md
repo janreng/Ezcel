@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v0.82.0 — Hàm đổi chuỗi thành số NUMBERVALUE (Spec 12)
+
+- **Thêm hàm `NUMBERVALUE`** — chuyển một chuỗi thành số với dấu thập phân và dấu phân nhóm tùy chọn (hỗ trợ cả kiểu châu Âu `1.234,56`), tự xử lý dấu phần trăm ở cuối.
+
 ## v0.81.0 — Mở rộng đổi đơn vị diện tích & thể tích (Spec 12)
 
 - **`CONVERT` hỗ trợ thêm đơn vị diện tích** (m², km², cm², ft², in², héc-ta) và **thể tích** (lít, ml, m³, gallon, quart, pint, ft³, in³) — bổ sung cho khối lượng, độ dài, thời gian và nhiệt độ đã có.

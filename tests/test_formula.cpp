@@ -196,6 +196,13 @@ int main() {
     checkNum("=CONVERT(1,\"gal\",\"qt\")", 4);
     checkNum("=CONVERT(1,\"l\",\"ml\")", 1000);
     checkStr("=CONVERT(1,\"m2\",\"l\")", "#N/A"); // dien tich vs the tich
+    // NUMBERVALUE (Spec 12)
+    checkNum("=NUMBERVALUE(\"1,234.56\")", 1234.56);
+    checkNum("=NUMBERVALUE(\"2.5%\")", 0.025);
+    checkNum("=NUMBERVALUE(\"1.234,56\",\",\",\".\")", 1234.56); // kieu chau Au
+    checkNum("=NUMBERVALUE(\"100\")", 100);
+    checkNum("=NUMBERVALUE(\"50%%\")", 0.005);
+    checkNum("=NUMBERVALUE(\"\")", 0);
     checkStr("=A1/0", "#DIV/0!");
     checkStr("=IFERROR(A1/0,\"err\")", "err");
     checkStr("=AND(A1>5,A2>5)", "true");

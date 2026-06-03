@@ -368,6 +368,22 @@ QHash<QString, Fn> &fnMap() {
         r["SEARCH"] = [](const Args &a) { if (a.size()<2||a.size()>3) argErr("SEARCH"); QString needle = toText(a[0]), hay = toText(a[1]); int start = a.size()==3 ? toInt(a[2]) : 1; int idx = hay.indexOf(needle, start-1, Qt::CaseInsensitive); if (idx<0) throw FormulaError(QStringLiteral("SEARCH không thấy"), ERR_VALUE); return Value::number(idx+1); };
         r["TEXTJOIN"] = [](const Args &a) { if (a.size()<3) argErr("TEXTJOIN"); QString delim = toText(a[0]); bool skipEmpty = toBool(a[1]); QStringList parts; std::vector<Value> rest(a.begin()+2, a.end()); for (auto &v : flatten(rest)) { if (skipEmpty && (v.type == Type::Empty || (v.type==Type::Text && v.text.isEmpty()))) continue; parts << toText(v); } return Value::str(parts.join(delim)); };
         r["VALUE"] = [need](const Args &a) { need(a,1,"VALUE"); bool ok=false; double n = toText(a[0]).trimmed().toDouble(&ok); if (!ok) throw FormulaError(QStringLiteral("VALUE không phải số"), ERR_VALUE); return Value::number(n); };
+        // NUMBERVALUE(text, [dấu_thập_phân="."], [dấu_nhóm=","]): đổi chuỗi thành số theo dấu phân cách tùy chọn.
+        r["NUMBERVALUE"] = [](const Args &a) {
+            if (a.size() < 1 || a.size() > 3) argErr("NUMBERVALUE");
+            QString s = toText(a[0]);
+            QString dec = a.size() >= 2 && !toText(a[1]).isEmpty() ? toText(a[1]).left(1) : QStringLiteral(".");
+            QString grp = a.size() >= 3 && !toText(a[2]).isEmpty() ? toText(a[2]).left(1) : QStringLiteral(",");
+            s.remove(' ').remove('\t');
+            if (s.isEmpty()) return Value::number(0);
+            int pct = 0; while (s.endsWith('%')) { ++pct; s.chop(1); }
+            s.remove(grp);
+            if (dec != QStringLiteral(".")) { s.remove('.'); s.replace(dec, QStringLiteral(".")); }
+            bool ok = false; double n = s.toDouble(&ok);
+            if (!ok) throw FormulaError(QStringLiteral("NUMBERVALUE: chuỗi không hợp lệ"), ERR_VALUE);
+            for (int i = 0; i < pct; ++i) n /= 100.0;
+            return Value::number(n);
+        };
         r["T"]     = [need](const Args &a) { need(a,1,"T"); return a[0].type == Type::Text ? a[0] : Value::str(QString()); };
 
         // --- điều kiện (COUNTIF/SUMIF/AVERAGEIF) ---
