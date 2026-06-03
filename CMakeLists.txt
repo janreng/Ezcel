@@ -14,23 +14,29 @@ endif()
 
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Svg)
 
-# Danh sách nguồn — bổ sung dần theo từng phase port.
-set(EZCEL_SOURCES
+# --- Engine công thức (không phụ thuộc GUI) -> static lib dùng chung app + test.
+add_library(ezcel_formula STATIC
+    src/formula/Formula.cpp
+    src/formula/Functions.cpp
+    src/formula/Value.cpp
+)
+target_include_directories(ezcel_formula PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_link_libraries(ezcel_formula PUBLIC Qt6::Core)
+
+# --- App GUI ---
+qt_add_executable(Ezcel WIN32
     src/main.cpp
     src/MainWindow.cpp
-    src/formula/Formula.cpp
-    src/model/SpreadsheetModel.cpp
-)
-
-set(EZCEL_HEADERS
     src/MainWindow.h
-    src/formula/Formula.h
+    src/model/SpreadsheetModel.cpp
     src/model/SpreadsheetModel.h
 )
-
-qt_add_executable(Ezcel WIN32 ${EZCEL_SOURCES} ${EZCEL_HEADERS})
-
 target_include_directories(Ezcel PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
-target_link_libraries(Ezcel PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Svg)
+target_link_libraries(Ezcel PRIVATE ezcel_formula Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Svg)
 
-# Tổ chức: app bảng tính, sau này thêm QXlsx (P4) qua FetchContent.
+# --- Test engine (console, headless) ---
+add_executable(test_formula tests/test_formula.cpp)
+target_link_libraries(test_formula PRIVATE ezcel_formula Qt6::Core)
+
+enable_testing()
+add_test(NAME formula COMMAND test_formula)

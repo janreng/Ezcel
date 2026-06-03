@@ -27,18 +27,38 @@ QVariant SpreadsheetModel::data(const QModelIndex &index, int role) const
     const QString &raw = m_data[index.row()][index.column()];
     if (role == Qt::EditRole) return raw; // sửa: hiện công thức thô
 
-    if (raw.startsWith(QLatin1Char('='))) {
-        const qint64 k = key(index.row(), index.column());
-        auto it = m_evalCache.constFind(k);
-        if (it != m_evalCache.constEnd()) return it.value();
-        QVariant v = formula::evaluate(raw, [this](int r, int c) -> QVariant {
-            if (r < 0 || c < 0 || r >= m_data.size() || c >= m_data.first().size()) return {};
-            return m_data[r][c];
-        });
-        m_evalCache.insert(k, v);
-        return v;
-    }
+    if (formula::isFormula(raw))
+        return evalCell(index.row(), index.column());
     return raw;
+}
+
+QVariant SpreadsheetModel::evalCell(int row, int col) const
+{
+    if (row < 0 || col < 0 || row >= m_data.size()
+        || (m_data.isEmpty() ? true : col >= m_data.first().size()))
+        return {};
+
+    const QString &raw = m_data[row][col];
+    if (!formula::isFormula(raw))
+        return raw; // ô thường: trả chuỗi/số thô
+
+    const qint64 k = key(row, col);
+    auto it = m_evalCache.constFind(k);
+    if (it != m_evalCache.constEnd()) return it.value();
+
+    if (m_evaluating.contains(k)) // tham chiếu vòng
+        return QString::fromLatin1(formula::ERR_REF);
+
+    m_evaluating.insert(k);
+    QVariant result;
+    try {
+        result = formula::evaluate(raw, [this](int r, int c) { return evalCell(r, c); });
+    } catch (const formula::FormulaError &e) {
+        result = e.etype(); // hiện mã lỗi kiểu Excel (#VALUE!, #DIV/0!...)
+    }
+    m_evaluating.remove(k);
+    m_evalCache.insert(k, result);
+    return result;
 }
 
 bool SpreadsheetModel::setData(const QModelIndex &index, const QVariant &value, int role)

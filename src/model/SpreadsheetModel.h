@@ -3,6 +3,8 @@
 #include <QVector>
 #include <QString>
 #include <QHash>
+#include <QSet>
+#include <QVariant>
 
 // Bản port của table_model.py — SpreadsheetModel(QAbstractTableModel).
 // P1 sẽ bổ sung: _eval_cache theo đồ thị phụ thuộc, _fmt định dạng ô,
@@ -26,9 +28,13 @@ public:
     // Nhãn cột kiểu Excel: 0->A, 25->Z, 26->AA...
     static QString columnLabel(int col);
 
+    // Giá trị ĐÃ TÍNH của ô (resolver cho engine; chống vòng lặp tham chiếu).
+    QVariant evalCell(int row, int col) const;
+
 private:
     QVector<QVector<QString>> m_data;            // lưới thô (chuỗi/công thức)
     mutable QHash<qint64, QVariant> m_evalCache; // giá trị công thức đã tính (P1: vô hiệu hóa chọn lọc)
+    mutable QSet<qint64> m_evaluating;           // ô đang tính (phát hiện tham chiếu vòng)
 
     static qint64 key(int row, int col) { return (qint64(row) << 32) | quint32(col); }
 };
