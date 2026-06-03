@@ -411,6 +411,12 @@ int main() {
     checkStr("=IMPRODUCT(\"3+4i\",\"1+2i\")", "-5+10i"); // (3-8)+(6+4)i
     checkStr("=IMDIV(\"3+4i\",\"1+2i\")", "2.2-0.4i");   // (11-2i)/5
     checkStr("=IMDIV(\"1\",\"i\")", "-i");               // 1/i = -i
+    // IMEXP / IMLN (Spec 12) — dung khu hoi de tranh sai so dinh dang
+    checkNum("=IMREAL(IMEXP(\"0\"))", 1);       // e^0 = 1
+    checkNum("=IMREAL(IMLN(\"1\"))", 0);        // ln(1) = 0
+    checkNum("=IMAGINARY(IMLN(\"i\"))", 1.5707963267948966); // ln(i) = i*pi/2
+    checkNum("=IMREAL(IMEXP(IMLN(\"3+4i\")))", 3);   // exp(ln(z)) = z
+    checkNum("=IMAGINARY(IMEXP(IMLN(\"3+4i\")))", 4);
 
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);
     return g_fail == 0 ? 0 : 1;

@@ -1004,6 +1004,19 @@ QHash<QString, Fn> &fnMap() {
             return Value::str(formatComplex((c1.first*c2.first + c1.second*c2.second)/denom,
                                             (c1.second*c2.first - c1.first*c2.second)/denom));
         };
+        // IMEXP (e mũ số phức) và IMLN (logarit tự nhiên của số phức).
+        r["IMEXP"] = [need, parseComplex, formatComplex](const Args &a) {
+            need(a,1,"IMEXP");
+            auto c = parseComplex(toText(a[0]));
+            double ea = std::exp(c.first);
+            return Value::str(formatComplex(ea * std::cos(c.second), ea * std::sin(c.second)));
+        };
+        r["IMLN"] = [need, parseComplex, formatComplex](const Args &a) {
+            need(a,1,"IMLN");
+            auto c = parseComplex(toText(a[0]));
+            if (c.first == 0 && c.second == 0) throw FormulaError(QStringLiteral("IMLN: logarit của 0"), ERR_NUM);
+            return Value::str(formatComplex(std::log(std::hypot(c.first, c.second)), std::atan2(c.second, c.first)));
+        };
 
         // --- thống kê ---
         r["MEDIAN"] = [](const Args &a) { auto n = numbers(a); if (n.empty()) throw FormulaError(QStringLiteral("MEDIAN cần ít nhất một số")); std::sort(n.begin(), n.end()); size_t m = n.size(); return Value::number(m%2 ? n[m/2] : (n[m/2-1]+n[m/2])/2.0); };

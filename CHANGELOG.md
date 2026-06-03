@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v1.3.0 — Hàm mũ & logarit số phức (Spec 12)
+
+- **Thêm hàm `IMEXP`** — tính lũy thừa cơ số e của một số phức.
+- **Thêm hàm `IMLN`** — tính logarit tự nhiên của một số phức.
+
 ## v1.2.0 — Nhân & chia số phức (Spec 12)
 
 - **Thêm hàm `IMPRODUCT`** — nhân nhiều số phức với nhau.
