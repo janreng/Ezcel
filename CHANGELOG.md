@@ -1,5 +1,11 @@
 # Lịch sử thay đổi
 
+## v1.15.0 — Bộ hàm lớn: phân phối xác suất, đổi đơn vị & thống kê (Spec 12)
+
+- **Thêm nhóm hàm phân phối xác suất**: `BINOMDIST` (nhị thức), `POISSON`, `EXPONDIST` (mũ), `WEIBULL`, `NEGBINOMDIST` (nhị thức âm) và `HYPGEOMDIST` (siêu bội), hỗ trợ cả dạng mật độ và tích lũy.
+- **Mở rộng hàm `CONVERT`** với bốn nhóm đơn vị mới: **áp suất** (Pa, kPa, bar, atm, mmHg, psi), **năng lượng** (J, kJ, cal, kcal, Wh, kWh, eV), **công suất** (W, kW, mã lực HP/PS) và **lực** (N, kN, dyn, lbf).
+- **Thêm hàm thống kê**: `CONFIDENCE` (khoảng tin cậy), `TRIMMEAN` (trung bình cắt), `MODE` (giá trị xuất hiện nhiều nhất) và `SUMX2MY2`, `SUMX2PY2`, `SUMXMY2`.
+
 ## v1.14.0 — Hàm gamma & phân phối chuẩn (Spec 12)
 
 - **Thêm hàm `GAMMA` và `GAMMALN`** — tính hàm gamma và logarit của hàm gamma.

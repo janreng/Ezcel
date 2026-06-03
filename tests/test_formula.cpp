@@ -185,6 +185,38 @@ int main() {
     checkNum("=NORMSDIST(1.96)", 0.9750021048517795);
     checkNum("=NORMSINV(0.5)", 0);
     checkNum("=NORMSDIST(NORMSINV(0.975))", 0.975); // khu hoi (xap xi)
+    // === Batch ultracode (Spec 12): phan phoi xac suat ===
+    checkNum("=BINOMDIST(2,10,0.3,0)", 0.23347444049999988);
+    checkNum("=BINOMDIST(2,10,0.3,1)", 0.3827827863999998);
+    checkNum("=POISSON(3,2,0)", 0.1804470443154836);
+    checkNum("=POISSON(3,2,1)", 0.8571234604985472);
+    checkNum("=EXPONDIST(1,2,0)", 0.2706705664732254);
+    checkNum("=EXPONDIST(1,2,1)", 0.8646647167633873);
+    checkNum("=WEIBULL(1,2,1,0)", 0.7357588823428847);
+    checkNum("=WEIBULL(1,2,1,1)", 0.6321205588285577);
+    checkNum("=NEGBINOMDIST(3,2,0.4)", 0.13824);
+    checkNum("=NEGBINOMDIST(4,2,0.5)", 0.078125);
+    checkNum("=HYPGEOMDIST(1,4,8,20)", 0.3632610939112487);
+    checkNum("=HYPGEOMDIST(2,3,5,10)", 0.4166666666666667);
+    // === Batch ultracode (Spec 12): doi don vi mo rong ===
+    checkNum("=CONVERT(1,\"bar\",\"Pa\")", 100000.0);
+    checkNum("=CONVERT(1,\"atm\",\"Pa\")", 101325.0);
+    checkNum("=CONVERT(760,\"mmHg\",\"Pa\")", 101324.72);
+    checkNum("=CONVERT(1,\"atm\",\"kPa\")", 101.325);
+    checkNum("=CONVERT(1,\"kcal\",\"J\")", 4184.0);
+    checkNum("=CONVERT(1,\"kWh\",\"Wh\")", 1000.0);
+    checkNum("=CONVERT(1,\"HP\",\"W\")", 745.69987158227);
+    checkNum("=CONVERT(1,\"psi\",\"Pa\")", 6894.757293168);
+    checkNum("=CONVERT(1,\"eV\",\"J\")", 1.602176634e-19);
+    // === Batch ultracode (Spec 12): toan/thong ke ===
+    checkNum("=CONFIDENCE(0.05,2.5,50)", 0.69295191217483854);
+    checkNum("=CONFIDENCE(0.1,1,16)", 0.41121340673786788);
+    checkNum("=TRIMMEAN(A1:A3,0.2)", 20.0);
+    checkNum("=MODE(1,2,2,3)", 2.0);
+    checkNum("=MODE(H1:H3,1,1)", 1.0);
+    checkNum("=SUMX2MY2(H1:H3,I1:I3)", -70.0);
+    checkNum("=SUMX2PY2(H1:H3,I1:I3)", 98.0);
+    checkNum("=SUMXMY2(H1:H3,I1:I3)", 38.0);
     // COMBINA / PERMUTATIONA (Spec 12) — co lap
     checkNum("=COMBINA(4,3)", 20);   // C(6,3)
     checkNum("=COMBINA(3,2)", 6);    // C(4,2)
