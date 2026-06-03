@@ -671,6 +671,21 @@ QHash<QString, Fn> &fnMap() {
             double intercept = regression(reg, "FORECAST", false);
             return Value::number(intercept + slope * xv);
         };
+        // STEYX(known_y, known_x): sai số chuẩn của giá trị y dự báo theo đường hồi quy.
+        r["STEYX"] = [](const Args &a) {
+            if (a.size() != 2) argErr("STEYX");
+            auto y = numbers(std::vector<Value>{a[0]});
+            auto x = numbers(std::vector<Value>{a[1]});
+            if (x.size() != y.size() || x.size() < 3) throw FormulaError(QStringLiteral("STEYX: cần >= 3 cặp cùng kích thước"), ERR_NA);
+            int n = int(x.size());
+            double mx = 0, my = 0;
+            for (int i = 0; i < n; ++i) { mx += x[i]; my += y[i]; }
+            mx /= n; my /= n;
+            double syy = 0, sxy = 0, sxx = 0;
+            for (int i = 0; i < n; ++i) { double dx = x[i]-mx, dy = y[i]-my; syy += dy*dy; sxy += dx*dy; sxx += dx*dx; }
+            if (sxx == 0) throw FormulaError(QStringLiteral("STEYX: phương sai x bằng 0"), ERR_DIV0);
+            return Value::number(std::sqrt((syy - sxy*sxy/sxx) / (n - 2)));
+        };
         // NUMBERVALUE(text, [dấu_thập_phân="."], [dấu_nhóm=","]): đổi chuỗi thành số theo dấu phân cách tùy chọn.
         r["NUMBERVALUE"] = [](const Args &a) {
             if (a.size() < 1 || a.size() > 3) argErr("NUMBERVALUE");

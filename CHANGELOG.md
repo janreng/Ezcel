@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v0.97.0 — Hàm sai số chuẩn hồi quy STEYX (Spec 12)
+
+- **Thêm hàm `STEYX`** — tính sai số chuẩn của giá trị y dự báo theo đường hồi quy, cho biết độ chính xác của dự báo.
+
 ## v0.96.0 — Hàm COVAR & FORECAST (Spec 12)
 
 - **Thêm hàm `COVAR`** — tính hiệp phương sai tổng thể giữa hai vùng dữ liệu.

@@ -246,6 +246,9 @@ int main() {
     checkNum("=COVAR(A1:A3,H1:H3)", 10.0/3.0); // hiep phuong sai tong the
     checkNum("=FORECAST(50,G1:G3,A1:A3)", 101); // y=2*50+1
     checkNum("=FORECAST(0,G1:G3,A1:A3)", 1);    // = intercept
+    // STEYX (Spec 12) — sai so chuan hoi quy
+    checkNum("=STEYX(H1:H3,A1:A3)", 1.22474487139159); // = can(1.5)
+    checkNum("=STEYX(G1:G3,A1:A3)", 0);                 // tuyen tinh hoan hao -> 0
     // IPMT / PPMT (Spec 12): vay 8000, lai 10%/nam, 36 ky
     checkNum("=IPMT(0.1/12,1,36,8000)", -66.6666666666667); // ky 1: -pv*rate
     checkNum("=IPMT(0.1/12,2,36,8000)", -65.0710764092997);
