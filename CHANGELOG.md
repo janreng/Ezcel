@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v0.99.0 — Đổi chéo hệ nhị phân, bát phân & thập lục (Spec 12)
+
+- **Thêm nhóm hàm đổi chéo hệ** `BIN2HEX`, `HEX2BIN`, `BIN2OCT`, `OCT2BIN`, `HEX2OCT`, `OCT2HEX` — chuyển trực tiếp giữa nhị phân, bát phân và thập lục mà không cần qua thập phân.
+
 ## v0.98.0 — Hàm đổi hệ bát phân DEC2OCT & OCT2DEC (Spec 12)
 
 - **Thêm hàm `DEC2OCT`** — đổi số thập phân sang chuỗi bát phân (cơ số 8).

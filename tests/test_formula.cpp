@@ -382,6 +382,13 @@ int main() {
     checkNum("=OCT2DEC(\"17\")", 15);
     checkNum("=OCT2DEC(\"100\")", 64);
     checkNum("=OCT2DEC(DEC2OCT(255))", 255); // khu hoi
+    // Doi cheo he (Spec 12)
+    checkStr("=BIN2HEX(\"1111\")", "F");
+    checkStr("=HEX2BIN(\"F\")", "1111");
+    checkStr("=BIN2OCT(\"1000\")", "10");
+    checkStr("=OCT2BIN(\"10\")", "1000");
+    checkStr("=HEX2OCT(\"FF\")", "377");
+    checkStr("=OCT2HEX(\"377\")", "FF");
 
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);
     return g_fail == 0 ? 0 : 1;

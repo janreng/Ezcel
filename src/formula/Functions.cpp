@@ -906,6 +906,21 @@ QHash<QString, Fn> &fnMap() {
         // Bát phân: DEC2OCT (số->chuỗi bát phân), OCT2DEC (chuỗi bát phân->số).
         r["DEC2OCT"] = [pad](const Args &a) { if (a.size()<1||a.size()>2) argErr("DEC2OCT"); return Value::str(pad(QString::number((long long)toNumber(a[0]), 8), a, 1)); };
         r["OCT2DEC"] = [need](const Args &a) { need(a,1,"OCT2DEC"); bool ok=false; long long n = toText(a[0]).toLongLong(&ok, 8); if (!ok) throw FormulaError(QStringLiteral("OCT2DEC: chuỗi bát phân không hợp lệ")); return Value::number(n); };
+        // Đổi chéo hệ (nhị phân / bát phân / thập lục): parse cơ số nguồn -> ghi cơ số đích.
+        auto crossBase = [pad](const Args &a, const char *fn, int from, int to, bool upper) {
+            if (a.size() < 1 || a.size() > 2) argErr(fn);
+            bool ok = false; long long n = toText(a[0]).toLongLong(&ok, from);
+            if (!ok) throw FormulaError(QString::fromUtf8(fn) + QStringLiteral(": chuỗi không hợp lệ"), ERR_NUM);
+            QString out = QString::number(n, to);
+            if (upper) out = out.toUpper();
+            return Value::str(pad(out, a, 1));
+        };
+        r["BIN2HEX"] = [crossBase](const Args &a) { return crossBase(a, "BIN2HEX", 2, 16, true); };
+        r["HEX2BIN"] = [crossBase](const Args &a) { return crossBase(a, "HEX2BIN", 16, 2, false); };
+        r["BIN2OCT"] = [crossBase](const Args &a) { return crossBase(a, "BIN2OCT", 2, 8, false); };
+        r["OCT2BIN"] = [crossBase](const Args &a) { return crossBase(a, "OCT2BIN", 8, 2, false); };
+        r["HEX2OCT"] = [crossBase](const Args &a) { return crossBase(a, "HEX2OCT", 16, 8, false); };
+        r["OCT2HEX"] = [crossBase](const Args &a) { return crossBase(a, "OCT2HEX", 8, 16, true); };
 
         // --- thống kê ---
         r["MEDIAN"] = [](const Args &a) { auto n = numbers(a); if (n.empty()) throw FormulaError(QStringLiteral("MEDIAN cần ít nhất một số")); std::sort(n.begin(), n.end()); size_t m = n.size(); return Value::number(m%2 ? n[m/2] : (n[m/2-1]+n[m/2])/2.0); };
