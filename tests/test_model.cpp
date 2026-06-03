@@ -114,6 +114,31 @@ int main(int argc, char **argv) {
     m.undo();
     ok(disp(m, 0, 3) == "zzz", "undo clear -> zzz");
 
+    // --- clear formats / clear all + undo (Spec 09) ---
+    {
+        SpreadsheetModel mm;
+        mm.resizeGrid(5, 3);
+        put(mm, 0, 0, "hello");
+        SpreadsheetModel::Format bf; bf.insert("bold", true);
+        mm.setFormat(0, 0, 0, 0, bf);
+        ok(mm.formatAt(0, 0).value("bold").toBool(), "co dinh dang bold");
+
+        // Clear Formats: giu noi dung, mat dinh dang.
+        mm.clearFormatsRange(0, 0, 0, 0);
+        ok(mm.formatAt(0, 0).isEmpty(), "clearFormats -> het dinh dang");
+        ok(mm.data(mm.index(0, 0), Qt::EditRole).toString() == "hello", "clearFormats giu noi dung");
+        mm.undo();
+        ok(mm.formatAt(0, 0).value("bold").toBool(), "undo clearFormats -> bold lai");
+
+        // Clear All: mat ca noi dung lan dinh dang, 1 buoc undo khoi phuc het.
+        mm.clearAllRange(0, 0, 0, 0);
+        ok(mm.formatAt(0, 0).isEmpty(), "clearAll -> het dinh dang");
+        ok(mm.data(mm.index(0, 0), Qt::EditRole).toString() == "", "clearAll -> het noi dung");
+        mm.undo();
+        ok(mm.data(mm.index(0, 0), Qt::EditRole).toString() == "hello", "undo clearAll -> noi dung lai");
+        ok(mm.formatAt(0, 0).value("bold").toBool(), "undo clearAll -> bold lai");
+    }
+
     // --- gop o (merge) ---
     {
         SpreadsheetModel mm;

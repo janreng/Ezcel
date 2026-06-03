@@ -91,7 +91,9 @@ public:
     void sortRange(int top, int left, int bottom, int right, int keyCol, bool ascending);
 
     // Thao tác vùng (đều undoable theo ô).
-    void clearRange(int top, int left, int bottom, int right);
+    void clearRange(int top, int left, int bottom, int right);     // chỉ xóa nội dung
+    void clearFormatsRange(int top, int left, int bottom, int right); // chỉ xóa định dạng (Spec 09)
+    void clearAllRange(int top, int left, int bottom, int right);  // xóa cả nội dung + định dạng
     void pasteBlock(int top, int left, const QVector<QVector<QString>> &block,
                     int srcAnchorRow = -1, int srcAnchorCol = -1);
     void autofillVertical(int col, int srcTop, int srcBottom, int dstBottom);

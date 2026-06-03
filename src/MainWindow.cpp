@@ -500,6 +500,12 @@ void MainWindow::buildMenus()
     edit->addAction(i18n::tr("edit_paste"), QKeySequence::Paste, this, &MainWindow::pasteClipboard);
     edit->addAction(i18n::tr("edit_paste_special"), QKeySequence(QStringLiteral("Ctrl+Alt+V")), this, &MainWindow::pasteSpecial);
     edit->addAction(i18n::tr("edit_clear"), QKeySequence::Delete, this, &MainWindow::clearSelection);
+    {
+        QMenu *clearSub = edit->addMenu(QStringLiteral("Xóa..."));
+        clearSub->addAction(QStringLiteral("Tất cả (nội dung + định dạng)"), this, &MainWindow::clearAllSel);
+        clearSub->addAction(QStringLiteral("Chỉ định dạng"), this, &MainWindow::clearFormatsSel);
+        clearSub->addAction(QStringLiteral("Chỉ nội dung"), this, &MainWindow::clearSelection);
+    }
     edit->addSeparator();
     edit->addAction(i18n::tr("edit_fill_down"), QKeySequence(QStringLiteral("Ctrl+D")), this, &MainWindow::fillDown);
     edit->addAction(i18n::tr("edit_fill_right"), QKeySequence(QStringLiteral("Ctrl+R")), this, &MainWindow::fillRight);
@@ -1093,6 +1099,18 @@ void MainWindow::clearSelection()
 {
     int t, l, b, r;
     if (selectionBox(t, l, b, r)) m_model->clearRange(t, l, b, r);
+}
+
+void MainWindow::clearFormatsSel()
+{
+    int t, l, b, r;
+    if (selectionBox(t, l, b, r)) m_model->clearFormatsRange(t, l, b, r);
+}
+
+void MainWindow::clearAllSel()
+{
+    int t, l, b, r;
+    if (selectionBox(t, l, b, r)) m_model->clearAllRange(t, l, b, r);
 }
 
 // ---------------------------------------------------------------- fill / merge / view

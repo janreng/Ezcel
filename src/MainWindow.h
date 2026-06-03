@@ -41,6 +41,8 @@ private slots:
     void pasteClipboard();
     void pasteSpecial();      // dán đặc biệt (chuyển vị…)
     void clearSelection();
+    void clearFormatsSel();   // xóa chỉ định dạng vùng chọn (Spec 09)
+    void clearAllSel();       // xóa cả nội dung + định dạng vùng chọn (Spec 09)
     void fillDown();
     void fillRight();
     void flashFill();         // tự điền theo mẫu (Spec 05)

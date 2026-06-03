@@ -506,6 +506,42 @@ void SpreadsheetModel::clearRange(int top, int left, int bottom, int right) {
     applyCellChanges(std::move(changes));
 }
 
+// Chỉ xóa định dạng (giữ nội dung) — undoable. Mirror setFormat: gom FmtChange,
+// gỡ khỏi m_fmt, đẩy undo, dọn cache font, báo dataChanged.
+void SpreadsheetModel::clearFormatsRange(int top, int left, int bottom, int right) {
+    UndoEntry e;
+    for (int r = top; r <= bottom; ++r)
+        for (int c = left; c <= right; ++c) {
+            Format oldF = m_fmt.value(key(r, c));
+            if (!oldF.isEmpty()) e.fmts.push_back({r, c, oldF, Format()});
+        }
+    if (e.fmts.isEmpty()) return;
+    for (const auto &fc : e.fmts) m_fmt.remove(key(fc.row, fc.col));
+    pushUndo(std::move(e));
+    m_fontCache.clear();
+    emit dataChanged(index(top, left), index(bottom, right));
+}
+
+// Xóa cả nội dung lẫn định dạng trong một bước hoàn tác duy nhất.
+void SpreadsheetModel::clearAllRange(int top, int left, int bottom, int right) {
+    UndoEntry e;
+    for (int r = top; r <= bottom; ++r)
+        for (int c = left; c <= right; ++c) {
+            if (r < m_data.size() && c < m_data[r].size() && !m_data[r][c].isEmpty())
+                e.cells.push_back({r, c, m_data[r][c], QString()});
+            Format oldF = m_fmt.value(key(r, c));
+            if (!oldF.isEmpty()) e.fmts.push_back({r, c, oldF, Format()});
+        }
+    if (e.cells.isEmpty() && e.fmts.isEmpty()) return;
+    const bool hadFmts = !e.fmts.isEmpty();
+    for (const auto &cc : e.cells) { m_data[cc.row][cc.col] = QString(); updateDeps(cc.row, cc.col); }
+    for (const auto &fc : e.fmts) m_fmt.remove(key(fc.row, fc.col));
+    pushUndo(std::move(e));
+    if (hadFmts) m_fontCache.clear();
+    recalculateAll();
+    emit dataChanged(index(top, left), index(bottom, right));
+}
+
 void SpreadsheetModel::pasteBlock(int top, int left, const QVector<QVector<QString>> &block,
                                   int srcAnchorRow, int srcAnchorCol) {
     QVector<CellChange> changes;

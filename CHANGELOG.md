@@ -1,5 +1,11 @@
 # Lịch sử thay đổi
 
+## v1.27.0 — Xóa định dạng & xóa tất cả (Spec 09)
+
+- **Menu "Xóa..."** trong Sửa: tách 3 lựa chọn rõ ràng — Tất cả (nội dung + định dạng), Chỉ định dạng, Chỉ nội dung.
+- **Chỉ định dạng**: gỡ hết tô màu, in đậm, căn lề... mà vẫn giữ nguyên dữ liệu.
+- **Tất cả**: xóa sạch cả nội dung lẫn định dạng trong một bước, hoàn tác lại được bằng một lần Ctrl+Z.
+
 ## v1.26.0 — Gom nhóm & thu gọn cột (Spec 09)
 
 - **Gom nhóm cột**: chọn một dải cột rồi gom thành nhóm để gấp gọn theo chiều ngang.
