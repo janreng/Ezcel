@@ -30,6 +30,8 @@
 #include <QItemSelectionModel>
 #include <QItemSelection>
 #include <QPoint>
+#include <QWheelEvent>
+#include <QEvent>
 
 // Bộ lọc file dùng chung cho mở/lưu.
 static const char *kFileFilter =
@@ -51,6 +53,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_view->horizontalHeader()->setHighlightSections(true); // header sáng khi chọn (giống Excel)
     m_view->verticalHeader()->setHighlightSections(true);
     m_view->setItemDelegate(new CellBorderDelegate(m_view, m_view)); // viền xanh ô đang chọn
+    m_view->viewport()->installEventFilter(this); // bắt Ctrl+wheel để zoom
 
     buildFormulaBar();
 
@@ -245,6 +248,10 @@ void MainWindow::buildMenus()
     });
 
     QMenu *view = menuBar()->addMenu(QStringLiteral("&Xem"));
+    view->addAction(QStringLiteral("Phóng to"), QKeySequence::ZoomIn, this, [this] { m_zoom += 10; applyZoom(); });
+    view->addAction(QStringLiteral("Thu nhỏ"), QKeySequence::ZoomOut, this, [this] { m_zoom -= 10; applyZoom(); });
+    view->addAction(QStringLiteral("Thu phóng 100%"), QKeySequence(QStringLiteral("Ctrl+0")), this, [this] { m_zoom = 100; applyZoom(); });
+    view->addSeparator();
     QAction *sf = view->addAction(QStringLiteral("Hiện công thức"));
     sf->setCheckable(true);
     sf->setShortcut(QKeySequence(QStringLiteral("Ctrl+`")));
@@ -468,6 +475,34 @@ void MainWindow::toggleMergeSelection()
 void MainWindow::toggleShowFormulas(bool on)
 {
     m_model->setShowFormulas(on);
+}
+
+// ---------------------------------------------------------------- thu phóng
+void MainWindow::applyZoom()
+{
+    m_zoom = qBound(50, m_zoom, 400);
+    QFont f = theme::cellFont();
+    f.setPointSizeF(11.0 * m_zoom / 100.0);
+    m_view->setFont(f);
+    const int rh = theme::RowHeight * m_zoom / 100, cw = theme::ColWidth * m_zoom / 100;
+    m_view->verticalHeader()->setDefaultSectionSize(rh);
+    m_view->horizontalHeader()->setDefaultSectionSize(cw);
+    for (int r = 0; r < m_model->rowCount(); ++r) m_view->setRowHeight(r, rh);
+    for (int c = 0; c < m_model->columnCount(); ++c) m_view->setColumnWidth(c, cw);
+    statusBar()->showMessage(QStringLiteral("Thu phóng: %1%").arg(m_zoom), 1500);
+}
+
+bool MainWindow::eventFilter(QObject *obj, QEvent *ev)
+{
+    if (obj == m_view->viewport() && ev->type() == QEvent::Wheel) {
+        auto *we = static_cast<QWheelEvent *>(ev);
+        if (we->modifiers() & Qt::ControlModifier) {
+            m_zoom += (we->angleDelta().y() > 0 ? 10 : -10);
+            applyZoom();
+            return true; // nuốt sự kiện, không cuộn
+        }
+    }
+    return QMainWindow::eventFilter(obj, ev);
 }
 
 // ---------------------------------------------------------------- tiêu đề

@@ -22,6 +22,9 @@ public:
     // Mở file từ CLI hoặc hộp thoại (CSV/TXT/TSV/XLSX/XLSM).
     void openPath(const QString &path);
 
+protected:
+    bool eventFilter(QObject *obj, QEvent *ev) override; // Ctrl+wheel -> zoom
+
 private slots:
     void newFile();
     void openFile();
@@ -49,6 +52,7 @@ private:
     void buildFormatToolbar();   // định nghĩa ở MainWindowFormat.cpp
     void buildFormulaBar();
     void updateTitle();
+    void applyZoom();                          // áp mức thu phóng hiện tại
     bool saveTo(const QString &path);          // ghi theo phần mở rộng
     void doCopy(bool cut);                      // copy/cut chung một đường
     // Vùng chọn hiện tại dạng [top,left,bottom,right]; false nếu không có.
@@ -64,6 +68,7 @@ private:
     QLineEdit *m_formulaBar = nullptr;
     QLineEdit *m_nameBox = nullptr; // ô địa chỉ (A1) cạnh thanh công thức
     QString m_currentPath; // rỗng = chưa lưu lần nào
+    int m_zoom = 100;      // mức thu phóng (%)
 
     // Hộp thoại Tìm & Thay thế (modeless, dựng lười).
     QDialog *m_findDialog = nullptr;

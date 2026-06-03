@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v0.31.0 — Thu phóng (Zoom)
+
+- **Phóng to / thu nhỏ bảng tính**: giữ **Ctrl + lăn chuột**, hoặc menu **Xem → Phóng to / Thu nhỏ / Thu phóng 100%** (Ctrl+`=`, Ctrl+`-`, Ctrl+`0`). Phóng từ 50% đến 400%.
+
 ## v0.30.0 — Tự vừa khít cột/dòng
 
 - **Tự điều chỉnh độ rộng cột và chiều cao dòng cho vừa nội dung** (menu **Cấu trúc**): chọn vùng rồi chọn "Vừa khít độ rộng cột" / "Vừa khít chiều cao dòng" — không còn cảnh chữ bị che hay cột quá rộng.
