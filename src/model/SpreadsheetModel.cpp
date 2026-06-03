@@ -2,6 +2,7 @@
 #include "formula/Formula.h"
 #include "model/TextSearch.h"
 #include "model/Sort.h"
+#include "model/Validation.h"
 
 #include <QColor>
 #include <QDate>
@@ -248,6 +249,12 @@ bool SpreadsheetModel::setData(const QModelIndex &index, const QVariant &value, 
     QString nw = value.isNull() ? QString() : value.toString();
     QString old = m_data[row][col];
     if (old == nw) return true;
+    // Kiểm tra dữ liệu: từ chối nếu vi phạm quy tắc của ô.
+    for (const validation::Rule &vr : m_validationRules)
+        if (vr.contains(row, col) && !validation::check(nw, vr.allow, vr.op, vr.v1, vr.v2)) {
+            emit validationFailed(QStringLiteral("Giá trị không hợp lệ theo quy tắc kiểm tra dữ liệu"));
+            return false;
+        }
     UndoEntry e; e.cells.push_back({row, col, old, nw});
     pushUndo(std::move(e));
     m_data[row][col] = nw;
@@ -314,6 +321,9 @@ void SpreadsheetModel::clearCondRules() {
         emit dataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1),
                          {Qt::BackgroundRole, Qt::ForegroundRole});
 }
+
+void SpreadsheetModel::addValidationRule(const validation::Rule &rule) { m_validationRules.push_back(rule); }
+void SpreadsheetModel::clearValidationRules() { m_validationRules.clear(); }
 
 QMap<QPair<int, int>, SpreadsheetModel::Format> SpreadsheetModel::cellFormats() const {
     QMap<QPair<int, int>, Format> m;
@@ -822,6 +832,7 @@ void SpreadsheetModel::loadGrid(const QVector<QVector<QString>> &rows) {
     m_fmt.clear();
     m_merges.clear();
     m_condRules.clear();
+    m_validationRules.clear();
     m_undo.clear();
     m_redo.clear();
     rebuildDeps();

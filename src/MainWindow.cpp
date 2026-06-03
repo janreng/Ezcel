@@ -141,6 +141,9 @@ void MainWindow::bindActiveModel()
     m_modelConns << connect(m_model, &SpreadsheetModel::mergesChanged, this, [this] {
         viewutil::applyMergeSpans(m_view, m_model->merges());
     });
+    m_modelConns << connect(m_model, &SpreadsheetModel::validationFailed, this, [this](const QString &msg) {
+        statusBar()->showMessage(msg, 4000);
+    });
     viewutil::applyMergeSpans(m_view, m_model->merges());
 }
 
@@ -364,6 +367,9 @@ void MainWindow::buildMenus()
     data->addSeparator();
     data->addAction(i18n::tr("data_cond"), this, &MainWindow::showCondFormat);
     data->addAction(i18n::tr("data_clear_cond"), this, [this] { m_model->clearCondRules(); });
+    data->addSeparator();
+    data->addAction(QStringLiteral("Kiểm tra dữ liệu..."), this, &MainWindow::showDataValidation);
+    data->addAction(QStringLiteral("Xóa kiểm tra dữ liệu"), this, [this] { m_model->clearValidationRules(); });
     data->addSeparator();
     data->addAction(i18n::tr("data_filter"), this, [this] {
         QModelIndex cur = m_view->currentIndex();

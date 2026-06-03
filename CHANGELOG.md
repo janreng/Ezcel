@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v0.51.0 — Kiểm tra dữ liệu nhập
+
+- **Đặt quy tắc kiểm tra dữ liệu cho ô** (menu **Dữ liệu → Kiểm tra dữ liệu**): chọn vùng và yêu cầu giá trị là **số nguyên / số thập phân / độ dài văn bản** thỏa điều kiện (nằm giữa, lớn hơn, nhỏ hơn…). Nhập sai sẽ bị từ chối và báo ở thanh trạng thái. Có nút xóa quy tắc.
+
 ## v0.50.0 — Thêm hàm đổi hệ cơ số
 
 - **Bổ sung hàm đổi hệ cơ số**: `DECIMAL`, `DEC2BIN`, `DEC2HEX`, `BIN2DEC`, `HEX2DEC` — chuyển qua lại giữa số thập phân, nhị phân và thập lục phân.

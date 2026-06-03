@@ -45,6 +45,7 @@ private slots:
     void toggleShowFormulas(bool on);
     void showFindReplace();   // định nghĩa ở MainWindowFind.cpp
     void showCondFormat();    // định dạng có điều kiện (MainWindowFind.cpp)
+    void showDataValidation();// kiểm tra dữ liệu (MainWindowFind.cpp)
     void findNextFromDialog();
     void replaceOne();
     void replaceAllFromDialog();

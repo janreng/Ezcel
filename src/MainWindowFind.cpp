@@ -3,6 +3,7 @@
 #include "model/SpreadsheetModel.h"
 #include "model/TextSearch.h"
 #include "model/CondFormat.h"
+#include "model/Validation.h"
 
 #include <QTableView>
 #include <QDialog>
@@ -157,4 +158,56 @@ void MainWindow::showCondFormat()
     rule.bg = chosenBg;
     m_model->addCondRule(rule);
     statusBar()->showMessage(QStringLiteral("Đã thêm định dạng có điều kiện"), 3000);
+}
+
+void MainWindow::showDataValidation()
+{
+    int t, l, b, r;
+    if (!selectionBox(t, l, b, r)) return;
+
+    QDialog dlg(this);
+    dlg.setWindowTitle(QStringLiteral("Kiểm tra dữ liệu"));
+    auto *g = new QGridLayout(&dlg);
+
+    g->addWidget(new QLabel(QStringLiteral("Cho phép:"), &dlg), 0, 0);
+    auto *allowBox = new QComboBox(&dlg);
+    allowBox->addItem(QStringLiteral("Bất kỳ"), int(validation::Allow::Any));
+    allowBox->addItem(QStringLiteral("Số nguyên"), int(validation::Allow::WholeNumber));
+    allowBox->addItem(QStringLiteral("Số thập phân"), int(validation::Allow::Decimal));
+    allowBox->addItem(QStringLiteral("Độ dài văn bản"), int(validation::Allow::TextLength));
+    g->addWidget(allowBox, 0, 1, 1, 2);
+
+    g->addWidget(new QLabel(QStringLiteral("Điều kiện:"), &dlg), 1, 0);
+    auto *opBox = new QComboBox(&dlg);
+    opBox->addItem(QStringLiteral("Nằm giữa"), int(validation::Op::Between));
+    opBox->addItem(QStringLiteral("Không nằm giữa"), int(validation::Op::NotBetween));
+    opBox->addItem(QStringLiteral("Bằng"), int(validation::Op::Equal));
+    opBox->addItem(QStringLiteral("Khác"), int(validation::Op::NotEqual));
+    opBox->addItem(QStringLiteral("Lớn hơn"), int(validation::Op::Greater));
+    opBox->addItem(QStringLiteral("Nhỏ hơn"), int(validation::Op::Less));
+    opBox->addItem(QStringLiteral("Lớn hơn hoặc bằng"), int(validation::Op::GreaterEqual));
+    opBox->addItem(QStringLiteral("Nhỏ hơn hoặc bằng"), int(validation::Op::LessEqual));
+    g->addWidget(opBox, 1, 1, 1, 2);
+
+    g->addWidget(new QLabel(QStringLiteral("Giá trị:"), &dlg), 2, 0);
+    auto *v1 = new QLineEdit(&dlg);
+    auto *v2 = new QLineEdit(&dlg);
+    v2->setPlaceholderText(QStringLiteral("đến (cho Nằm giữa)"));
+    g->addWidget(v1, 2, 1);
+    g->addWidget(v2, 2, 2);
+
+    auto *bb = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dlg);
+    QObject::connect(bb, &QDialogButtonBox::accepted, &dlg, &QDialog::accept);
+    QObject::connect(bb, &QDialogButtonBox::rejected, &dlg, &QDialog::reject);
+    g->addWidget(bb, 3, 0, 1, 3);
+
+    if (dlg.exec() != QDialog::Accepted) return;
+    validation::Rule rule;
+    rule.top = t; rule.left = l; rule.bottom = b; rule.right = r;
+    rule.allow = validation::Allow(allowBox->currentData().toInt());
+    rule.op = validation::Op(opBox->currentData().toInt());
+    rule.v1 = v1->text().toDouble();
+    rule.v2 = v2->text().toDouble();
+    m_model->addValidationRule(rule);
+    statusBar()->showMessage(QStringLiteral("Đã đặt kiểm tra dữ liệu cho vùng chọn"), 3000);
 }

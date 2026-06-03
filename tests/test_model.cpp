@@ -6,6 +6,7 @@
 #include "model/PasteOps.h"
 #include "model/Stats.h"
 #include "model/AutoSum.h"
+#include "model/Validation.h"
 #include <QGuiApplication>
 #include <QFont>
 #include <QColor>
@@ -317,6 +318,29 @@ int main(int argc, char **argv) {
         ok(autosum::trailingNumericRun({"a", "b"}) == 0, "khong co so -> 0");
         ok(autosum::trailingNumericRun({}) == 0, "rong -> 0");
         ok(autosum::trailingNumericRun({"10", "20"}) == 2, "ca hai so -> 2");
+    }
+
+    // --- kiem tra du lieu (data validation) ---
+    {
+        using A = validation::Allow; using O = validation::Op;
+        ok(validation::check("5", A::WholeNumber, O::Between, 1, 10), "5 trong [1,10]");
+        ok(!validation::check("11", A::WholeNumber, O::Between, 1, 10), "11 ngoai [1,10]");
+        ok(!validation::check("5.5", A::WholeNumber, O::Between, 1, 10), "5.5 khong phai so nguyen");
+        ok(validation::check("5.5", A::Decimal, O::Greater, 5, 0), "5.5 > 5 (decimal)");
+        ok(!validation::check("abc", A::WholeNumber, O::Between, 1, 10), "chuoi -> khong hop le");
+        ok(validation::check("", A::WholeNumber, O::Between, 1, 10), "rong -> hop le (ignore blank)");
+        ok(validation::check("hello", A::TextLength, O::LessEqual, 10, 0), "do dai 5 <= 10");
+        ok(!validation::check("hello world!!", A::TextLength, O::LessEqual, 10, 0), "do dai 13 > 10");
+
+        // tich hop model: setData tu choi gia tri sai
+        SpreadsheetModel mm;
+        mm.resizeGrid(3, 3);
+        validation::Rule vr; vr.top=0; vr.left=0; vr.bottom=2; vr.right=0;
+        vr.allow = A::WholeNumber; vr.op = O::Between; vr.v1 = 1; vr.v2 = 100;
+        mm.addValidationRule(vr);
+        ok(mm.setData(mm.index(0,0), "50", Qt::EditRole) && disp(mm,0,0) == "50", "validation: nhan 50");
+        ok(!mm.setData(mm.index(1,0), "999", Qt::EditRole), "validation: tu choi 999");
+        ok(disp(mm,1,0) == "", "validation: o van rong sau khi tu choi");
     }
 
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);

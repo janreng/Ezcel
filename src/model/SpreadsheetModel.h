@@ -10,6 +10,7 @@
 #include <QPair>
 #include <optional>
 #include "model/CondFormat.h"
+#include "model/Validation.h"
 
 // Vùng ô gộp [top,left]..[bottom,right] (port tuple (t,l,b,r) của Python).
 struct MergeRange {
@@ -91,6 +92,11 @@ public:
     void clearCondRules();
     int condRuleCount() const { return m_condRules.size(); }
 
+    // Kiểm tra dữ liệu (data validation): thêm/xóa quy tắc; setData sẽ từ chối giá trị sai.
+    void addValidationRule(const validation::Rule &rule);
+    void clearValidationRules();
+    int validationRuleCount() const { return m_validationRules.size(); }
+
     // Gộp ô (merge). Giữ nội dung ô góc trên-trái, xóa phần còn lại. Đều undoable.
     const QVector<MergeRange> &merges() const { return m_merges; }
     std::optional<MergeRange> mergeAt(int row, int col) const;
@@ -109,6 +115,7 @@ public:
 signals:
     void contentChanged();
     void mergesChanged(); // view cập nhật span khi danh sách ô gộp đổi
+    void validationFailed(const QString &msg); // nhập sai quy tắc kiểm tra dữ liệu
 
 private:
     struct CellChange { int row, col; QString oldVal, newVal; };
@@ -127,6 +134,7 @@ private:
     QHash<qint64, Format> m_fmt;                 // định dạng theo ô
     QVector<MergeRange> m_merges;                // vùng ô gộp
     QVector<cond::Rule> m_condRules;             // định dạng có điều kiện
+    QVector<validation::Rule> m_validationRules; // kiểm tra dữ liệu nhập
     mutable QHash<QString, QFont> m_fontCache;   // QFont chia sẻ theo style
     mutable QHash<QString, bool> m_fontCacheNull;// style không có font
 
