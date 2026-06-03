@@ -86,6 +86,17 @@ int main() {
     checkStr("=UPPER(B1)", "HELLO");
     checkStr("=LEFT(B1,3)", "hel");
     checkStr("=MID(B1,2,3)", "ell");
+    // TEXTBEFORE / TEXTAFTER (Spec 12)
+    checkStr("=TEXTBEFORE(\"a-b-c\",\"-\")", "a");
+    checkStr("=TEXTAFTER(\"a-b-c\",\"-\")", "b-c");
+    checkStr("=TEXTBEFORE(\"a-b-c\",\"-\",2)", "a-b");
+    checkStr("=TEXTAFTER(\"a-b-c\",\"-\",2)", "c");
+    checkStr("=TEXTBEFORE(\"a-b-c\",\"-\",-1)", "a-b"); // tu cuoi
+    checkStr("=TEXTAFTER(\"a-b-c\",\"-\",-1)", "c");
+    checkStr("=TEXTBEFORE(\"hello world\",\" \")", "hello");
+    checkStr("=TEXTAFTER(\"name@mail.com\",\"@\")", "mail.com");
+    checkStr("=TEXTBEFORE(\"AxBxC\",\"x\",1,1)", "A"); // khong phan biet hoa thuong
+    checkStr("=TEXTBEFORE(\"abc\",\"-\")", "#N/A"); // khong tim thay
     // ROMAN / ARABIC (Spec 12)
     checkStr("=ROMAN(4)", "IV");
     checkStr("=ROMAN(1994)", "MCMXCIV");

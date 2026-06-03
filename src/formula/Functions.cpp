@@ -151,6 +151,37 @@ QHash<QString, Fn> &fnMap() {
         r["AVERAGEA"] = [valuesA](const Args &a) { auto n = valuesA(a); if (n.empty()) throw FormulaError(QStringLiteral("AVERAGEA chia 0"), ERR_DIV0); return Value::number(sumv(n)/n.size()); };
         r["MAXA"] = [valuesA](const Args &a) { auto n = valuesA(a); if (n.empty()) return Value::number(0); return Value::number(*std::max_element(n.begin(), n.end())); };
         r["MINA"] = [valuesA](const Args &a) { auto n = valuesA(a); if (n.empty()) return Value::number(0); return Value::number(*std::min_element(n.begin(), n.end())); };
+        // TEXTBEFORE/TEXTAFTER(text, delim, [instance=1], [match_mode=0]): lấy phần trước/sau dấu phân cách.
+        // instance âm -> đếm từ cuối; match_mode 1 -> không phân biệt hoa thường.
+        auto matchPositions = [](const QString &s, const QString &d, Qt::CaseSensitivity cs) {
+            std::vector<int> pos; int from = 0, idx;
+            while ((idx = s.indexOf(d, from, cs)) >= 0) { pos.push_back(idx); from = idx + d.size(); }
+            return pos;
+        };
+        r["TEXTBEFORE"] = [matchPositions](const Args &a) {
+            if (a.size() < 2 || a.size() > 4) argErr("TEXTBEFORE");
+            QString s = toText(a[0]), d = toText(a[1]);
+            int inst = a.size() >= 3 ? toInt(a[2]) : 1;
+            Qt::CaseSensitivity cs = (a.size() >= 4 && toInt(a[3]) == 1) ? Qt::CaseInsensitive : Qt::CaseSensitive;
+            if (inst == 0) throw FormulaError(QStringLiteral("TEXTBEFORE: instance khác 0"), ERR_VALUE);
+            if (d.isEmpty()) return Value::str(QString());
+            auto pos = matchPositions(s, d, cs);
+            int k = inst > 0 ? inst - 1 : int(pos.size()) + inst;
+            if (k < 0 || k >= int(pos.size())) throw FormulaError(QStringLiteral("TEXTBEFORE: không tìm thấy"), ERR_NA);
+            return Value::str(s.left(pos[k]));
+        };
+        r["TEXTAFTER"] = [matchPositions](const Args &a) {
+            if (a.size() < 2 || a.size() > 4) argErr("TEXTAFTER");
+            QString s = toText(a[0]), d = toText(a[1]);
+            int inst = a.size() >= 3 ? toInt(a[2]) : 1;
+            Qt::CaseSensitivity cs = (a.size() >= 4 && toInt(a[3]) == 1) ? Qt::CaseInsensitive : Qt::CaseSensitive;
+            if (inst == 0) throw FormulaError(QStringLiteral("TEXTAFTER: instance khác 0"), ERR_VALUE);
+            if (d.isEmpty()) return Value::str(s);
+            auto pos = matchPositions(s, d, cs);
+            int k = inst > 0 ? inst - 1 : int(pos.size()) + inst;
+            if (k < 0 || k >= int(pos.size())) throw FormulaError(QStringLiteral("TEXTAFTER: không tìm thấy"), ERR_NA);
+            return Value::str(s.mid(pos[k] + d.size()));
+        };
         r["ABS"]   = [need](const Args &a) { need(a,1,"ABS"); return Value::number(std::abs(toNumber(a[0]))); };
         r["SIGN"]  = [need](const Args &a) { need(a,1,"SIGN"); double n = toNumber(a[0]); return Value::number((n>0)-(n<0)); };
         r["INT"]   = [need](const Args &a) { need(a,1,"INT"); return Value::number(std::floor(toNumber(a[0]))); };

@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v0.70.0 — Hàm tách chuỗi TEXTBEFORE & TEXTAFTER (Spec 12)
+
+- **Thêm hàm `TEXTBEFORE`** — lấy phần văn bản trước dấu phân cách; chọn được lần xuất hiện thứ mấy (đếm từ đầu hoặc từ cuối) và có/không phân biệt hoa thường.
+- **Thêm hàm `TEXTAFTER`** — lấy phần văn bản sau dấu phân cách, với cùng các tùy chọn, tiện tách họ tên, email, mã chuỗi…
+
 ## v0.69.0 — Hàm thống kê AVERAGEA, MAXA, MINA (Spec 12)
 
 - **Thêm `AVERAGEA`, `MAXA`, `MINA`** — giống AVERAGE/MAX/MIN nhưng tính cả ô chứa chữ (coi là 0) và giá trị logic (ĐÚNG = 1, SAI = 0), hữu ích khi vùng dữ liệu lẫn cả số, chữ và logic.
