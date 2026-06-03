@@ -376,6 +376,12 @@ int main() {
     checkStr("=DEC2HEX(255)", "FF");
     checkNum("=BIN2DEC(\"1010\")", 10);
     checkNum("=HEX2DEC(\"1F\")", 31);
+    // OCT2DEC / DEC2OCT (Spec 12) — bat phan
+    checkStr("=DEC2OCT(8)", "10");
+    checkStr("=DEC2OCT(64)", "100");
+    checkNum("=OCT2DEC(\"17\")", 15);
+    checkNum("=OCT2DEC(\"100\")", 64);
+    checkNum("=OCT2DEC(DEC2OCT(255))", 255); // khu hoi
 
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);
     return g_fail == 0 ? 0 : 1;

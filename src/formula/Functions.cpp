@@ -903,6 +903,9 @@ QHash<QString, Fn> &fnMap() {
         r["DEC2HEX"] = [pad](const Args &a) { if (a.size()<1||a.size()>2) argErr("DEC2HEX"); return Value::str(pad(QString::number((long long)toNumber(a[0]), 16).toUpper(), a, 1)); };
         r["BIN2DEC"] = [need](const Args &a) { need(a,1,"BIN2DEC"); bool ok=false; long long n = toText(a[0]).toLongLong(&ok, 2); if (!ok) throw FormulaError(QStringLiteral("BIN2DEC: chuỗi nhị phân không hợp lệ")); return Value::number(n); };
         r["HEX2DEC"] = [need](const Args &a) { need(a,1,"HEX2DEC"); bool ok=false; long long n = toText(a[0]).toLongLong(&ok, 16); if (!ok) throw FormulaError(QStringLiteral("HEX2DEC: chuỗi thập lục không hợp lệ")); return Value::number(n); };
+        // Bát phân: DEC2OCT (số->chuỗi bát phân), OCT2DEC (chuỗi bát phân->số).
+        r["DEC2OCT"] = [pad](const Args &a) { if (a.size()<1||a.size()>2) argErr("DEC2OCT"); return Value::str(pad(QString::number((long long)toNumber(a[0]), 8), a, 1)); };
+        r["OCT2DEC"] = [need](const Args &a) { need(a,1,"OCT2DEC"); bool ok=false; long long n = toText(a[0]).toLongLong(&ok, 8); if (!ok) throw FormulaError(QStringLiteral("OCT2DEC: chuỗi bát phân không hợp lệ")); return Value::number(n); };
 
         // --- thống kê ---
         r["MEDIAN"] = [](const Args &a) { auto n = numbers(a); if (n.empty()) throw FormulaError(QStringLiteral("MEDIAN cần ít nhất một số")); std::sort(n.begin(), n.end()); size_t m = n.size(); return Value::number(m%2 ? n[m/2] : (n[m/2-1]+n[m/2])/2.0); };

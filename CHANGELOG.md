@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v0.98.0 — Hàm đổi hệ bát phân DEC2OCT & OCT2DEC (Spec 12)
+
+- **Thêm hàm `DEC2OCT`** — đổi số thập phân sang chuỗi bát phân (cơ số 8).
+- **Thêm hàm `OCT2DEC`** — đổi chuỗi bát phân về số thập phân, bổ sung cho nhóm đổi hệ nhị phân và thập lục đã có.
+
 ## v0.97.0 — Hàm sai số chuẩn hồi quy STEYX (Spec 12)
 
 - **Thêm hàm `STEYX`** — tính sai số chuẩn của giá trị y dự báo theo đường hồi quy, cho biết độ chính xác của dự báo.
