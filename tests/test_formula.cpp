@@ -129,6 +129,16 @@ int main() {
     checkNum("=MAXA(2,TRUE)", 2);
     checkNum("=MINA(-1,FALSE)", -1);
     checkNum("=AVERAGE(A1:B1)", 10);   // AVERAGE bo qua text -> 10/1
+    // PERCENTILE / QUARTILE (Spec 12): A1:A3 = {10,20,30}
+    checkNum("=PERCENTILE(A1:A3,0)", 10);
+    checkNum("=PERCENTILE(A1:A3,1)", 30);
+    checkNum("=PERCENTILE(A1:A3,0.5)", 20);   // trung vi
+    checkNum("=PERCENTILE(A1:A3,0.25)", 15);  // noi suy
+    checkNum("=QUARTILE(A1:A3,0)", 10);
+    checkNum("=QUARTILE(A1:A3,1)", 15);
+    checkNum("=QUARTILE(A1:A3,2)", 20);
+    checkNum("=QUARTILE(A1:A3,3)", 25);
+    checkNum("=QUARTILE(A1:A3,4)", 30);
     checkStr("=A1/0", "#DIV/0!");
     checkStr("=IFERROR(A1/0,\"err\")", "err");
     checkStr("=AND(A1>5,A2>5)", "true");

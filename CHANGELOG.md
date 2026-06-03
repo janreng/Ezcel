@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v0.71.0 — Hàm phân vị PERCENTILE & QUARTILE (Spec 12)
+
+- **Thêm hàm `PERCENTILE`** — tính phân vị thứ k (0–1) của một vùng số theo phương pháp nội suy tuyến tính.
+- **Thêm hàm `QUARTILE`** — tính tứ phân vị (nhỏ nhất, 25%, trung vị, 75%, lớn nhất) của vùng số.
+
 ## v0.70.0 — Hàm tách chuỗi TEXTBEFORE & TEXTAFTER (Spec 12)
 
 - **Thêm hàm `TEXTBEFORE`** — lấy phần văn bản trước dấu phân cách; chọn được lần xuất hiện thứ mấy (đếm từ đầu hoặc từ cuối) và có/không phân biệt hoa thường.

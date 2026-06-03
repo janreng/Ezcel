@@ -151,6 +151,31 @@ QHash<QString, Fn> &fnMap() {
         r["AVERAGEA"] = [valuesA](const Args &a) { auto n = valuesA(a); if (n.empty()) throw FormulaError(QStringLiteral("AVERAGEA chia 0"), ERR_DIV0); return Value::number(sumv(n)/n.size()); };
         r["MAXA"] = [valuesA](const Args &a) { auto n = valuesA(a); if (n.empty()) return Value::number(0); return Value::number(*std::max_element(n.begin(), n.end())); };
         r["MINA"] = [valuesA](const Args &a) { auto n = valuesA(a); if (n.empty()) return Value::number(0); return Value::number(*std::min_element(n.begin(), n.end())); };
+        // PERCENTILE/QUARTILE: phân vị theo nội suy tuyến tính (phương pháp INC, gồm cả hai đầu).
+        auto percentileInc = [](std::vector<double> v, double k) {
+            std::sort(v.begin(), v.end());
+            double rank = k * (v.size() - 1);
+            int lo = int(std::floor(rank));
+            double frac = rank - lo;
+            if (lo + 1 < int(v.size())) return v[lo] + frac * (v[lo+1] - v[lo]);
+            return v[lo];
+        };
+        r["PERCENTILE"] = [percentileInc](const Args &a) {
+            if (a.size() != 2) argErr("PERCENTILE");
+            auto v = numbers(std::vector<Value>{a[0]});
+            if (v.empty()) throw FormulaError(QStringLiteral("PERCENTILE: vùng rỗng"), ERR_NUM);
+            double k = toNumber(a[1]);
+            if (k < 0 || k > 1) throw FormulaError(QStringLiteral("PERCENTILE: k trong [0,1]"), ERR_NUM);
+            return Value::number(percentileInc(v, k));
+        };
+        r["QUARTILE"] = [percentileInc](const Args &a) {
+            if (a.size() != 2) argErr("QUARTILE");
+            auto v = numbers(std::vector<Value>{a[0]});
+            if (v.empty()) throw FormulaError(QStringLiteral("QUARTILE: vùng rỗng"), ERR_NUM);
+            int q = toInt(a[1]);
+            if (q < 0 || q > 4) throw FormulaError(QStringLiteral("QUARTILE: phần tư 0..4"), ERR_NUM);
+            return Value::number(percentileInc(v, q * 0.25));
+        };
         // TEXTBEFORE/TEXTAFTER(text, delim, [instance=1], [match_mode=0]): lấy phần trước/sau dấu phân cách.
         // instance âm -> đếm từ cuối; match_mode 1 -> không phân biệt hoa thường.
         auto matchPositions = [](const QString &s, const QString &d, Qt::CaseSensitivity cs) {
