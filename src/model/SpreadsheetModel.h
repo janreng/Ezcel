@@ -68,6 +68,10 @@ public:
     // Thay mọi lần xuất hiện find->repl trong dữ liệu thô (undoable). Trả số ô đổi.
     int replaceAll(const QString &find, const QString &repl, bool matchCase = false);
 
+    // Sắp xếp các hàng của vùng [top,left]..[bottom,right] theo cột keyCol
+    // (chỉ số cột tuyệt đối, phải nằm trong vùng). Ổn định, kiểu Excel (undoable).
+    void sortRange(int top, int left, int bottom, int right, int keyCol, bool ascending);
+
     // Thao tác vùng (đều undoable theo ô).
     void clearRange(int top, int left, int bottom, int right);
     void pasteBlock(int top, int left, const QVector<QVector<QString>> &block,

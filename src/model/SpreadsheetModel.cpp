@@ -1,6 +1,7 @@
 #include "model/SpreadsheetModel.h"
 #include "formula/Formula.h"
 #include "model/TextSearch.h"
+#include "model/Sort.h"
 
 #include <QColor>
 #include <QDate>
@@ -418,6 +419,28 @@ int SpreadsheetModel::replaceAll(const QString &find, const QString &repl, bool 
     int n = changes.size();
     applyCellChanges(std::move(changes));
     return n;
+}
+
+void SpreadsheetModel::sortRange(int top, int left, int bottom, int right,
+                                 int keyCol, bool ascending) {
+    if (top < 0 || left < 0 || bottom >= m_data.size() || keyCol < left || keyCol > right)
+        return;
+    // Trích block, sắp theo cột (đổi keyCol về chỉ số trong block).
+    QVector<QVector<QString>> block;
+    for (int r = top; r <= bottom; ++r)
+        block.push_back(m_data[r].mid(left, right - left + 1));
+    QVector<sort::SortKey> keys{
+        {keyCol - left, ascending ? sort::Order::Ascending : sort::Order::Descending}};
+    QVector<QVector<QString>> sorted = sort::sortRows(block, keys);
+
+    QVector<CellChange> changes;
+    for (int i = 0; i < sorted.size(); ++i)
+        for (int j = 0; j < sorted[i].size(); ++j) {
+            int r = top + i, c = left + j;
+            if (m_data[r][c] != sorted[i][j])
+                changes.push_back({r, c, m_data[r][c], sorted[i][j]});
+        }
+    applyCellChanges(std::move(changes));
 }
 
 void SpreadsheetModel::clearRange(int top, int left, int bottom, int right) {

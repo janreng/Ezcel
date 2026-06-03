@@ -152,6 +152,18 @@ void MainWindow::buildMenus()
         int t, l, b, r; if (selectionBox(t, l, b, r)) m_model->removeColumns(l, r - l + 1);
     });
 
+    QMenu *data = menuBar()->addMenu(QStringLiteral("&Dữ liệu"));
+    data->addAction(QStringLiteral("Sắp xếp tăng dần"), this, [this] {
+        int t, l, b, r; if (!selectionBox(t, l, b, r)) return;
+        int kc = m_view->currentIndex().isValid() ? m_view->currentIndex().column() : l;
+        m_model->sortRange(t, l, b, r, qBound(l, kc, r), true);
+    });
+    data->addAction(QStringLiteral("Sắp xếp giảm dần"), this, [this] {
+        int t, l, b, r; if (!selectionBox(t, l, b, r)) return;
+        int kc = m_view->currentIndex().isValid() ? m_view->currentIndex().column() : l;
+        m_model->sortRange(t, l, b, r, qBound(l, kc, r), false);
+    });
+
     QMenu *view = menuBar()->addMenu(QStringLiteral("&Xem"));
     QAction *sf = view->addAction(QStringLiteral("Hiện công thức"));
     sf->setCheckable(true);

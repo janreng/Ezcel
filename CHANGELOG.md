@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v0.22.0 — Sắp xếp dữ liệu
+
+- **Sắp xếp vùng dữ liệu** (menu **Dữ liệu → Sắp xếp tăng dần / giảm dần**): sắp các hàng của vùng đang chọn theo cột đang đứng, kiểu Excel — số đứng trước chữ, ô trống dồn xuống cuối, các cột còn lại đi theo hàng. Hoàn tác được.
+
 ## v0.21.0 — Tự động cập nhật
 
 - **Kiểm tra cập nhật trong ứng dụng**: menu **Trợ giúp → Kiểm tra cập nhật** sẽ dò bản mới nhất trên GitHub, nếu có bản mới thì tải file cài và chạy luôn cho bạn.

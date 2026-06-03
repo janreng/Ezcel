@@ -231,6 +231,24 @@ int main(int argc, char **argv) {
         ok(n2 == 1 && disp(mm, 0, 1) == "CAT", "replaceAll case-sensitive 1 o");
     }
 
+    // --- sortRange (tich hop engine sort vao model, undoable) ---
+    {
+        SpreadsheetModel mm;
+        mm.resizeGrid(5, 3);
+        // vung A1:B3 — cot A khoa
+        put(mm, 0, 0, "3"); put(mm, 0, 1, "ba");
+        put(mm, 1, 0, "1"); put(mm, 1, 1, "mot");
+        put(mm, 2, 0, "2"); put(mm, 2, 1, "hai");
+        mm.sortRange(0, 0, 2, 1, 0, true);   // sap tang theo cot A
+        ok(disp(mm, 0, 0) == "1" && disp(mm, 0, 1) == "mot", "sortRange tang: hang 1->mot");
+        ok(disp(mm, 2, 0) == "3" && disp(mm, 2, 1) == "ba", "sortRange tang: hang cuoi->ba");
+        // hang phai di theo (khoa gan voi du lieu)
+        mm.undo();
+        ok(disp(mm, 0, 0) == "3" && disp(mm, 0, 1) == "ba", "undo sortRange ve nguyen");
+        mm.sortRange(0, 0, 2, 1, 0, false);  // giam dan
+        ok(disp(mm, 0, 0) == "3" && disp(mm, 2, 0) == "1", "sortRange giam: 3..1");
+    }
+
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);
     return g_fail == 0 ? 0 : 1;
 }
