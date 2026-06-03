@@ -203,6 +203,13 @@ int main() {
     checkNum("=NUMBERVALUE(\"100\")", 100);
     checkNum("=NUMBERVALUE(\"50%%\")", 0.005);
     checkNum("=NUMBERVALUE(\"\")", 0);
+    // FV / PV (Spec 12) — gia tri tuong lai / hien tai
+    checkNum("=FV(0,10,-100,0,0)", 1000);   // lai 0% -> -pmt*n
+    checkNum("=FV(0.1,1,0,-100,0)", 110);   // pv -100 sinh lai 10%
+    checkNum("=FV(0.05,10,-100,-1000,0)", 2886.683880332324);
+    checkNum("=PV(0,5,-100,0,0)", 500);     // lai 0%
+    checkNum("=PV(0.1,1,0,-110,0)", 100);   // chiet khau fv -110
+    checkNum("=PV(0.05,10,-100,0,0)", 772.1734929184818); // tra gop
     checkStr("=A1/0", "#DIV/0!");
     checkStr("=IFERROR(A1/0,\"err\")", "err");
     checkStr("=AND(A1>5,A2>5)", "true");

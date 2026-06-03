@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v0.83.0 — Hàm tài chính FV & PV (Spec 12)
+
+- **Thêm hàm `FV`** — tính giá trị tương lai của một khoản đầu tư hoặc khoản vay với lãi suất và kỳ hạn cố định.
+- **Thêm hàm `PV`** — tính giá trị hiện tại của một dòng tiền đều trong tương lai.
+
 ## v0.82.0 — Hàm đổi chuỗi thành số NUMBERVALUE (Spec 12)
 
 - **Thêm hàm `NUMBERVALUE`** — chuyển một chuỗi thành số với dấu thập phân và dấu phân nhóm tùy chọn (hỗ trợ cả kiểu châu Âu `1.234,56`), tự xử lý dấu phần trăm ở cuối.

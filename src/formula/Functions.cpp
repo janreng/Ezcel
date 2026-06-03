@@ -368,6 +368,26 @@ QHash<QString, Fn> &fnMap() {
         r["SEARCH"] = [](const Args &a) { if (a.size()<2||a.size()>3) argErr("SEARCH"); QString needle = toText(a[0]), hay = toText(a[1]); int start = a.size()==3 ? toInt(a[2]) : 1; int idx = hay.indexOf(needle, start-1, Qt::CaseInsensitive); if (idx<0) throw FormulaError(QStringLiteral("SEARCH không thấy"), ERR_VALUE); return Value::number(idx+1); };
         r["TEXTJOIN"] = [](const Args &a) { if (a.size()<3) argErr("TEXTJOIN"); QString delim = toText(a[0]); bool skipEmpty = toBool(a[1]); QStringList parts; std::vector<Value> rest(a.begin()+2, a.end()); for (auto &v : flatten(rest)) { if (skipEmpty && (v.type == Type::Empty || (v.type==Type::Text && v.text.isEmpty()))) continue; parts << toText(v); } return Value::str(parts.join(delim)); };
         r["VALUE"] = [need](const Args &a) { need(a,1,"VALUE"); bool ok=false; double n = toText(a[0]).trimmed().toDouble(&ok); if (!ok) throw FormulaError(QStringLiteral("VALUE không phải số"), ERR_VALUE); return Value::number(n); };
+        // FV(rate, nper, pmt, [pv=0], [type=0]): giá trị tương lai của dòng tiền đều.
+        r["FV"] = [](const Args &a) {
+            if (a.size() < 3 || a.size() > 5) argErr("FV");
+            double rate = toNumber(a[0]), n = toNumber(a[1]), pmt = toNumber(a[2]);
+            double pv = a.size() >= 4 ? toNumber(a[3]) : 0.0;
+            int type = a.size() >= 5 ? toInt(a[4]) : 0;
+            if (rate == 0) return Value::number(-(pv + pmt * n));
+            double p = std::pow(1 + rate, n);
+            return Value::number(-(pv * p + pmt * (1 + rate * type) * (p - 1) / rate));
+        };
+        // PV(rate, nper, pmt, [fv=0], [type=0]): giá trị hiện tại của dòng tiền đều.
+        r["PV"] = [](const Args &a) {
+            if (a.size() < 3 || a.size() > 5) argErr("PV");
+            double rate = toNumber(a[0]), n = toNumber(a[1]), pmt = toNumber(a[2]);
+            double fv = a.size() >= 4 ? toNumber(a[3]) : 0.0;
+            int type = a.size() >= 5 ? toInt(a[4]) : 0;
+            if (rate == 0) return Value::number(-(fv + pmt * n));
+            double p = std::pow(1 + rate, n);
+            return Value::number(-(fv + pmt * (1 + rate * type) * (p - 1) / rate) / p);
+        };
         // NUMBERVALUE(text, [dấu_thập_phân="."], [dấu_nhóm=","]): đổi chuỗi thành số theo dấu phân cách tùy chọn.
         r["NUMBERVALUE"] = [](const Args &a) {
             if (a.size() < 1 || a.size() > 3) argErr("NUMBERVALUE");
