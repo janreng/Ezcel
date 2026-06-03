@@ -191,6 +191,31 @@ QHash<QString, Fn> &fnMap() {
             for (double x : v) s += std::abs(x - m);
             return Value::number(s / v.size());
         };
+        // SKEW: độ lệch (skewness) mẫu — cần >=3 giá trị. KURT: độ nhọn (kurtosis) mẫu — cần >=4.
+        r["SKEW"] = [](const Args &a) {
+            auto v = numbers(a);
+            int n = int(v.size());
+            if (n < 3) throw FormulaError(QStringLiteral("SKEW: cần ít nhất 3 số"), ERR_DIV0);
+            double m = sumv(v) / n, ss = 0;
+            for (double x : v) ss += (x - m) * (x - m);
+            double s = std::sqrt(ss / (n - 1));
+            if (s == 0) throw FormulaError(QStringLiteral("SKEW: độ lệch chuẩn 0"), ERR_DIV0);
+            double sum3 = 0; for (double x : v) { double z = (x - m) / s; sum3 += z*z*z; }
+            return Value::number(double(n) / ((n-1.0)*(n-2.0)) * sum3);
+        };
+        r["KURT"] = [](const Args &a) {
+            auto v = numbers(a);
+            int n = int(v.size());
+            if (n < 4) throw FormulaError(QStringLiteral("KURT: cần ít nhất 4 số"), ERR_DIV0);
+            double m = sumv(v) / n, ss = 0;
+            for (double x : v) ss += (x - m) * (x - m);
+            double s = std::sqrt(ss / (n - 1));
+            if (s == 0) throw FormulaError(QStringLiteral("KURT: độ lệch chuẩn 0"), ERR_DIV0);
+            double sum4 = 0; for (double x : v) { double z = (x - m) / s; sum4 += z*z*z*z; }
+            double a1 = double(n)*(n+1.0) / ((n-1.0)*(n-2.0)*(n-3.0));
+            double a2 = 3.0*(n-1.0)*(n-1.0) / ((n-2.0)*(n-3.0));
+            return Value::number(a1 * sum4 - a2);
+        };
         // TEXTBEFORE/TEXTAFTER(text, delim, [instance=1], [match_mode=0]): lấy phần trước/sau dấu phân cách.
         // instance âm -> đếm từ cuối; match_mode 1 -> không phân biệt hoa thường.
         auto matchPositions = [](const QString &s, const QString &d, Qt::CaseSensitivity cs) {
