@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v0.49.0 — Thêm hàm định dạng số
+
+- **Bổ sung hàm** `FIXED` (định dạng số có dấu phẩy hàng nghìn), `DOLLAR` (định dạng tiền tệ) và `BASE` (đổi số sang hệ cơ số khác, ví dụ nhị phân/thập lục).
+
 ## v0.48.0 — Thêm hàm công thức
 
 - **Bổ sung hàm** `TIME` (tạo giờ từ giờ/phút/giây), `T` (lấy phần văn bản) và `N` (đổi sang số) — nâng tổng số hàm tính toán hỗ trợ.

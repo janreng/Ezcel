@@ -330,6 +330,16 @@ QHash<QString, Fn> &fnMap() {
         r["TIME"] = [need](const Args &a) { need(a,3,"TIME"); double s = toNumber(a[0])*3600 + toNumber(a[1])*60 + toNumber(a[2]); return Value::number(std::fmod(s/86400.0 + 1.0, 1.0)); };
         r["T"]    = [need](const Args &a) { need(a,1,"T"); return a[0].type == Type::Text ? a[0] : Value::str(QString()); };
         r["N"]    = [need](const Args &a) { need(a,1,"N"); const Value &v = a[0]; if (v.type == Type::Number) return v; if (v.type == Type::Bool) return Value::number(v.boolean ? 1 : 0); return Value::number(0); };
+        // FIXED/DOLLAR: định dạng số -> chuỗi (dấu phẩy hàng nghìn). BASE: đổi cơ số.
+        auto withCommas = [](QString s) {
+            int dot = s.indexOf('.'); int end = (dot < 0) ? s.size() : dot;
+            int start = (s.size() && s[0] == '-') ? 1 : 0;
+            for (int i = end - 3; i > start; i -= 3) s.insert(i, ',');
+            return s;
+        };
+        r["FIXED"] = [withCommas](const Args &a) { if (a.size()<1||a.size()>3) argErr("FIXED"); double n = toNumber(a[0]); int dec = a.size()>=2 ? toInt(a[1]) : 2; bool noComma = a.size()>=3 && toBool(a[2]); QString s = QString::number(n, 'f', qMax(0, dec)); return Value::str(noComma ? s : withCommas(s)); };
+        r["DOLLAR"] = [withCommas](const Args &a) { if (a.size()<1||a.size()>2) argErr("DOLLAR"); double n = toNumber(a[0]); int dec = a.size()>=2 ? toInt(a[1]) : 2; QString s = QString::number(std::abs(n), 'f', qMax(0, dec)); return Value::str((n<0?"-$":"$") + withCommas(s)); };
+        r["BASE"] = [](const Args &a) { if (a.size()<2||a.size()>3) argErr("BASE"); long long n = (long long)toNumber(a[0]); int radix = toInt(a[1]); if (radix<2||radix>36) throw FormulaError(QStringLiteral("BASE: cơ số 2-36")); int minLen = a.size()>=3 ? toInt(a[2]) : 0; QString s = QString::number(n, radix).toUpper(); while (s.size() < minLen) s.prepend('0'); return Value::str(s); };
 
         // --- thống kê ---
         r["MEDIAN"] = [](const Args &a) { auto n = numbers(a); if (n.empty()) throw FormulaError(QStringLiteral("MEDIAN cần ít nhất một số")); std::sort(n.begin(), n.end()); size_t m = n.size(); return Value::number(m%2 ? n[m/2] : (n[m/2-1]+n[m/2])/2.0); };
