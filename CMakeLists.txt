@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
-project(Ezcel VERSION 0.20.0 LANGUAGES CXX)
+project(Ezcel VERSION 0.21.0 LANGUAGES CXX)
 
 # Bản port C++ của Ezcel (gốc Python/PySide6). Dùng Qt6 Widgets + MinGW.
 set(CMAKE_CXX_STANDARD 20)
@@ -12,7 +12,7 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Svg)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Svg Network)
 
 # --- QXlsx (đọc/ghi XLSX) — tải qua FetchContent, ghim tag v1.5.0.
 # Tải về build/_deps (đã gitignore), không nhúng nguồn vào repo.
@@ -51,10 +51,18 @@ add_library(ezcel_view STATIC src/view/MergeSpans.cpp src/view/MergeSpans.h)
 target_include_directories(ezcel_view PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(ezcel_view PUBLIC Qt6::Core Qt6::Gui Qt6::Widgets)
 
+# --- Cập nhật (GitHub Releases) — cần Network + Widgets -> static lib.
+add_library(ezcel_update STATIC
+    src/update/VersionCompare.cpp src/update/VersionCompare.h
+    src/update/Updater.cpp src/update/Updater.h)
+target_include_directories(ezcel_update PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_link_libraries(ezcel_update PUBLIC Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Network)
+
 # --- App GUI ---
 qt_add_executable(Ezcel WIN32 src/main.cpp src/MainWindow.cpp src/MainWindowFormat.cpp src/MainWindowFind.cpp src/MainWindow.h)
 target_include_directories(Ezcel PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
-target_link_libraries(Ezcel PRIVATE ezcel_model ezcel_io ezcel_view ezcel_formula Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Svg)
+target_compile_definitions(Ezcel PRIVATE EZCEL_VERSION="${PROJECT_VERSION}")
+target_link_libraries(Ezcel PRIVATE ezcel_model ezcel_io ezcel_view ezcel_update ezcel_formula Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Svg Qt6::Network)
 
 # --- Tests (console, headless) ---
 add_executable(test_formula tests/test_formula.cpp)
@@ -69,8 +77,14 @@ target_link_libraries(test_io PRIVATE ezcel_io Qt6::Core)
 add_executable(test_view tests/test_view.cpp)
 target_link_libraries(test_view PRIVATE ezcel_view ezcel_model Qt6::Core Qt6::Gui Qt6::Widgets)
 
+# So sánh phiên bản — test thuần Core (không kéo Network).
+add_executable(test_version tests/test_version.cpp src/update/VersionCompare.cpp)
+target_include_directories(test_version PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_link_libraries(test_version PRIVATE Qt6::Core)
+
 enable_testing()
 add_test(NAME formula COMMAND test_formula)
 add_test(NAME model COMMAND test_model)
 add_test(NAME io COMMAND test_io)
 add_test(NAME view COMMAND test_view)
+add_test(NAME version COMMAND test_version)

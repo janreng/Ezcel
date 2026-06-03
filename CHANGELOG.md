@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v0.21.0 — Tự động cập nhật
+
+- **Kiểm tra cập nhật trong ứng dụng**: menu **Trợ giúp → Kiểm tra cập nhật** sẽ dò bản mới nhất trên GitHub, nếu có bản mới thì tải file cài và chạy luôn cho bạn.
+- Thêm hộp thoại **Giới thiệu Ezcel** hiển thị phiên bản đang dùng.
+
 ## v0.20.0 — Bản C++ đầu tiên
 
 Ezcel viết lại hoàn toàn bằng C++/Qt6 cho nhẹ và mượt hơn. Bản đầu này đã có đủ tính năng dùng hằng ngày:

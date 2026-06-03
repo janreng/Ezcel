@@ -3,6 +3,7 @@
 #include "io/Csv.h"
 #include "io/Xlsx.h"
 #include "view/MergeSpans.h"
+#include "update/Updater.h"
 
 #include <QTableView>
 #include <QHeaderView>
@@ -156,6 +157,26 @@ void MainWindow::buildMenus()
     sf->setCheckable(true);
     sf->setShortcut(QKeySequence(QStringLiteral("Ctrl+`")));
     connect(sf, &QAction::toggled, this, &MainWindow::toggleShowFormulas);
+
+    QMenu *help = menuBar()->addMenu(QStringLiteral("&Trợ giúp"));
+    help->addAction(QStringLiteral("Kiểm tra cập nhật"), this, [this] {
+#ifdef EZCEL_VERSION
+        const QString ver = QStringLiteral(EZCEL_VERSION);
+#else
+        const QString ver = QStringLiteral("0.0.0");
+#endif
+        auto *up = new Updater(ver, this);
+        up->checkForUpdates(/*silentIfNone*/ false);
+    });
+    help->addAction(QStringLiteral("Giới thiệu Ezcel"), this, [this] {
+#ifdef EZCEL_VERSION
+        const QString ver = QStringLiteral(EZCEL_VERSION);
+#else
+        const QString ver = QStringLiteral("?");
+#endif
+        QMessageBox::about(this, QStringLiteral("Ezcel"),
+            QStringLiteral("Ezcel %1\nBảng tính gọn nhẹ viết bằng C++/Qt6.").arg(ver));
+    });
 }
 
 void MainWindow::buildToolbar()
