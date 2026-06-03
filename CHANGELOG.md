@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v0.33.0 — Lọc dữ liệu
+
+- **Lọc nhanh theo cột** (menu **Dữ liệu → Lọc theo cột hiện tại**): nhập một từ khóa, chỉ giữ lại các hàng có cột đó chứa từ khóa (giữ nguyên hàng tiêu đề). Bấm "Bỏ lọc" để hiện lại tất cả.
+
 ## v0.32.0 — Định dạng có điều kiện
 
 - **Tô màu ô theo điều kiện** (menu **Dữ liệu → Định dạng có điều kiện**): chọn vùng, đặt điều kiện (lớn hơn / nhỏ hơn / bằng / khác / nằm giữa / chứa chữ) và màu nền — những ô thỏa điều kiện sẽ tự tô màu. Có nút xóa toàn bộ quy tắc.

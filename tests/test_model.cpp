@@ -2,6 +2,7 @@
 #include "model/SpreadsheetModel.h"
 #include "model/TextSearch.h"
 #include "model/CondFormat.h"
+#include "model/Filter.h"
 #include <QGuiApplication>
 #include <QFont>
 #include <QColor>
@@ -274,6 +275,16 @@ int main(int argc, char **argv) {
         ok(!bg1.isValid(), "cond khong to o <= 50");
         mm.clearCondRules();
         ok(!mm.data(mm.index(0, 0), Qt::BackgroundRole).isValid(), "clear cond -> het mau");
+    }
+
+    // --- loc du lieu ---
+    {
+        QVector<QString> col{"Ten", "Cafe", "Tra sua", "Banh", "cafe sua"};
+        auto h = filterutil::rowsToHide(col, "cafe"); // ci: giu Cafe(1) & cafe sua(4); an 2,3
+        ok(h.size() == 2 && h.contains(2) && h.contains(3), "loc 'cafe' an 2 hang");
+        ok(!h.contains(0), "hang tieu de luon giu");
+        ok(filterutil::rowsToHide(col, "").isEmpty(), "loc rong -> khong an");
+        ok(filterutil::rowsToHide(col, "xyz").size() == 4, "loc khong khop -> an het (tru header)");
     }
 
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);

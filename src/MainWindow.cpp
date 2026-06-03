@@ -5,6 +5,7 @@
 #include "view/MergeSpans.h"
 #include "view/CellBorderDelegate.h"
 #include "view/Visibility.h"
+#include "model/Filter.h"
 #include "update/Updater.h"
 #include "ui/Theme.h"
 
@@ -23,6 +24,7 @@
 #include <climits>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QInputDialog>
 #include <QApplication>
 #include <QClipboard>
 #include <QFileInfo>
@@ -249,6 +251,25 @@ void MainWindow::buildMenus()
     data->addSeparator();
     data->addAction(QStringLiteral("Định dạng có điều kiện..."), this, &MainWindow::showCondFormat);
     data->addAction(QStringLiteral("Xóa định dạng có điều kiện"), this, [this] { m_model->clearCondRules(); });
+    data->addSeparator();
+    data->addAction(QStringLiteral("Lọc theo cột hiện tại..."), this, [this] {
+        QModelIndex cur = m_view->currentIndex();
+        int col = cur.isValid() ? cur.column() : 0;
+        bool okIn = false;
+        QString text = QInputDialog::getText(this, QStringLiteral("Lọc dữ liệu"),
+            QStringLiteral("Hiện các hàng có cột %1 chứa:").arg(SpreadsheetModel::columnLabel(col)),
+            QLineEdit::Normal, QString(), &okIn);
+        if (!okIn) return;
+        QVector<QString> colVals;
+        for (int r = 0; r < m_model->rowCount(); ++r)
+            colVals.push_back(m_model->data(m_model->index(r, col), Qt::DisplayRole).toString());
+        for (int r = 0; r < m_model->rowCount(); ++r) m_view->setRowHidden(r, false); // reset trước
+        for (int r : filterutil::rowsToHide(colVals, text)) m_view->setRowHidden(r, true);
+        statusBar()->showMessage(QStringLiteral("Đã lọc cột %1").arg(SpreadsheetModel::columnLabel(col)), 3000);
+    });
+    data->addAction(QStringLiteral("Bỏ lọc (hiện tất cả)"), this, [this] {
+        for (int r = 0; r < m_model->rowCount(); ++r) m_view->setRowHidden(r, false);
+    });
 
     QMenu *view = menuBar()->addMenu(QStringLiteral("&Xem"));
     view->addAction(QStringLiteral("Phóng to"), QKeySequence::ZoomIn, this, [this] { m_zoom += 10; applyZoom(); });
