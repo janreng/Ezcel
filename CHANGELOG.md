@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v1.6.0 — Tang & logarit cơ số số phức (Spec 12)
+
+- **Thêm hàm `IMTAN`** — tính tang của một số phức.
+- **Thêm hàm `IMLOG10` và `IMLOG2`** — tính logarit cơ số 10 và cơ số 2 của một số phức.
+
 ## v1.5.0 — Sin & cos số phức (Spec 12)
 
 - **Thêm hàm `IMSIN`** — tính sin của một số phức.

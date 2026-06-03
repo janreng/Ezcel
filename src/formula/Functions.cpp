@@ -1042,6 +1042,24 @@ QHash<QString, Fn> &fnMap() {
             auto c = parseComplex(toText(a[0]));
             return Value::str(formatComplex(std::cos(c.first)*std::cosh(c.second), -std::sin(c.first)*std::sinh(c.second)));
         };
+        // IMTAN (= sin/cos số phức) và IMLOG10/IMLOG2 (logarit cơ số 10 / 2).
+        r["IMTAN"] = [need, parseComplex, formatComplex](const Args &a) {
+            need(a,1,"IMTAN");
+            auto c = parseComplex(toText(a[0]));
+            double sr = std::sin(c.first)*std::cosh(c.second), si = std::cos(c.first)*std::sinh(c.second);
+            double cr = std::cos(c.first)*std::cosh(c.second), ci = -std::sin(c.first)*std::sinh(c.second);
+            double d = cr*cr + ci*ci;
+            if (d == 0) throw FormulaError(QStringLiteral("IMTAN: chia cho 0"), ERR_DIV0);
+            return Value::str(formatComplex((sr*cr + si*ci)/d, (si*cr - sr*ci)/d));
+        };
+        auto imLogBase = [parseComplex, formatComplex](const QString &s, double lnBase) {
+            auto c = parseComplex(s);
+            if (c.first == 0 && c.second == 0) throw FormulaError(QStringLiteral("IMLOG: logarit của 0"), ERR_NUM);
+            double lr = std::log(std::hypot(c.first, c.second)), li = std::atan2(c.second, c.first);
+            return Value::str(formatComplex(lr/lnBase, li/lnBase));
+        };
+        r["IMLOG10"] = [need, imLogBase](const Args &a) { need(a,1,"IMLOG10"); return imLogBase(toText(a[0]), std::log(10.0)); };
+        r["IMLOG2"]  = [need, imLogBase](const Args &a) { need(a,1,"IMLOG2"); return imLogBase(toText(a[0]), std::log(2.0)); };
 
         // --- thống kê ---
         r["MEDIAN"] = [](const Args &a) { auto n = numbers(a); if (n.empty()) throw FormulaError(QStringLiteral("MEDIAN cần ít nhất một số")); std::sort(n.begin(), n.end()); size_t m = n.size(); return Value::number(m%2 ? n[m/2] : (n[m/2-1]+n[m/2])/2.0); };

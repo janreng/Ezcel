@@ -429,6 +429,12 @@ int main() {
     checkNum("=IMAGINARY(IMSIN(\"i\"))", 1.1752011936438014); // sin(i)=i*sinh(1)
     checkNum("=IMREAL(IMCOS(\"i\"))", 1.5430806348152437);    // cos(i)=cosh(1)
     checkNum("=IMAGINARY(IMCOS(\"i\"))", 0);
+    // IMTAN / IMLOG10 / IMLOG2 (Spec 12)
+    checkNum("=IMREAL(IMTAN(\"0\"))", 0);   // tan(0)=0
+    checkNum("=IMAGINARY(IMTAN(\"i\"))", 0.7615941559557649); // tan(i)=i*tanh(1)
+    checkNum("=IMREAL(IMLOG10(\"100\"))", 2); // log10(100)=2
+    checkNum("=IMREAL(IMLOG2(\"8\"))", 3);    // log2(8)=3
+    checkNum("=IMREAL(IMLOG10(\"1\"))", 0);
 
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);
     return g_fail == 0 ? 0 : 1;
