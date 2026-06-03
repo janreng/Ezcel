@@ -232,6 +232,11 @@ int main() {
     // RATE (Spec 12) — lai suat moi ky (khu hoi PMT/PV)
     checkNum("=RATE(1,0,-100,110)", 0.1);  // -100*(1+r)+110=0
     checkNum("=RATE(36,-258.137497550701,8000)", 0.1/12); // khu hoi PMT
+    // SLN / SYD (Spec 12) — khau hao
+    checkNum("=SLN(10000,1000,5)", 1800);     // deu: (cost-salvage)/life
+    checkNum("=SYD(10000,1000,5,1)", 3000);   // nam dau lon nhat
+    checkNum("=SYD(10000,1000,5,5)", 600);    // nam cuoi nho nhat
+    checkNum("=SYD(10000,1000,5,3)", 1800);   // nam giua
     checkStr("=A1/0", "#DIV/0!");
     checkStr("=IFERROR(A1/0,\"err\")", "err");
     checkStr("=AND(A1>5,A2>5)", "true");

@@ -511,6 +511,19 @@ QHash<QString, Fn> &fnMap() {
             }
             throw FormulaError(QStringLiteral("RATE: không hội tụ"), ERR_NUM);
         };
+        // SLN(cost, salvage, life): khấu hao đều mỗi kỳ. SYD(...,per): khấu hao theo tổng số năm.
+        r["SLN"] = [need](const Args &a) {
+            need(a,3,"SLN");
+            double cost = toNumber(a[0]), salv = toNumber(a[1]), life = toNumber(a[2]);
+            if (life == 0) throw FormulaError(QStringLiteral("SLN: life khác 0"), ERR_NUM);
+            return Value::number((cost - salv) / life);
+        };
+        r["SYD"] = [need](const Args &a) {
+            need(a,4,"SYD");
+            double cost = toNumber(a[0]), salv = toNumber(a[1]), life = toNumber(a[2]), per = toNumber(a[3]);
+            if (life <= 0 || per < 1 || per > life) throw FormulaError(QStringLiteral("SYD: đối số sai"), ERR_NUM);
+            return Value::number((cost - salv) * (life - per + 1) * 2.0 / (life * (life + 1)));
+        };
         // NUMBERVALUE(text, [dấu_thập_phân="."], [dấu_nhóm=","]): đổi chuỗi thành số theo dấu phân cách tùy chọn.
         r["NUMBERVALUE"] = [](const Args &a) {
             if (a.size() < 1 || a.size() > 3) argErr("NUMBERVALUE");
