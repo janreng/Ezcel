@@ -20,6 +20,7 @@
 #include "ui/WorkbookStats.h"
 #include "model/FlashFill.h"
 #include "model/AutoComplete.h"
+#include "model/DataTools.h"
 
 #include <QTableView>
 #include <QHeaderView>
@@ -522,6 +523,8 @@ void MainWindow::buildMenus()
         statusBar()->showMessage(QStringLiteral("Đã lọc cột %1").arg(SpreadsheetModel::columnLabel(col)), 3000);
     });
     data->addAction(QStringLiteral("Lọc theo giá trị..."), this, &MainWindow::filterByValues);
+    data->addAction(QStringLiteral("Xóa hàng trùng"), this, &MainWindow::removeDuplicates);
+    data->addAction(QStringLiteral("Tách cột theo dấu phân cách..."), this, &MainWindow::textToColumns);
     data->addAction(i18n::tr("data_clear_filter"), this, [this] {
         for (int r = 0; r < m_model->rowCount(); ++r) m_view->setRowHidden(r, false);
     });
@@ -1026,6 +1029,61 @@ void MainWindow::filterByValues()
     for (int r : hide) m_view->setRowHidden(r, true);
     statusBar()->showMessage(QStringLiteral("Đã lọc cột %1: ẩn %2 hàng")
         .arg(SpreadsheetModel::columnLabel(col)).arg(hide.size()), 3000);
+}
+
+// Xóa hàng trùng (Spec 27): dùng toàn bộ cột làm khóa, giữ lần xuất hiện đầu, có tiêu đề.
+void MainWindow::removeDuplicates()
+{
+    const int rows = m_model->rowCount(), cols = m_model->columnCount();
+    // Chỉ xét khối dữ liệu liền mạch từ trên xuống.
+    int lastRow = -1;
+    for (int r = 0; r < rows; ++r) {
+        bool empty = true;
+        for (int c = 0; c < cols; ++c)
+            if (!m_model->data(m_model->index(r, c), Qt::EditRole).toString().trimmed().isEmpty()) { empty = false; break; }
+        if (empty) break;
+        lastRow = r;
+    }
+    if (lastRow < 1) { statusBar()->showMessage(QStringLiteral("Không đủ dữ liệu để xóa hàng trùng"), 2500); return; }
+
+    std::vector<std::vector<QString>> grid;
+    for (int r = 0; r <= lastRow; ++r) {
+        std::vector<QString> row;
+        for (int c = 0; c < cols; ++c) row.push_back(m_model->data(m_model->index(r, c), Qt::EditRole).toString());
+        grid.push_back(std::move(row));
+    }
+    QVector<int> keyCols;
+    for (int c = 0; c < cols; ++c) keyCols.push_back(c);
+    auto dup = datatools::duplicateRowIndices(grid, keyCols, /*hasHeader*/ true);
+    if (dup.isEmpty()) { statusBar()->showMessage(QStringLiteral("Không tìm thấy hàng trùng"), 2500); return; }
+
+    // Xóa từ dưới lên để giữ chỉ số hợp lệ.
+    for (int i = dup.size() - 1; i >= 0; --i) m_model->removeRows(dup[i], 1);
+    statusBar()->showMessage(QStringLiteral("Đã xóa %1 hàng trùng").arg(dup.size()), 3000);
+}
+
+// Tách cột theo dấu phân cách (Spec 27): cột hiện tại tách thành nhiều cột bên phải.
+void MainWindow::textToColumns()
+{
+    QModelIndex cur = m_view->currentIndex();
+    int col = cur.isValid() ? cur.column() : 0;
+    bool okIn = false;
+    QString delim = QInputDialog::getText(this, QStringLiteral("Tách cột"),
+        QStringLiteral("Dấu phân cách (vd , hoặc ; hoặc dấu cách):"),
+        QLineEdit::Normal, QStringLiteral(","), &okIn);
+    if (!okIn || delim.isEmpty()) return;
+
+    const int rows = m_model->rowCount(), cols = m_model->columnCount();
+    int filled = 0;
+    for (int r = 0; r < rows; ++r) {
+        QString text = m_model->data(m_model->index(r, col), Qt::EditRole).toString();
+        if (text.trimmed().isEmpty()) continue;
+        const QStringList parts = datatools::splitDelimited(text, delim);
+        for (int k = 0; k < parts.size() && col + k < cols; ++k)
+            m_model->setData(m_model->index(r, col + k), parts[k], Qt::EditRole);
+        ++filled;
+    }
+    statusBar()->showMessage(QStringLiteral("Đã tách %1 hàng theo '%2'").arg(filled).arg(delim), 3000);
 }
 
 void MainWindow::toggleShowFormulas(bool on)

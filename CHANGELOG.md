@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v1.21.0 — Công cụ dữ liệu: xóa hàng trùng & tách cột (Spec 27)
+
+- **Thêm "Xóa hàng trùng"** trong menu Dữ liệu: tự tìm và xóa các hàng có nội dung trùng nhau (giữ lần xuất hiện đầu, giữ hàng tiêu đề).
+- **Thêm "Tách cột theo dấu phân cách..."**: tách nội dung một cột thành nhiều cột dựa trên dấu phân cách (phẩy, chấm phẩy, dấu cách…).
+
 ## v1.20.0 — Lọc theo giá trị (Spec 15)
 
 - **Thêm "Lọc theo giá trị..."** trong menu Dữ liệu: mở hộp thoại liệt kê các giá trị duy nhất của cột với ô tích chọn — bỏ tích để ẩn các hàng có giá trị đó, giống bộ lọc cột quen thuộc. Bổ sung cho bộ lọc theo từ khóa đã có.
