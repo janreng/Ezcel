@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v0.29.0 — Ẩn / hiện hàng và cột
+
+- **Ẩn và hiện lại hàng/cột** (menu **Cấu trúc**): chọn vùng rồi Ẩn hàng / Ẩn cột để giấu tạm; chọn quanh chỗ bị ẩn rồi "Hiện lại (bỏ ẩn)" để cho hiện ra.
+
 ## v0.28.0 — Ô địa chỉ (Name Box)
 
 - **Ô địa chỉ bên trái thanh công thức**: luôn hiện vị trí ô đang chọn (vd `A1`). Gõ một địa chỉ (`B10`) hoặc một vùng (`A1:C5`) rồi Enter để **nhảy/chọn nhanh** tới đó.

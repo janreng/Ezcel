@@ -1,5 +1,6 @@
 // Test headless cho span ô gộp (viewutil::applyMergeSpans). Chi in ASCII.
 #include "view/MergeSpans.h"
+#include "view/Visibility.h"
 #include "model/SpreadsheetModel.h"
 #include <QApplication>
 #include <QTableView>
@@ -39,6 +40,20 @@ int main(int argc, char **argv) {
     m.unmergeCells(0, 4, 2, 4);
     viewutil::applyMergeSpans(&view, m.merges());
     ok(view.rowSpan(0, 4) == 1, "unmerge het -> E1 het span");
+
+    // --- an/hien hang-cot ---
+    {
+        SpreadsheetModel mm;
+        mm.resizeGrid(8, 6);
+        QTableView v2;
+        v2.setModel(&mm);
+        viewutil::hideRows(&v2, 2, 3);
+        ok(v2.isRowHidden(2) && v2.isRowHidden(3) && !v2.isRowHidden(1), "an hang 2-3");
+        viewutil::hideCols(&v2, 1, 1);
+        ok(v2.isColumnHidden(1) && !v2.isColumnHidden(0), "an cot 1");
+        viewutil::unhideRange(&v2, 0, 0, 5, 5);
+        ok(!v2.isRowHidden(2) && !v2.isRowHidden(3) && !v2.isColumnHidden(1), "hien lai het");
+    }
 
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);
     return g_fail == 0 ? 0 : 1;

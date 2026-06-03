@@ -4,6 +4,7 @@
 #include "io/Xlsx.h"
 #include "view/MergeSpans.h"
 #include "view/CellBorderDelegate.h"
+#include "view/Visibility.h"
 #include "update/Updater.h"
 #include "ui/Theme.h"
 
@@ -208,6 +209,16 @@ void MainWindow::buildMenus()
     });
     st->addAction(QStringLiteral("Xóa cột"), this, [this] {
         int t, l, b, r; if (selectionBox(t, l, b, r)) m_model->removeColumns(l, r - l + 1);
+    });
+    st->addSeparator();
+    st->addAction(QStringLiteral("Ẩn hàng"), this, [this] {
+        int t, l, b, r; if (selectionBox(t, l, b, r)) viewutil::hideRows(m_view, t, b);
+    });
+    st->addAction(QStringLiteral("Ẩn cột"), this, [this] {
+        int t, l, b, r; if (selectionBox(t, l, b, r)) viewutil::hideCols(m_view, l, r);
+    });
+    st->addAction(QStringLiteral("Hiện lại (bỏ ẩn)"), this, [this] {
+        int t, l, b, r; if (selectionBox(t, l, b, r)) viewutil::unhideRange(m_view, t, l, b, r);
     });
 
     QMenu *data = menuBar()->addMenu(QStringLiteral("&Dữ liệu"));
