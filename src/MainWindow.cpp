@@ -220,6 +220,17 @@ void MainWindow::buildMenus()
     st->addAction(QStringLiteral("Hiện lại (bỏ ẩn)"), this, [this] {
         int t, l, b, r; if (selectionBox(t, l, b, r)) viewutil::unhideRange(m_view, t, l, b, r);
     });
+    st->addSeparator();
+    st->addAction(QStringLiteral("Vừa khít độ rộng cột"), this, [this] {
+        int t, l, b, r;
+        if (selectionBox(t, l, b, r)) for (int c = l; c <= r; ++c) m_view->resizeColumnToContents(c);
+        else m_view->resizeColumnsToContents();
+    });
+    st->addAction(QStringLiteral("Vừa khít chiều cao dòng"), this, [this] {
+        int t, l, b, r;
+        if (selectionBox(t, l, b, r)) for (int row = t; row <= b; ++row) m_view->resizeRowToContents(row);
+        else m_view->resizeRowsToContents();
+    });
 
     QMenu *data = menuBar()->addMenu(QStringLiteral("&Dữ liệu"));
     data->addAction(QStringLiteral("Sắp xếp tăng dần"), this, [this] {

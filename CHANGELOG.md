@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v0.30.0 — Tự vừa khít cột/dòng
+
+- **Tự điều chỉnh độ rộng cột và chiều cao dòng cho vừa nội dung** (menu **Cấu trúc**): chọn vùng rồi chọn "Vừa khít độ rộng cột" / "Vừa khít chiều cao dòng" — không còn cảnh chữ bị che hay cột quá rộng.
+
 ## v0.29.0 — Ẩn / hiện hàng và cột
 
 - **Ẩn và hiện lại hàng/cột** (menu **Cấu trúc**): chọn vùng rồi Ẩn hàng / Ẩn cột để giấu tạm; chọn quanh chỗ bị ẩn rồi "Hiện lại (bỏ ẩn)" để cho hiện ra.
