@@ -103,6 +103,13 @@ int main() {
     checkNum("=GESTEP(4,5)", 0);
     checkNum("=GESTEP(5,5)", 1); // bang nhau -> 1
     checkNum("=GESTEP(-1)", 0);  // step mac dinh 0
+    // YEARFRAC (Spec 12): 1/1/2024 -> 1/7/2024 (182 ngay thuc; nam 2024 nhuan)
+    checkNum("=YEARFRAC(DATE(2024,1,1),DATE(2024,7,1),0)", 0.5);            // US 30/360
+    checkNum("=YEARFRAC(DATE(2024,1,1),DATE(2024,7,1),4)", 0.5);            // EU 30/360
+    checkNum("=YEARFRAC(DATE(2024,1,1),DATE(2024,7,1),3)", 182.0/365.0);    // thuc/365
+    checkNum("=YEARFRAC(DATE(2024,1,1),DATE(2024,7,1),2)", 182.0/360.0);    // thuc/360
+    checkNum("=YEARFRAC(DATE(2024,1,1),DATE(2024,7,1),1)", 182.0/366.0);    // thuc/thuc nam nhuan
+    checkNum("=YEARFRAC(DATE(2024,1,31),DATE(2024,2,28),0)", 28.0/360.0);   // 30/360 don ngay 31
     checkStr("=A1/0", "#DIV/0!");
     checkStr("=IFERROR(A1/0,\"err\")", "err");
     checkStr("=AND(A1>5,A2>5)", "true");

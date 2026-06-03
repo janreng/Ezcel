@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v0.68.0 — Hàm phần năm YEARFRAC (Spec 12)
+
+- **Thêm hàm `YEARFRAC`** — tính phần năm giữa hai ngày theo 5 quy ước đếm ngày (US 30/360, thực/thực, thực/360, thực/365, Âu 30/360), tiện cho tính lãi và kỳ hạn tài chính.
+
 ## v0.67.0 — Hàm so sánh kỹ thuật DELTA & GESTEP (Spec 12)
 
 - **Thêm hàm `DELTA`** — trả về 1 nếu hai số bằng nhau, ngược lại 0 (delta Kronecker).

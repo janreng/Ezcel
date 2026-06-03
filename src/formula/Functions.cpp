@@ -508,6 +508,35 @@ QHash<QString, Fn> &fnMap() {
         r["DELTA"] = [](const Args &a) { if (a.size()<1||a.size()>2) argErr("DELTA"); double x = toNumber(a[0]); double y = a.size()==2 ? toNumber(a[1]) : 0.0; return Value::number(x==y ? 1 : 0); };
         // GESTEP(num,[step]): 1 nếu num >= step, ngược lại 0. step mặc định 0.
         r["GESTEP"] = [](const Args &a) { if (a.size()<1||a.size()>2) argErr("GESTEP"); double x = toNumber(a[0]); double s = a.size()==2 ? toNumber(a[1]) : 0.0; return Value::number(x>=s ? 1 : 0); };
+        // YEARFRAC(start, end, [basis]): phần năm giữa hai ngày theo quy ước đếm ngày.
+        // basis 0=US 30/360 (mặc định), 1=thực/thực, 2=thực/360, 3=thực/365, 4=Âu 30/360.
+        r["YEARFRAC"] = [](const Args &a) {
+            if (a.size() < 2 || a.size() > 3) argErr("YEARFRAC");
+            QDate d1 = serialToDate(toNumber(a[0])), d2 = serialToDate(toNumber(a[1]));
+            int basis = a.size() == 3 ? toInt(a[2]) : 0;
+            if (basis < 0 || basis > 4) throw FormulaError(QStringLiteral("YEARFRAC: basis 0..4"), ERR_NUM);
+            if (d1 > d2) std::swap(d1, d2);
+            auto days360 = [](QDate s, QDate e, bool eu) {
+                int sd = s.day(), ed = e.day();
+                if (eu) { if (sd == 31) sd = 30; if (ed == 31) ed = 30; }
+                else { if (sd == 31) sd = 30; if (ed == 31 && sd == 30) ed = 30; }
+                return (e.year()-s.year())*360 + (e.month()-s.month())*30 + (ed - sd);
+            };
+            double diff = double(d1.daysTo(d2));
+            switch (basis) {
+                case 0: return Value::number(days360(d1, d2, false) / 360.0);
+                case 4: return Value::number(days360(d1, d2, true) / 360.0);
+                case 2: return Value::number(diff / 360.0);
+                case 3: return Value::number(diff / 365.0);
+                default: { // basis 1: thực/thực — chia cho độ dài năm trung bình trong khoảng
+                    if (d1.year() == d2.year())
+                        return Value::number(diff / (QDate::isLeapYear(d1.year()) ? 366.0 : 365.0));
+                    double totalDays = double(QDate(d1.year(),1,1).daysTo(QDate(d2.year(),12,31)) + 1);
+                    double avg = totalDays / (d2.year() - d1.year() + 1);
+                    return Value::number(diff / avg);
+                }
+            }
+        };
 
         // --- text/info mở rộng ---
         r["CHAR"]    = [need](const Args &a) { need(a,1,"CHAR"); int c = toInt(a[0]); if (c<1||c>255) throw FormulaError(QStringLiteral("CHAR mã 1..255"), ERR_VALUE); return Value::str(QString(QChar(c))); };
