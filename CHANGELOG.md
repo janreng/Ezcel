@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v0.64.0 — Hàm lượng giác mở rộng (Spec 12)
+
+- **Thêm hàm lượng giác nghịch đảo** `SEC`, `CSC`, `COT` và phiên bản hyperbolic `SECH`, `CSCH`, `COTH`.
+- **Thêm hàm hyperbolic ngược** `ASINH`, `ACOSH`, `ATANH` — tính nghịch đảo của sinh, cosh, tanh.
+
 ## v0.63.0 — Hàm số tuần WEEKNUM & ISOWEEKNUM (Spec 12)
 
 - **Thêm hàm `WEEKNUM`** — trả về số thứ tự tuần trong năm của một ngày; chọn được tuần bắt đầu từ Chủ Nhật (mặc định) hoặc Thứ Hai.

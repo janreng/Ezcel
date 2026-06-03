@@ -57,6 +57,17 @@ int main() {
     checkNum("=ABS(-7)", 7);
     checkNum("=INT(3.9)", 3);
     checkNum("=POWER(2,8)", 256);
+    // Luong giac nghich dao + hyperbolic nguoc (Spec 12)
+    checkNum("=SEC(0)", 1);
+    checkNum("=COT(PI()/4)", 1);
+    checkNum("=CSC(PI()/6)", 2);
+    checkNum("=SECH(0)", 1);
+    checkNum("=ACOSH(1)", 0);
+    checkNum("=ATANH(0)", 0);
+    checkNum("=ASINH(0)", 0);
+    checkNum("=ACOSH(COSH(1))", 1);
+    checkNum("=ATANH(TANH(0.5))", 0.5);
+    checkNum("=ASINH(SINH(2))", 2);
     checkNum("=LEN(B1)", 5);
     checkNum("=COUNTIF(A1:A3,\">15\")", 2);
     checkNum("=SUMIF(A1:A3,\">15\")", 50);

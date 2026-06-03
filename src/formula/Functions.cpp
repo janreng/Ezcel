@@ -453,6 +453,18 @@ QHash<QString, Fn> &fnMap() {
         r["SINH"] = [need](const Args &a) { need(a,1,"SINH"); return Value::number(std::sinh(toNumber(a[0]))); };
         r["COSH"] = [need](const Args &a) { need(a,1,"COSH"); return Value::number(std::cosh(toNumber(a[0]))); };
         r["TANH"] = [need](const Args &a) { need(a,1,"TANH"); return Value::number(std::tanh(toNumber(a[0]))); };
+        // Lượng giác nghịch đảo: SEC=1/cos, CSC=1/sin, COT=1/tan (báo lỗi khi chia 0).
+        r["SEC"] = [need](const Args &a) { need(a,1,"SEC"); double c = std::cos(toNumber(a[0])); if (c==0) throw FormulaError(QStringLiteral("SEC chia 0"), ERR_DIV0); return Value::number(1.0/c); };
+        r["CSC"] = [need](const Args &a) { need(a,1,"CSC"); double s = std::sin(toNumber(a[0])); if (s==0) throw FormulaError(QStringLiteral("CSC chia 0"), ERR_DIV0); return Value::number(1.0/s); };
+        r["COT"] = [need](const Args &a) { need(a,1,"COT"); double t = std::tan(toNumber(a[0])); if (t==0) throw FormulaError(QStringLiteral("COT chia 0"), ERR_DIV0); return Value::number(1.0/t); };
+        // Hyperbolic nghịch đảo: SECH=1/cosh, CSCH=1/sinh, COTH=1/tanh.
+        r["SECH"] = [need](const Args &a) { need(a,1,"SECH"); return Value::number(1.0/std::cosh(toNumber(a[0]))); };
+        r["CSCH"] = [need](const Args &a) { need(a,1,"CSCH"); double s = std::sinh(toNumber(a[0])); if (s==0) throw FormulaError(QStringLiteral("CSCH chia 0"), ERR_DIV0); return Value::number(1.0/s); };
+        r["COTH"] = [need](const Args &a) { need(a,1,"COTH"); double t = std::tanh(toNumber(a[0])); if (t==0) throw FormulaError(QStringLiteral("COTH chia 0"), ERR_DIV0); return Value::number(1.0/t); };
+        // Hàm hyperbolic ngược: ASINH (mọi x), ACOSH (x>=1), ATANH (-1<x<1).
+        r["ASINH"] = [need](const Args &a) { need(a,1,"ASINH"); return Value::number(std::asinh(toNumber(a[0]))); };
+        r["ACOSH"] = [need](const Args &a) { need(a,1,"ACOSH"); double x = toNumber(a[0]); if (x<1) throw FormulaError(QStringLiteral("ACOSH miền x>=1"), ERR_NUM); return Value::number(std::acosh(x)); };
+        r["ATANH"] = [need](const Args &a) { need(a,1,"ATANH"); double x = toNumber(a[0]); if (x<=-1||x>=1) throw FormulaError(QStringLiteral("ATANH miền (-1,1)"), ERR_NUM); return Value::number(std::atanh(x)); };
 
         // --- text/info mở rộng ---
         r["CHAR"]    = [need](const Args &a) { need(a,1,"CHAR"); int c = toInt(a[0]); if (c<1||c>255) throw FormulaError(QStringLiteral("CHAR mã 1..255"), ERR_VALUE); return Value::str(QString(QChar(c))); };
