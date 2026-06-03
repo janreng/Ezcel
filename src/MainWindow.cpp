@@ -185,78 +185,78 @@ void MainWindow::buildMenus()
     file->addAction(i18n::tr("file_quit"), QKeySequence::Quit, this, &QWidget::close);
 
     QMenu *edit = menuBar()->addMenu(i18n::tr("menu_edit"));
-    edit->addAction(QStringLiteral("&Hoàn tác"), QKeySequence::Undo, this, [this] {
+    edit->addAction(i18n::tr("edit_undo"), QKeySequence::Undo, this, [this] {
         if (!m_model->undo()) statusBar()->showMessage(QStringLiteral("Không có gì để hoàn tác"), 2000);
     });
-    edit->addAction(QStringLiteral("Làm &lại"), QKeySequence::Redo, this, [this] {
+    edit->addAction(i18n::tr("edit_redo"), QKeySequence::Redo, this, [this] {
         if (!m_model->redo()) statusBar()->showMessage(QStringLiteral("Không có gì để làm lại"), 2000);
     });
     edit->addSeparator();
-    edit->addAction(QStringLiteral("Cắt"), QKeySequence::Cut, this, &MainWindow::cutSelection);
-    edit->addAction(QStringLiteral("Sao chép"), QKeySequence::Copy, this, &MainWindow::copySelection);
-    edit->addAction(QStringLiteral("Dán"), QKeySequence::Paste, this, &MainWindow::pasteClipboard);
-    edit->addAction(QStringLiteral("Dán đặc biệt..."), QKeySequence(QStringLiteral("Ctrl+Alt+V")), this, &MainWindow::pasteSpecial);
-    edit->addAction(QStringLiteral("Xóa nội dung"), QKeySequence::Delete, this, &MainWindow::clearSelection);
+    edit->addAction(i18n::tr("edit_cut"), QKeySequence::Cut, this, &MainWindow::cutSelection);
+    edit->addAction(i18n::tr("edit_copy"), QKeySequence::Copy, this, &MainWindow::copySelection);
+    edit->addAction(i18n::tr("edit_paste"), QKeySequence::Paste, this, &MainWindow::pasteClipboard);
+    edit->addAction(i18n::tr("edit_paste_special"), QKeySequence(QStringLiteral("Ctrl+Alt+V")), this, &MainWindow::pasteSpecial);
+    edit->addAction(i18n::tr("edit_clear"), QKeySequence::Delete, this, &MainWindow::clearSelection);
     edit->addSeparator();
-    edit->addAction(QStringLiteral("Điền xuống"), QKeySequence(QStringLiteral("Ctrl+D")), this, &MainWindow::fillDown);
-    edit->addAction(QStringLiteral("Điền phải"), QKeySequence(QStringLiteral("Ctrl+R")), this, &MainWindow::fillRight);
-    edit->addAction(QStringLiteral("Gộp / bỏ gộp ô"), this, &MainWindow::toggleMergeSelection);
+    edit->addAction(i18n::tr("edit_fill_down"), QKeySequence(QStringLiteral("Ctrl+D")), this, &MainWindow::fillDown);
+    edit->addAction(i18n::tr("edit_fill_right"), QKeySequence(QStringLiteral("Ctrl+R")), this, &MainWindow::fillRight);
+    edit->addAction(i18n::tr("edit_merge"), this, &MainWindow::toggleMergeSelection);
     edit->addSeparator();
-    edit->addAction(QStringLiteral("Tìm && Thay thế..."), QKeySequence::Find, this, &MainWindow::showFindReplace);
-    edit->addAction(QStringLiteral("Thay thế..."), QKeySequence::Replace, this, &MainWindow::showFindReplace);
+    edit->addAction(i18n::tr("edit_find"), QKeySequence::Find, this, &MainWindow::showFindReplace);
+    edit->addAction(i18n::tr("edit_replace"), QKeySequence::Replace, this, &MainWindow::showFindReplace);
 
     QMenu *st = menuBar()->addMenu(i18n::tr("menu_struct"));
-    st->addAction(QStringLiteral("Chèn hàng trên"), this, [this] {
+    st->addAction(i18n::tr("st_ins_row"), this, [this] {
         int t, l, b, r; if (selectionBox(t, l, b, r)) m_model->insertRows(t, b - t + 1);
     });
-    st->addAction(QStringLiteral("Chèn cột trái"), this, [this] {
+    st->addAction(i18n::tr("st_ins_col"), this, [this] {
         int t, l, b, r; if (selectionBox(t, l, b, r)) m_model->insertColumns(l, r - l + 1);
     });
     st->addSeparator();
-    st->addAction(QStringLiteral("Xóa hàng"), this, [this] {
+    st->addAction(i18n::tr("st_del_row"), this, [this] {
         int t, l, b, r; if (selectionBox(t, l, b, r)) m_model->removeRows(t, b - t + 1);
     });
-    st->addAction(QStringLiteral("Xóa cột"), this, [this] {
+    st->addAction(i18n::tr("st_del_col"), this, [this] {
         int t, l, b, r; if (selectionBox(t, l, b, r)) m_model->removeColumns(l, r - l + 1);
     });
     st->addSeparator();
-    st->addAction(QStringLiteral("Ẩn hàng"), this, [this] {
+    st->addAction(i18n::tr("st_hide_row"), this, [this] {
         int t, l, b, r; if (selectionBox(t, l, b, r)) viewutil::hideRows(m_view, t, b);
     });
-    st->addAction(QStringLiteral("Ẩn cột"), this, [this] {
+    st->addAction(i18n::tr("st_hide_col"), this, [this] {
         int t, l, b, r; if (selectionBox(t, l, b, r)) viewutil::hideCols(m_view, l, r);
     });
-    st->addAction(QStringLiteral("Hiện lại (bỏ ẩn)"), this, [this] {
+    st->addAction(i18n::tr("st_unhide"), this, [this] {
         int t, l, b, r; if (selectionBox(t, l, b, r)) viewutil::unhideRange(m_view, t, l, b, r);
     });
     st->addSeparator();
-    st->addAction(QStringLiteral("Vừa khít độ rộng cột"), this, [this] {
+    st->addAction(i18n::tr("st_fit_col"), this, [this] {
         int t, l, b, r;
         if (selectionBox(t, l, b, r)) for (int c = l; c <= r; ++c) m_view->resizeColumnToContents(c);
         else m_view->resizeColumnsToContents();
     });
-    st->addAction(QStringLiteral("Vừa khít chiều cao dòng"), this, [this] {
+    st->addAction(i18n::tr("st_fit_row"), this, [this] {
         int t, l, b, r;
         if (selectionBox(t, l, b, r)) for (int row = t; row <= b; ++row) m_view->resizeRowToContents(row);
         else m_view->resizeRowsToContents();
     });
 
     QMenu *data = menuBar()->addMenu(i18n::tr("menu_data"));
-    data->addAction(QStringLiteral("Sắp xếp tăng dần"), this, [this] {
+    data->addAction(i18n::tr("data_sort_asc"), this, [this] {
         int t, l, b, r; if (!selectionBox(t, l, b, r)) return;
         int kc = m_view->currentIndex().isValid() ? m_view->currentIndex().column() : l;
         m_model->sortRange(t, l, b, r, qBound(l, kc, r), true);
     });
-    data->addAction(QStringLiteral("Sắp xếp giảm dần"), this, [this] {
+    data->addAction(i18n::tr("data_sort_desc"), this, [this] {
         int t, l, b, r; if (!selectionBox(t, l, b, r)) return;
         int kc = m_view->currentIndex().isValid() ? m_view->currentIndex().column() : l;
         m_model->sortRange(t, l, b, r, qBound(l, kc, r), false);
     });
     data->addSeparator();
-    data->addAction(QStringLiteral("Định dạng có điều kiện..."), this, &MainWindow::showCondFormat);
-    data->addAction(QStringLiteral("Xóa định dạng có điều kiện"), this, [this] { m_model->clearCondRules(); });
+    data->addAction(i18n::tr("data_cond"), this, &MainWindow::showCondFormat);
+    data->addAction(i18n::tr("data_clear_cond"), this, [this] { m_model->clearCondRules(); });
     data->addSeparator();
-    data->addAction(QStringLiteral("Lọc theo cột hiện tại..."), this, [this] {
+    data->addAction(i18n::tr("data_filter"), this, [this] {
         QModelIndex cur = m_view->currentIndex();
         int col = cur.isValid() ? cur.column() : 0;
         bool okIn = false;
@@ -271,7 +271,7 @@ void MainWindow::buildMenus()
         for (int r : filterutil::rowsToHide(colVals, text)) m_view->setRowHidden(r, true);
         statusBar()->showMessage(QStringLiteral("Đã lọc cột %1").arg(SpreadsheetModel::columnLabel(col)), 3000);
     });
-    data->addAction(QStringLiteral("Bỏ lọc (hiện tất cả)"), this, [this] {
+    data->addAction(i18n::tr("data_clear_filter"), this, [this] {
         for (int r = 0; r < m_model->rowCount(); ++r) m_view->setRowHidden(r, false);
     });
 

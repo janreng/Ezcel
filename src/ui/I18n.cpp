@@ -38,6 +38,28 @@ static const QHash<QString, QPair<QString, QString>> &table() {
         {"help_about",  {QStringLiteral("Giới thiệu Ezcel"), QStringLiteral("About Ezcel")}},
         {"lang_vi",     {QStringLiteral("Tiếng Việt"),  QStringLiteral("Tiếng Việt")}},
         {"lang_en",     {QStringLiteral("English"),     QStringLiteral("English")}},
+        // Sửa
+        {"edit_fill_down", {QStringLiteral("Điền xuống"), QStringLiteral("Fill Down")}},
+        {"edit_fill_right",{QStringLiteral("Điền phải"),  QStringLiteral("Fill Right")}},
+        {"edit_merge",  {QStringLiteral("Gộp / bỏ gộp ô"), QStringLiteral("Merge / Unmerge")}},
+        {"edit_replace",{QStringLiteral("Thay thế..."), QStringLiteral("Replace...")}},
+        // Cấu trúc
+        {"st_ins_row",  {QStringLiteral("Chèn hàng trên"), QStringLiteral("Insert Row Above")}},
+        {"st_ins_col",  {QStringLiteral("Chèn cột trái"),  QStringLiteral("Insert Column Left")}},
+        {"st_del_row",  {QStringLiteral("Xóa hàng"),       QStringLiteral("Delete Row")}},
+        {"st_del_col",  {QStringLiteral("Xóa cột"),        QStringLiteral("Delete Column")}},
+        {"st_hide_row", {QStringLiteral("Ẩn hàng"),        QStringLiteral("Hide Rows")}},
+        {"st_hide_col", {QStringLiteral("Ẩn cột"),         QStringLiteral("Hide Columns")}},
+        {"st_unhide",   {QStringLiteral("Hiện lại (bỏ ẩn)"), QStringLiteral("Unhide")}},
+        {"st_fit_col",  {QStringLiteral("Vừa khít độ rộng cột"), QStringLiteral("Autofit Column Width")}},
+        {"st_fit_row",  {QStringLiteral("Vừa khít chiều cao dòng"), QStringLiteral("Autofit Row Height")}},
+        // Dữ liệu
+        {"data_sort_asc",  {QStringLiteral("Sắp xếp tăng dần"), QStringLiteral("Sort Ascending")}},
+        {"data_sort_desc", {QStringLiteral("Sắp xếp giảm dần"), QStringLiteral("Sort Descending")}},
+        {"data_cond",   {QStringLiteral("Định dạng có điều kiện..."), QStringLiteral("Conditional Formatting...")}},
+        {"data_clear_cond", {QStringLiteral("Xóa định dạng có điều kiện"), QStringLiteral("Clear Conditional Formatting")}},
+        {"data_filter", {QStringLiteral("Lọc theo cột hiện tại..."), QStringLiteral("Filter by Current Column...")}},
+        {"data_clear_filter", {QStringLiteral("Bỏ lọc (hiện tất cả)"), QStringLiteral("Clear Filter (Show All)")}},
     };
     return t;
 }

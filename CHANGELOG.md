@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v0.36.0 — Dịch trọn thanh menu
+
+- **Toàn bộ thanh menu đã song ngữ**: ngoài các menu trước đó, nay cả menu **Sửa, Cấu trúc, Dữ liệu** cũng đổi theo ngôn ngữ đã chọn (Tiếng Việt / English).
+
 ## v0.35.0 — Song ngữ Việt / Anh
 
 - **Đổi ngôn ngữ giao diện** (menu **Cài đặt → Ngôn ngữ → Tiếng Việt / English**): thanh menu chuyển sang tiếng Anh hoặc tiếng Việt. Các phần còn lại của giao diện sẽ được dịch dần ở các bản sau.
