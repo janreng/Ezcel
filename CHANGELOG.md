@@ -1,5 +1,18 @@
 # Lịch sử thay đổi
 
+## v1.0.0 — Phiên bản 1.0 🎉
+
+**Cột mốc lớn:** đây là bản viết lại hoàn chỉnh bằng C++/Qt6 — khởi động nhanh hơn, thao tác mượt hơn và đầy đủ tính năng so với bản cũ. Ứng dụng đã có:
+
+- **Bảng tính đa trang** với thanh tab, đổi tên, màu tab và phím tắt chuyển trang.
+- **Định dạng phong phú**: phông chữ, màu sắc, viền ô, gộp ô, kiểu ô dựng sẵn, nhiều kiểu định dạng số.
+- **Công cụ dữ liệu**: sắp xếp, lọc, tìm & thay thế, định dạng có điều kiện, kiểm tra dữ liệu, đi tới đặc biệt.
+- **Hơn 250 hàm tính toán**: toán học, thống kê & hồi quy, ngày tháng, văn bản, tra cứu, tài chính (vay/đầu tư/khấu hao) và kỹ thuật (đổi hệ, số phức).
+- **Tiện ích giao diện**: thu phóng, chỉ báo chế độ ô, thanh trạng thái thống kê, bảng tra cứu phím tắt, hai ngôn ngữ Việt/Anh, tự động cập nhật.
+
+### Mới trong bản này (Spec 12)
+- **Thêm nhóm hàm số phức** `COMPLEX`, `IMREAL`, `IMAGINARY`, `IMABS` — dựng và phân tích số phức dạng `a+bi`.
+
 ## v0.99.0 — Đổi chéo hệ nhị phân, bát phân & thập lục (Spec 12)
 
 - **Thêm nhóm hàm đổi chéo hệ** `BIN2HEX`, `HEX2BIN`, `BIN2OCT`, `OCT2BIN`, `HEX2OCT`, `OCT2HEX` — chuyển trực tiếp giữa nhị phân, bát phân và thập lục mà không cần qua thập phân.

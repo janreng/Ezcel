@@ -389,6 +389,18 @@ int main() {
     checkStr("=OCT2BIN(\"10\")", "1000");
     checkStr("=HEX2OCT(\"FF\")", "377");
     checkStr("=OCT2HEX(\"377\")", "FF");
+    // So phuc (Spec 12)
+    checkStr("=COMPLEX(3,4)", "3+4i");
+    checkStr("=COMPLEX(0,1)", "i");
+    checkStr("=COMPLEX(0,-1)", "-i");
+    checkStr("=COMPLEX(3,0)", "3");
+    checkStr("=COMPLEX(3,-4)", "3-4i");
+    checkStr("=COMPLEX(3,1)", "3+i");
+    checkNum("=IMREAL(\"3+4i\")", 3);
+    checkNum("=IMAGINARY(\"3+4i\")", 4);
+    checkNum("=IMAGINARY(\"-i\")", -1);
+    checkNum("=IMAGINARY(\"5\")", 0);
+    checkNum("=IMABS(\"3+4i\")", 5);
 
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);
     return g_fail == 0 ? 0 : 1;

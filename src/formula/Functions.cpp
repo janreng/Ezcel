@@ -921,6 +921,42 @@ QHash<QString, Fn> &fnMap() {
         r["OCT2BIN"] = [crossBase](const Args &a) { return crossBase(a, "OCT2BIN", 8, 2, false); };
         r["HEX2OCT"] = [crossBase](const Args &a) { return crossBase(a, "HEX2OCT", 16, 8, false); };
         r["OCT2HEX"] = [crossBase](const Args &a) { return crossBase(a, "OCT2HEX", 8, 16, true); };
+        // Số phức dạng chuỗi "a+bi": COMPLEX dựng chuỗi; IMREAL/IMAGINARY/IMABS phân tích.
+        auto parseComplex = [](QString s) -> std::pair<double,double> {
+            s = s.trimmed();
+            if (s.isEmpty()) return {0, 0};
+            bool hasImag = s.endsWith('i') || s.endsWith('j');
+            if (!hasImag) { bool ok=false; double v=s.toDouble(&ok); if(!ok) throw FormulaError(QStringLiteral("Số phức không hợp lệ"), ERR_NUM); return {v, 0}; }
+            s.chop(1);
+            int split = -1;
+            for (int k = s.size() - 1; k >= 1; --k) {
+                QChar c = s[k];
+                if ((c == '+' || c == '-') && s[k-1] != 'e' && s[k-1] != 'E') { split = k; break; }
+            }
+            double re = 0; QString imstr;
+            if (split < 0) imstr = s;
+            else { bool ok=false; re = s.left(split).toDouble(&ok); if(!ok) throw FormulaError(QStringLiteral("Số phức không hợp lệ"), ERR_NUM); imstr = s.mid(split); }
+            double im;
+            if (imstr.isEmpty() || imstr == "+") im = 1;
+            else if (imstr == "-") im = -1;
+            else { bool ok=false; im = imstr.toDouble(&ok); if(!ok) throw FormulaError(QStringLiteral("Số phức không hợp lệ"), ERR_NUM); }
+            return {re, im};
+        };
+        r["COMPLEX"] = [](const Args &a) {
+            if (a.size() < 2 || a.size() > 3) argErr("COMPLEX");
+            double re = toNumber(a[0]), im = toNumber(a[1]);
+            QString suf = a.size() == 3 ? toText(a[2]) : QStringLiteral("i");
+            if (suf != "i" && suf != "j") throw FormulaError(QStringLiteral("COMPLEX: hậu tố phải i hoặc j"), ERR_VALUE);
+            auto numS = [](double d) { return QString::number(d, 'g', 15); };
+            if (im == 0) return Value::str(numS(re));
+            QString imCoef = im == 1 ? QString() : im == -1 ? QStringLiteral("-") : numS(im);
+            QString imagPart = imCoef + suf;
+            if (re == 0) return Value::str(imagPart);
+            return Value::str(numS(re) + (im > 0 ? QStringLiteral("+") : QString()) + imagPart);
+        };
+        r["IMREAL"]      = [need, parseComplex](const Args &a) { need(a,1,"IMREAL"); return Value::number(parseComplex(toText(a[0])).first); };
+        r["IMAGINARY"]   = [need, parseComplex](const Args &a) { need(a,1,"IMAGINARY"); return Value::number(parseComplex(toText(a[0])).second); };
+        r["IMABS"]       = [need, parseComplex](const Args &a) { need(a,1,"IMABS"); auto c = parseComplex(toText(a[0])); return Value::number(std::hypot(c.first, c.second)); };
 
         // --- thống kê ---
         r["MEDIAN"] = [](const Args &a) { auto n = numbers(a); if (n.empty()) throw FormulaError(QStringLiteral("MEDIAN cần ít nhất một số")); std::sort(n.begin(), n.end()); size_t m = n.size(); return Value::number(m%2 ? n[m/2] : (n[m/2-1]+n[m/2])/2.0); };
