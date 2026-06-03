@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v0.93.0 — Hàm tổng lãi & gốc CUMIPMT & CUMPRINC (Spec 12)
+
+- **Thêm hàm `CUMIPMT`** — tính tổng tiền lãi đã trả giữa hai kỳ bất kỳ của khoản vay.
+- **Thêm hàm `CUMPRINC`** — tính tổng tiền gốc đã trả giữa hai kỳ, tiện theo dõi dư nợ theo từng giai đoạn.
+
 ## v0.92.0 — Hàm tài chính MIRR (Spec 12)
 
 - **Thêm hàm `MIRR`** — tính tỉ suất hoàn vốn nội bộ điều chỉnh, tách riêng lãi suất vay vốn và lãi suất tái đầu tư để đánh giá dự án thực tế hơn so với IRR.

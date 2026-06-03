@@ -586,6 +586,33 @@ QHash<QString, Fn> &fnMap() {
             if (pvn == 0 || fvp == 0) throw FormulaError(QStringLiteral("MIRR: cần cả dòng tiền âm và dương"), ERR_DIV0);
             return Value::number(std::pow(-fvp / pvn, 1.0 / (n - 1)) - 1);
         };
+        // CUMIPMT/CUMPRINC(rate, nper, pv, start, end, type): tổng lãi / tổng gốc từ kỳ start đến end.
+        r["CUMIPMT"] = [need, pmtVal, fvVal](const Args &a) {
+            need(a, 6, "CUMIPMT");
+            double rate = toNumber(a[0]), n = toNumber(a[1]), pv = toNumber(a[2]);
+            int s = toInt(a[3]), e = toInt(a[4]); int type = toInt(a[5]);
+            if (s < 1 || e < s || e > n) throw FormulaError(QStringLiteral("CUMIPMT: kỳ không hợp lệ"), ERR_NUM);
+            double pmt = pmtVal(rate, n, pv, 0, type), sum = 0;
+            for (int p = s; p <= e; ++p) {
+                double ip = (type == 1 && p == 1) ? 0 : fvVal(rate, type == 1 ? p - 2 : p - 1, pmt, pv, 0) * rate;
+                if (type == 1 && p != 1) ip /= (1 + rate);
+                sum += ip;
+            }
+            return Value::number(sum);
+        };
+        r["CUMPRINC"] = [need, pmtVal, fvVal](const Args &a) {
+            need(a, 6, "CUMPRINC");
+            double rate = toNumber(a[0]), n = toNumber(a[1]), pv = toNumber(a[2]);
+            int s = toInt(a[3]), e = toInt(a[4]); int type = toInt(a[5]);
+            if (s < 1 || e < s || e > n) throw FormulaError(QStringLiteral("CUMPRINC: kỳ không hợp lệ"), ERR_NUM);
+            double pmt = pmtVal(rate, n, pv, 0, type), sum = 0;
+            for (int p = s; p <= e; ++p) {
+                double ip = (type == 1 && p == 1) ? 0 : fvVal(rate, type == 1 ? p - 2 : p - 1, pmt, pv, 0) * rate;
+                if (type == 1 && p != 1) ip /= (1 + rate);
+                sum += pmt - ip;
+            }
+            return Value::number(sum);
+        };
         // NUMBERVALUE(text, [dấu_thập_phân="."], [dấu_nhóm=","]): đổi chuỗi thành số theo dấu phân cách tùy chọn.
         r["NUMBERVALUE"] = [](const Args &a) {
             if (a.size() < 1 || a.size() > 3) argErr("NUMBERVALUE");

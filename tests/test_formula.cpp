@@ -226,6 +226,10 @@ int main() {
     checkNum("=IRR(F5:F6)", 0.1);
     // MIRR (Spec 12): F1:F4 = {-1000,500,500,500}, lai vay 10%, tai dau tu 12%
     checkNum("=MIRR(F1:F4,0.1,0.12)", 0.190480233637062);
+    // CUMIPMT / CUMPRINC (Spec 12): vay 8000, lai 10%/nam, 36 ky
+    checkNum("=CUMIPMT(0.1/12,36,8000,1,12,0)", -691.71020732028);
+    checkNum("=CUMPRINC(0.1/12,36,8000,1,12,0)", -2405.93976328813);
+    checkNum("=CUMIPMT(0.1/12,36,8000,1,36,0)+CUMPRINC(0.1/12,36,8000,1,36,0)", -9292.94991182524); // = 36*PMT
     // IPMT / PPMT (Spec 12): vay 8000, lai 10%/nam, 36 ky
     checkNum("=IPMT(0.1/12,1,36,8000)", -66.6666666666667); // ky 1: -pv*rate
     checkNum("=IPMT(0.1/12,2,36,8000)", -65.0710764092997);
