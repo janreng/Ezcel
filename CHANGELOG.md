@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v1.33.0 — Sao chép chỉ ô đang hiển thị (Spec 32)
+
+- **Sao chép chỉ ô hiện (Alt+;)**: khi dữ liệu đã lọc/ẩn hàng, chỉ chép các hàng đang hiển thị, bỏ qua hàng ẩn.
+- Tránh tình trạng dán nhầm cả những hàng đã bị lọc đi như khi sao chép thường.
+
 ## v1.32.0 — Tìm ô khác biệt theo hàng/cột (Spec 32)
 
 - **Khác biệt theo hàng**: trong vùng chọn, đánh dấu các ô có giá trị khác với ô mốc trên cùng hàng (cột của ô đang chọn).

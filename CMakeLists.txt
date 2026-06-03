@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
-project(Ezcel VERSION 1.32.0 LANGUAGES CXX)
+project(Ezcel VERSION 1.33.0 LANGUAGES CXX)
 
 # Bản port C++ của Ezcel (gốc Python/PySide6). Dùng Qt6 Widgets + MinGW.
 set(CMAKE_CXX_STANDARD 20)
@@ -64,7 +64,8 @@ add_library(ezcel_view STATIC src/view/MergeSpans.cpp src/view/MergeSpans.h
     src/view/CellBorderDelegate.cpp src/view/CellBorderDelegate.h
     src/view/Visibility.cpp src/view/Visibility.h
     src/view/HeaderMenu.cpp src/view/HeaderMenu.h
-    src/view/Outline.cpp src/view/Outline.h)
+    src/view/Outline.cpp src/view/Outline.h
+    src/view/CopyVisible.cpp src/view/CopyVisible.h)
 target_include_directories(ezcel_view PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(ezcel_view PUBLIC Qt6::Core Qt6::Gui Qt6::Widgets)
 
@@ -151,6 +152,10 @@ add_executable(test_outline tests/test_outline.cpp src/view/Outline.cpp)
 target_include_directories(test_outline PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(test_outline PRIVATE Qt6::Core)
 
+add_executable(test_copyvisible tests/test_copyvisible.cpp src/view/CopyVisible.cpp)
+target_include_directories(test_copyvisible PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_link_libraries(test_copyvisible PRIVATE Qt6::Core)
+
 enable_testing()
 add_test(NAME formula COMMAND test_formula)
 add_test(NAME model COMMAND test_model)
@@ -170,6 +175,7 @@ add_test(NAME autocomplete COMMAND test_autocomplete)
 add_test(NAME datatools COMMAND test_datatools)
 add_test(NAME headermenu COMMAND test_headermenu)
 add_test(NAME outline COMMAND test_outline)
+add_test(NAME copyvisible COMMAND test_copyvisible)
 
 # --- Sort (sắp xếp vùng dữ liệu) — module logic thuần (Qt Core) -> static lib + test.
 add_library(ezcel_sort STATIC src/model/Sort.cpp src/model/Sort.h)

@@ -7,6 +7,7 @@
 #include "view/Visibility.h"
 #include "view/HeaderMenu.h"
 #include "view/Outline.h"
+#include "view/CopyVisible.h"
 #include "model/Filter.h"
 #include "model/PasteOps.h"
 #include "model/GotoSpecial.h"
@@ -587,6 +588,23 @@ void MainWindow::buildMenus()
     };
     edit->addAction(QStringLiteral("Khác biệt theo hàng"), this, [selectDiffCells] { selectDiffCells(true); });
     edit->addAction(QStringLiteral("Khác biệt theo cột"), this, [selectDiffCells] { selectDiffCells(false); });
+    // Sao chép chỉ ô hiện (Alt+;): bỏ qua các hàng đang ẩn (đã lọc).
+    edit->addAction(QStringLiteral("Sao chép chỉ ô hiện (Alt+;)"),
+                    QKeySequence(Qt::ALT | Qt::Key_Semicolon), this, [this] {
+        int t, l, b, r;
+        if (!selectionBox(t, l, b, r)) return;
+        QVector<QVector<QString>> block;
+        QSet<int> hidden;
+        for (int row = t; row <= b; ++row) {
+            if (m_view->isRowHidden(row)) hidden.insert(row - t);
+            QVector<QString> line;
+            for (int col = l; col <= r; ++col)
+                line.push_back(m_model->data(m_model->index(row, col), Qt::DisplayRole).toString());
+            block.push_back(line);
+        }
+        QApplication::clipboard()->setText(copyutil::toTsvSkipHidden(block, hidden));
+        statusBar()->showMessage(QStringLiteral("Đã sao chép %1 hàng hiển thị").arg(b - t + 1 - hidden.size()), 3000);
+    });
 
     QMenu *st = menuBar()->addMenu(i18n::tr("menu_struct"));
     st->addAction(i18n::tr("st_ins_row"), this, [this] {
