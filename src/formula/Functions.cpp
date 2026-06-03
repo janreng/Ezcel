@@ -151,6 +151,16 @@ QHash<QString, Fn> &fnMap() {
         r["AVERAGEA"] = [valuesA](const Args &a) { auto n = valuesA(a); if (n.empty()) throw FormulaError(QStringLiteral("AVERAGEA chia 0"), ERR_DIV0); return Value::number(sumv(n)/n.size()); };
         r["MAXA"] = [valuesA](const Args &a) { auto n = valuesA(a); if (n.empty()) return Value::number(0); return Value::number(*std::max_element(n.begin(), n.end())); };
         r["MINA"] = [valuesA](const Args &a) { auto n = valuesA(a); if (n.empty()) return Value::number(0); return Value::number(*std::min_element(n.begin(), n.end())); };
+        // VARA/STDEVA: phương sai / độ lệch chuẩn mẫu, tính cả text (=0) và logic (giống AVERAGEA).
+        auto varaCore = [valuesA](const Args &a, const char *fn) {
+            auto v = valuesA(a);
+            if (v.size() < 2) throw FormulaError(QString::fromUtf8(fn) + QStringLiteral(": cần ít nhất 2 giá trị"), ERR_DIV0);
+            double m = sumv(v) / v.size(), s = 0;
+            for (double x : v) s += (x - m) * (x - m);
+            return s / (v.size() - 1);
+        };
+        r["VARA"]   = [varaCore](const Args &a) { return Value::number(varaCore(a, "VARA")); };
+        r["STDEVA"] = [varaCore](const Args &a) { return Value::number(std::sqrt(varaCore(a, "STDEVA"))); };
         // PERCENTILE/QUARTILE: phân vị theo nội suy tuyến tính (phương pháp INC, gồm cả hai đầu).
         auto percentileInc = [](std::vector<double> v, double k) {
             std::sort(v.begin(), v.end());

@@ -255,6 +255,11 @@ int main() {
     checkNum("=TREND(G1:G3,A1:A3,50)", 101); // y=2x+1 -> 2*50+1
     checkNum("=TREND(G1:G3,A1:A3,0)", 1);    // = intercept
     checkNum("=GROWTH(I1:I3,D1:D3,4)", 16);  // y=2^x -> 2^4=16
+    // VARA / STDEVA (Spec 12) — tinh ca text=0
+    checkNum("=VARA(A1:A3)", 100);   // {10,20,30} mau
+    checkNum("=STDEVA(A1:A3)", 10);
+    checkNum("=VARA(A1:B1)", 50);    // {10, "hello"->0}
+    checkNum("=STDEVA(A1:B1)", 7.0710678118654755);
     // IPMT / PPMT (Spec 12): vay 8000, lai 10%/nam, 36 ky
     checkNum("=IPMT(0.1/12,1,36,8000)", -66.6666666666667); // ky 1: -pv*rate
     checkNum("=IPMT(0.1/12,2,36,8000)", -65.0710764092997);
