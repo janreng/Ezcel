@@ -1,5 +1,11 @@
 # Lịch sử thay đổi
 
+## v1.29.0 — Lọc tùy chỉnh 2 điều kiện (Spec 15)
+
+- **Thêm "Lọc tùy chỉnh (2 điều kiện)..."** trong menu Dữ liệu: kết hợp hai điều kiện bằng **VÀ / HOẶC**.
+- Mỗi điều kiện chọn phép: bằng, khác, lớn hơn, nhỏ hơn (và ≥ ≤), chứa, không chứa, bắt đầu bằng, kết thúc bằng.
+- So sánh thông minh: tự nhận biết số để so theo số, còn lại so theo chữ. Để trống điều kiện thứ hai nếu chỉ cần một.
+
 ## v1.28.0 — Lọc theo điều kiện số (Spec 15)
 
 - **Thêm "Lọc theo số..."** trong menu Dữ liệu: ẩn/hiện hàng theo so sánh số trên cột đang chọn.

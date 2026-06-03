@@ -75,4 +75,56 @@ QVector<int> rowsToHideByNumber(const QVector<QString> &colValues, NumOp op,
     return hide;
 }
 
+bool matchCond(const QString &cell, FiltOp op, const QString &operand) {
+    const QString c = cell.trimmed();
+    switch (op) {
+    case FiltOp::Contains:    return c.contains(operand, Qt::CaseInsensitive);
+    case FiltOp::NotContains: return !c.contains(operand, Qt::CaseInsensitive);
+    case FiltOp::BeginsWith:  return c.startsWith(operand, Qt::CaseInsensitive);
+    case FiltOp::EndsWith:    return c.endsWith(operand, Qt::CaseInsensitive);
+    default: break;
+    }
+    // Eq..Le: ưu tiên so theo số nếu cả hai là số.
+    bool cn = false, on = false;
+    const double cv = c.toDouble(&cn);
+    const double ov = operand.trimmed().toDouble(&on);
+    if (cn && on) {
+        switch (op) {
+        case FiltOp::Eq: return cv == ov;
+        case FiltOp::Ne: return cv != ov;
+        case FiltOp::Gt: return cv > ov;
+        case FiltOp::Ge: return cv >= ov;
+        case FiltOp::Lt: return cv < ov;
+        case FiltOp::Le: return cv <= ov;
+        default: return false;
+        }
+    }
+    const int cmp = c.compare(operand.trimmed(), Qt::CaseInsensitive);
+    switch (op) {
+    case FiltOp::Eq: return cmp == 0;
+    case FiltOp::Ne: return cmp != 0;
+    case FiltOp::Gt: return cmp > 0;
+    case FiltOp::Ge: return cmp >= 0;
+    case FiltOp::Lt: return cmp < 0;
+    case FiltOp::Le: return cmp <= 0;
+    default: return false;
+    }
+}
+
+QVector<int> rowsToHideCustom(const QVector<QString> &colValues,
+                              FiltOp op1, const QString &v1,
+                              bool useAnd, bool hasSecond,
+                              FiltOp op2, const QString &v2) {
+    QVector<int> hide;
+    for (int i = 1; i < colValues.size(); ++i) { // bỏ qua tiêu đề
+        bool keep = matchCond(colValues[i], op1, v1);
+        if (hasSecond) {
+            const bool m2 = matchCond(colValues[i], op2, v2);
+            keep = useAnd ? (keep && m2) : (keep || m2);
+        }
+        if (!keep) hide.push_back(i);
+    }
+    return hide;
+}
+
 } // namespace filterutil

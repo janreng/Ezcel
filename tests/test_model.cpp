@@ -360,6 +360,30 @@ int main(int argc, char **argv) {
         ok(mh.contains(2) && !mh.contains(1) && !mh.contains(3), "o text bi an khi loc so");
     }
 
+    // --- loc tuy chinh 2 dieu kien AND/OR (Custom AutoFilter, Spec 15) ---
+    {
+        using filterutil::FiltOp;
+        // matchCond co ban
+        ok(filterutil::matchCond("Hanoi", FiltOp::Contains, "ano"), "Contains ano");
+        ok(filterutil::matchCond("Hanoi", FiltOp::BeginsWith, "Ha"), "BeginsWith Ha");
+        ok(filterutil::matchCond("Hanoi", FiltOp::EndsWith, "oi"), "EndsWith oi");
+        ok(filterutil::matchCond("30", FiltOp::Gt, "20"), "so 30>20");
+        ok(filterutil::matchCond("apple", FiltOp::Lt, "banana"), "chuoi apple<banana");
+
+        // header + so
+        QVector<QString> col{"Diem", "10", "20", "30", "40", "50"};
+        // >15 AND <45 -> giu 20,30,40 ; an 10,50
+        auto a = filterutil::rowsToHideCustom(col, FiltOp::Gt, "15", true, true, FiltOp::Lt, "45");
+        ok(a.size() == 2 && a.contains(1) && a.contains(5), "AND >15 & <45 an 10,50");
+        // <15 OR >45 -> giu 10,50 ; an 20,30,40
+        auto o = filterutil::rowsToHideCustom(col, FiltOp::Lt, "15", false, true, FiltOp::Gt, "45");
+        ok(o.size() == 3 && o.contains(2) && o.contains(3) && o.contains(4), "OR <15 | >45 an 20,30,40");
+        // chi 1 dieu kien: >=30 -> an 10,20
+        auto s = filterutil::rowsToHideCustom(col, FiltOp::Ge, "30", true, false, FiltOp::Eq, "");
+        ok(s.size() == 2 && s.contains(1) && s.contains(2), "1 dieu kien >=30 an 10,20");
+        ok(!a.contains(0), "header luon giu (custom)");
+    }
+
     // --- dan dac biet: chuyen vi ---
     {
         QVector<QVector<QString>> blk{{"a", "b", "c"}, {"1", "2", "3"}};

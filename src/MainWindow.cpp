@@ -45,6 +45,7 @@
 #include <QTableWidgetItem>
 #include <QDialogButtonBox>
 #include <QRadioButton>
+#include <QComboBox>
 #include <QCheckBox>
 #include <QGroupBox>
 #include <QButtonGroup>
@@ -655,6 +656,7 @@ void MainWindow::buildMenus()
     });
     data->addAction(QStringLiteral("Lọc theo giá trị..."), this, &MainWindow::filterByValues);
     data->addAction(QStringLiteral("Lọc theo số..."), this, &MainWindow::filterByNumber);
+    data->addAction(QStringLiteral("Lọc tùy chỉnh (2 điều kiện)..."), this, &MainWindow::customFilter);
     data->addAction(QStringLiteral("Xóa hàng trùng"), this, &MainWindow::removeDuplicates);
     data->addAction(QStringLiteral("Tách cột theo dấu phân cách..."), this, &MainWindow::textToColumns);
     data->addAction(QStringLiteral("Tổng phụ theo nhóm..."), this, &MainWindow::subtotalRange);
@@ -1275,6 +1277,61 @@ void MainWindow::filterByNumber()
     const auto hide = filterutil::rowsToHideByNumber(colVals, op, v1, v2);
     for (int r : hide) m_view->setRowHidden(r, true);
     statusBar()->showMessage(QStringLiteral("Đã lọc số cột %1: ẩn %2 hàng")
+        .arg(SpreadsheetModel::columnLabel(col)).arg(hide.size()), 3000);
+}
+
+// Lọc tùy chỉnh 2 điều kiện AND/OR (Custom AutoFilter, Spec 15).
+void MainWindow::customFilter()
+{
+    QModelIndex cur = m_view->currentIndex();
+    int col = cur.isValid() ? cur.column() : 0;
+    QVector<QString> colVals;
+    for (int r = 0; r < m_model->rowCount(); ++r)
+        colVals.push_back(m_model->data(m_model->index(r, col), Qt::DisplayRole).toString());
+
+    // Tên phép — đồng bộ thứ tự với enum filterutil::FiltOp.
+    const QStringList ops{
+        QStringLiteral("bằng"), QStringLiteral("khác"),
+        QStringLiteral("lớn hơn"), QStringLiteral("lớn hơn hoặc bằng"),
+        QStringLiteral("nhỏ hơn"), QStringLiteral("nhỏ hơn hoặc bằng"),
+        QStringLiteral("chứa"), QStringLiteral("không chứa"),
+        QStringLiteral("bắt đầu bằng"), QStringLiteral("kết thúc bằng")};
+
+    QDialog dlg(this);
+    dlg.setWindowTitle(QStringLiteral("Lọc tùy chỉnh cột %1").arg(SpreadsheetModel::columnLabel(col)));
+    auto *lay = new QVBoxLayout(&dlg);
+
+    auto *cb1 = new QComboBox(&dlg); cb1->addItems(ops); cb1->setCurrentIndex(2);
+    auto *ed1 = new QLineEdit(&dlg);
+    auto *row1 = new QHBoxLayout(); row1->addWidget(cb1); row1->addWidget(ed1);
+    lay->addLayout(row1);
+
+    auto *rbAnd = new QRadioButton(QStringLiteral("VÀ (AND)"), &dlg);
+    auto *rbOr = new QRadioButton(QStringLiteral("HOẶC (OR)"), &dlg);
+    rbAnd->setChecked(true);
+    auto *rowLogic = new QHBoxLayout(); rowLogic->addWidget(rbAnd); rowLogic->addWidget(rbOr);
+    lay->addLayout(rowLogic);
+
+    auto *cb2 = new QComboBox(&dlg); cb2->addItems(ops); cb2->setCurrentIndex(4);
+    auto *ed2 = new QLineEdit(&dlg);
+    auto *row2 = new QHBoxLayout(); row2->addWidget(cb2); row2->addWidget(ed2);
+    lay->addLayout(row2);
+    lay->addWidget(new QLabel(QStringLiteral("(Để trống ô giá trị thứ hai nếu chỉ dùng 1 điều kiện)"), &dlg));
+
+    auto *box = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dlg);
+    connect(box, &QDialogButtonBox::accepted, &dlg, &QDialog::accept);
+    connect(box, &QDialogButtonBox::rejected, &dlg, &QDialog::reject);
+    lay->addWidget(box);
+    if (dlg.exec() != QDialog::Accepted) return;
+
+    auto op1 = static_cast<filterutil::FiltOp>(cb1->currentIndex());
+    auto op2 = static_cast<filterutil::FiltOp>(cb2->currentIndex());
+    const bool hasSecond = !ed2->text().isEmpty();
+    const auto hide = filterutil::rowsToHideCustom(colVals, op1, ed1->text(),
+                                                   rbAnd->isChecked(), hasSecond, op2, ed2->text());
+    for (int r = 0; r < m_model->rowCount(); ++r) m_view->setRowHidden(r, false);
+    for (int r : hide) m_view->setRowHidden(r, true);
+    statusBar()->showMessage(QStringLiteral("Đã lọc tùy chỉnh cột %1: ẩn %2 hàng")
         .arg(SpreadsheetModel::columnLabel(col)).arg(hide.size()), 3000);
 }
 

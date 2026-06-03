@@ -26,4 +26,19 @@ enum class NumOp { Eq, Ne, Gt, Ge, Lt, Le, Between, NotBetween, AboveAvg, BelowA
 QVector<int> rowsToHideByNumber(const QVector<QString> &colValues, NumOp op,
                                 double v1, double v2 = 0.0);
 
+// Phép so khớp cho Lọc tùy chỉnh (Custom AutoFilter, Spec 15).
+// Eq..Le: nếu cả ô lẫn toán hạng là số -> so theo số, ngược lại so theo chuỗi.
+// Contains/NotContains/BeginsWith/EndsWith: so chuỗi (không phân biệt hoa/thường).
+enum class FiltOp { Eq, Ne, Gt, Ge, Lt, Le, Contains, NotContains, BeginsWith, EndsWith };
+
+// Một ô có thỏa điều kiện (op, operand) không.
+bool matchCond(const QString &cell, FiltOp op, const QString &operand);
+
+// Lọc tùy chỉnh với 1 hoặc 2 điều kiện ghép bằng AND/OR. Hàng 0 (tiêu đề) luôn giữ.
+// hasSecond=false -> chỉ dùng điều kiện 1. useAnd=true -> AND, false -> OR.
+QVector<int> rowsToHideCustom(const QVector<QString> &colValues,
+                              FiltOp op1, const QString &v1,
+                              bool useAnd, bool hasSecond,
+                              FiltOp op2, const QString &v2);
+
 } // namespace filterutil
