@@ -15,9 +15,12 @@
     <file alias="icons/font_color.svg">assets/icons/font_color.svg</file>
     <file alias="icons/italic.svg">assets/icons/italic.svg</file>
     <file alias="icons/merge.svg">assets/icons/merge.svg</file>
+    <file alias="icons/new.svg">assets/icons/new.svg</file>
     <file alias="icons/number_format.svg">assets/icons/number_format.svg</file>
+    <file alias="icons/open.svg">assets/icons/open.svg</file>
     <file alias="icons/paste.svg">assets/icons/paste.svg</file>
     <file alias="icons/redo.svg">assets/icons/redo.svg</file>
+    <file alias="icons/save.svg">assets/icons/save.svg</file>
     <file alias="icons/sort_asc.svg">assets/icons/sort_asc.svg</file>
     <file alias="icons/sort_desc.svg">assets/icons/sort_desc.svg</file>
     <file alias="icons/strike.svg">assets/icons/strike.svg</file>

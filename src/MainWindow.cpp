@@ -42,6 +42,8 @@
 #include <QTime>
 #include <QTabBar>
 #include <QToolButton>
+#include <QIcon>
+#include <QSize>
 
 // Bộ lọc file dùng chung cho mở/lưu.
 static const char *kFileFilter =
@@ -420,17 +422,36 @@ void MainWindow::buildMenus()
 
 void MainWindow::buildToolbar()
 {
+    auto ic = [](const QString &name) { return QIcon(QStringLiteral(":/icons/%1.svg").arg(name)); };
     QToolBar *tb = addToolBar(QStringLiteral("Chính"));
     tb->setMovable(false);
     tb->setStyleSheet(theme::toolbarStyle()); // dải kiểu ribbon
-    tb->addAction(QStringLiteral("Mới"), this, &MainWindow::newFile);
-    tb->addAction(QStringLiteral("Mở"), this, &MainWindow::openFile);
-    tb->addAction(QStringLiteral("Lưu"), this, [this] { saveFile(); });
+    tb->setToolButtonStyle(Qt::ToolButtonIconOnly);
+    tb->setIconSize(QSize(18, 18));
+    tb->addAction(ic("new"), QStringLiteral("Mới"), this, &MainWindow::newFile);
+    tb->addAction(ic("open"), QStringLiteral("Mở"), this, &MainWindow::openFile);
+    tb->addAction(ic("save"), QStringLiteral("Lưu"), this, [this] { saveFile(); });
     tb->addSeparator();
-    tb->addAction(QStringLiteral("Hoàn tác"), this, [this] { m_model->undo(); });
-    tb->addAction(QStringLiteral("Làm lại"), this, [this] { m_model->redo(); });
+    tb->addAction(ic("undo"), QStringLiteral("Hoàn tác"), this, [this] { m_model->undo(); });
+    tb->addAction(ic("redo"), QStringLiteral("Làm lại"), this, [this] { m_model->redo(); });
     tb->addSeparator();
-    tb->addAction(QStringLiteral("Gộp ô"), this, &MainWindow::toggleMergeSelection);
+    tb->addAction(ic("cut"), QStringLiteral("Cắt"), this, &MainWindow::cutSelection);
+    tb->addAction(ic("copy"), QStringLiteral("Sao chép"), this, &MainWindow::copySelection);
+    tb->addAction(ic("paste"), QStringLiteral("Dán"), this, &MainWindow::pasteClipboard);
+    tb->addSeparator();
+    tb->addAction(ic("sort_asc"), QStringLiteral("Sắp xếp tăng"), this, [this] {
+        int t, l, b, r; if (!selectionBox(t, l, b, r)) return;
+        int kc = m_view->currentIndex().isValid() ? m_view->currentIndex().column() : l;
+        m_model->sortRange(t, l, b, r, qBound(l, kc, r), true);
+    });
+    tb->addAction(ic("sort_desc"), QStringLiteral("Sắp xếp giảm"), this, [this] {
+        int t, l, b, r; if (!selectionBox(t, l, b, r)) return;
+        int kc = m_view->currentIndex().isValid() ? m_view->currentIndex().column() : l;
+        m_model->sortRange(t, l, b, r, qBound(l, kc, r), false);
+    });
+    tb->addAction(ic("find"), QStringLiteral("Tìm & Thay thế"), this, &MainWindow::showFindReplace);
+    tb->addSeparator();
+    tb->addAction(ic("merge"), QStringLiteral("Gộp ô"), this, &MainWindow::toggleMergeSelection);
 }
 
 // ---------------------------------------------------------------- vùng chọn

@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v0.45.0 — Thanh công cụ chính bằng biểu tượng
+
+- **Thanh công cụ chính nhiều biểu tượng hơn**: Mới / Mở / Lưu, Hoàn tác / Làm lại, Cắt / Sao chép / Dán, Sắp xếp tăng-giảm, Tìm, Gộp ô — tất cả nay là biểu tượng trực quan, thao tác nhanh hơn.
+
 ## v0.44.0 — Biểu tượng cho thanh định dạng
 
 - **Nút định dạng có biểu tượng**: in đậm/nghiêng/gạch chân/gạch ngang, màu chữ, màu nền, căn lề trên thanh định dạng nay hiển thị bằng biểu tượng trực quan thay cho chữ — gọn và dễ nhận biết hơn.
