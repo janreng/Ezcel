@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v0.85.0 — Hàm tài chính NPV & IRR (Spec 12)
+
+- **Thêm hàm `NPV`** — tính giá trị hiện tại ròng của một dãy dòng tiền theo lãi suất chiết khấu.
+- **Thêm hàm `IRR`** — tính tỉ suất hoàn vốn nội bộ của một dãy dòng tiền, giúp đánh giá hiệu quả đầu tư.
+
 ## v0.84.0 — Hàm tài chính PMT & NPER (Spec 12)
 
 - **Thêm hàm `PMT`** — tính khoản trả đều mỗi kỳ cho một khoản vay (trả góp) với lãi suất và số kỳ cố định.

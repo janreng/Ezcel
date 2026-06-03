@@ -15,6 +15,9 @@ static QVariant resolver(int row, int col) {
         // Bang tra cuu D1:E3 (cot 3=keys, cot 4=values)
         {"0,3", "1"}, {"1,3", "2"}, {"2,3", "3"},
         {"0,4", "one"}, {"1,4", "two"}, {"2,4", "three"},
+        // Dong tien F1:F6 (cot 5) cho test tai chinh NPV/IRR
+        {"0,5", "-1000"}, {"1,5", "500"}, {"2,5", "500"}, {"3,5", "500"},
+        {"4,5", "-100"}, {"5,5", "110"},
     };
     auto it = cells.constFind(QString("%1,%2").arg(row).arg(col));
     return it == cells.constEnd() ? QVariant(QString()) : QVariant(it.value());
@@ -216,6 +219,11 @@ int main() {
     checkNum("=NPER(0,-100,1000,0,0)", 10);  // lai 0%
     checkNum("=NPER(0.01,88.8487886783417,-1000,0,0)", 12); // khu hoi PMT
     checkNum("=NPER(0.1,-110,100,0,0)", 1);
+    // NPV / IRR (Spec 12): F1:F4 = {-1000,500,500,500}, F5:F6 = {-100,110}
+    checkNum("=NPV(0.1,100,100,100)", 248.685199098422);
+    checkNum("=NPV(0.1,F2:F4)", 1243.42599549211);
+    checkNum("=IRR(F1:F4)", 0.233751928528259);
+    checkNum("=IRR(F5:F6)", 0.1);
     checkStr("=A1/0", "#DIV/0!");
     checkStr("=IFERROR(A1/0,\"err\")", "err");
     checkStr("=AND(A1>5,A2>5)", "true");

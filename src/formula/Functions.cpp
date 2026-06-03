@@ -413,6 +413,34 @@ QHash<QString, Fn> &fnMap() {
             if (num / den <= 0) throw FormulaError(QStringLiteral("NPER: không hội tụ"), ERR_NUM);
             return Value::number(std::log(num / den) / std::log(1 + rate));
         };
+        // NPV(rate, giá_trị...): giá trị hiện tại ròng của dãy dòng tiền (chiết khấu từ kỳ 1).
+        r["NPV"] = [](const Args &a) {
+            if (a.size() < 2) argErr("NPV");
+            double rate = toNumber(a[0]);
+            auto vals = numbers(std::vector<Value>(a.begin() + 1, a.end()));
+            double s = 0;
+            for (int i = 0; i < int(vals.size()); ++i) s += vals[i] / std::pow(1 + rate, i + 1);
+            return Value::number(s);
+        };
+        // IRR(dòng_tiền, [đoán=0.1]): tỉ suất hoàn vốn nội bộ — lặp Newton (giá_trị[0] ở kỳ 0).
+        r["IRR"] = [](const Args &a) {
+            if (a.size() < 1 || a.size() > 2) argErr("IRR");
+            auto v = numbers(std::vector<Value>{a[0]});
+            if (v.size() < 2) throw FormulaError(QStringLiteral("IRR: cần ít nhất 2 dòng tiền"), ERR_NUM);
+            double rate = a.size() == 2 ? toNumber(a[1]) : 0.1;
+            for (int it = 0; it < 100; ++it) {
+                double f = 0, df = 0;
+                for (int i = 0; i < int(v.size()); ++i) {
+                    f += v[i] / std::pow(1 + rate, i);
+                    df += -i * v[i] / std::pow(1 + rate, i + 1);
+                }
+                if (df == 0) break;
+                double nr = rate - f / df;
+                if (std::abs(nr - rate) < 1e-10) { rate = nr; if (rate <= -1) break; return Value::number(rate); }
+                rate = nr;
+            }
+            throw FormulaError(QStringLiteral("IRR: không hội tụ"), ERR_NUM);
+        };
         // NUMBERVALUE(text, [dấu_thập_phân="."], [dấu_nhóm=","]): đổi chuỗi thành số theo dấu phân cách tùy chọn.
         r["NUMBERVALUE"] = [](const Args &a) {
             if (a.size() < 1 || a.size() > 3) argErr("NUMBERVALUE");
