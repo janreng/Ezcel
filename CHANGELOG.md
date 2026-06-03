@@ -1,5 +1,11 @@
 # Lịch sử thay đổi
 
+## v1.23.0 — Dán đặc biệt: phép tính & bỏ qua ô trống (Spec 13)
+
+- **Hộp thoại "Dán đặc biệt" mở rộng**: chọn phép tính khi dán — Cộng, Trừ, Nhân, Chia — để gộp giá trị vùng dán vào giá trị đang có ở vùng đích.
+- **Bỏ qua ô trống**: ô trống trong vùng nguồn sẽ không ghi đè lên ô đích đang có dữ liệu.
+- Vẫn giữ tùy chọn **Chuyển vị** (hàng ↔ cột); các tùy chọn có thể kết hợp với nhau.
+
 ## v1.22.0 — Menu chuột phải trên ô và đầu hàng/cột (Spec 06)
 
 - **Bấm chuột phải vào ô** mở menu nhanh: Cắt, Sao chép, Dán, Dán đặc biệt, Chèn/Xóa hàng-cột, Xóa nội dung, Lọc theo giá trị, Sắp xếp tăng/giảm, Chọn từ danh sách.

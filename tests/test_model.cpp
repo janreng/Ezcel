@@ -317,6 +317,40 @@ int main(int argc, char **argv) {
         ok(pasteops::transpose({}).isEmpty(), "transpose rong -> rong");
     }
 
+    // --- dan dac biet: phep tinh (Operation) + bo qua o trong ---
+    {
+        using pasteops::Op;
+        QVector<QVector<QString>> dest{{"5", "10"}};
+        QVector<QVector<QString>> src{{"11", "3"}};
+        auto add = pasteops::applyOperation(dest, src, Op::Add, false);
+        ok(add[0][0] == "16" && add[0][1] == "13", "Operation Add: dest + src");
+        auto sub = pasteops::applyOperation(dest, src, Op::Subtract, false);
+        ok(sub[0][0] == "-6" && sub[0][1] == "7", "Operation Subtract");
+        auto mul = pasteops::applyOperation(dest, src, Op::Multiply, false);
+        ok(mul[0][0] == "55" && mul[0][1] == "30", "Operation Multiply");
+        auto div = pasteops::applyOperation({{"10"}}, {{"4"}}, Op::Divide, false);
+        ok(div[0][0] == "2.5", "Operation Divide");
+
+        // Chia cho 0 -> giu gia tri dich.
+        auto dz = pasteops::applyOperation({{"10"}}, {{"0"}}, Op::Divide, false);
+        ok(dz[0][0] == "10", "Divide by zero giu dich");
+
+        // None + skip blanks: o src trong giu dest, o khac lay src.
+        QVector<QVector<QString>> src2{{"", "99"}};
+        auto sk = pasteops::applyOperation(dest, src2, Op::None, true);
+        ok(sk[0][0] == "5" && sk[0][1] == "99", "Skip Blanks: o trong giu dich");
+        // Khong skip: o trong ghi de dest thanh rong.
+        auto nsk = pasteops::applyOperation(dest, src2, Op::None, false);
+        ok(nsk[0][0].isEmpty() && nsk[0][1] == "99", "Khong skip: o trong ghi de");
+
+        // Nguon khong phai so -> dan nguyen van (Add).
+        auto txt = pasteops::applyOperation({{"5"}}, {{"abc"}}, Op::Add, false);
+        ok(txt[0][0] == "abc", "Nguon text -> dan nguyen");
+        // Dich trong, Add -> coi dich = 0.
+        auto de = pasteops::applyOperation({{""}}, {{"7"}}, Op::Add, false);
+        ok(de[0][0] == "7", "Dich trong coi nhu 0");
+    }
+
     // --- thong ke vung chon ---
     {
         stats::Result r = stats::compute({"10", "20", "abc", "", "30"});

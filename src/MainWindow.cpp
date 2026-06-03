@@ -43,6 +43,10 @@
 #include <QTableWidget>
 #include <QTableWidgetItem>
 #include <QDialogButtonBox>
+#include <QRadioButton>
+#include <QCheckBox>
+#include <QGroupBox>
+#include <QButtonGroup>
 #include <QAbstractItemView>
 #include <QSlider>
 #include <QToolButton>
@@ -1015,13 +1019,59 @@ void MainWindow::pasteSpecial()
         statusBar()->showMessage(QStringLiteral("Clipboard trống"), 2000);
         return;
     }
-    bool ok = false;
-    QStringList opts{QStringLiteral("Dán bình thường"), QStringLiteral("Chuyển vị (hàng ↔ cột)")};
-    QString choice = QInputDialog::getItem(this, QStringLiteral("Dán đặc biệt"),
-        QStringLiteral("Kiểu dán:"), opts, 0, false, &ok);
-    if (!ok) return;
-    if (choice == opts[1]) block = pasteops::transpose(block);
-    m_model->pasteBlock(idx.row(), idx.column(), block);
+
+    // Hộp thoại Dán đặc biệt: phép tính (None/Cộng/Trừ/Nhân/Chia) + Bỏ qua ô
+    // trống + Chuyển vị (Spec 13 §13.3).
+    QDialog dlg(this);
+    dlg.setWindowTitle(QStringLiteral("Dán đặc biệt"));
+    auto *lay = new QVBoxLayout(&dlg);
+
+    auto *opGroup = new QGroupBox(QStringLiteral("Phép tính"), &dlg);
+    auto *opLay = new QVBoxLayout(opGroup);
+    auto *bg = new QButtonGroup(&dlg);
+    const QStringList opNames{QStringLiteral("Không"), QStringLiteral("Cộng"),
+        QStringLiteral("Trừ"), QStringLiteral("Nhân"), QStringLiteral("Chia")};
+    for (int i = 0; i < opNames.size(); ++i) {
+        auto *rb = new QRadioButton(opNames[i], opGroup);
+        if (i == 0) rb->setChecked(true);
+        bg->addButton(rb, i);
+        opLay->addWidget(rb);
+    }
+    lay->addWidget(opGroup);
+
+    auto *cbSkip = new QCheckBox(QStringLiteral("Bỏ qua ô trống"), &dlg);
+    auto *cbTrans = new QCheckBox(QStringLiteral("Chuyển vị (hàng ↔ cột)"), &dlg);
+    lay->addWidget(cbSkip);
+    lay->addWidget(cbTrans);
+
+    auto *box = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dlg);
+    connect(box, &QDialogButtonBox::accepted, &dlg, &QDialog::accept);
+    connect(box, &QDialogButtonBox::rejected, &dlg, &QDialog::reject);
+    lay->addWidget(box);
+    if (dlg.exec() != QDialog::Accepted) return;
+
+    if (cbTrans->isChecked()) block = pasteops::transpose(block);
+
+    const auto op = static_cast<pasteops::Op>(bg->checkedId());
+    const bool skip = cbSkip->isChecked();
+    const int row0 = idx.row(), col0 = idx.column();
+
+    // Nếu có phép tính hoặc Bỏ-qua-ô-trống thì cần đọc giá trị đích hiện tại,
+    // gộp với nguồn rồi mới ghi (nếu không thì dán thẳng như cũ).
+    if (op != pasteops::Op::None || skip) {
+        QVector<QVector<QString>> dest;
+        for (int r = 0; r < block.size(); ++r) {
+            QVector<QString> drow;
+            for (int c = 0; c < block[r].size(); ++c) {
+                QModelIndex di = m_model->index(row0 + r, col0 + c);
+                drow.push_back(di.isValid() ? m_model->data(di, Qt::EditRole).toString() : QString());
+            }
+            dest.push_back(drow);
+        }
+        block = pasteops::applyOperation(dest, block, op, skip);
+    }
+
+    m_model->pasteBlock(row0, col0, block);
     statusBar()->showMessage(QStringLiteral("Đã dán đặc biệt"), 2000);
 }
 
