@@ -417,6 +417,12 @@ int main() {
     checkNum("=IMAGINARY(IMLN(\"i\"))", 1.5707963267948966); // ln(i) = i*pi/2
     checkNum("=IMREAL(IMEXP(IMLN(\"3+4i\")))", 3);   // exp(ln(z)) = z
     checkNum("=IMAGINARY(IMEXP(IMLN(\"3+4i\")))", 4);
+    // IMSQRT / IMPOWER (Spec 12) — dung khu hoi
+    checkNum("=IMREAL(IMPRODUCT(IMSQRT(\"3+4i\"),IMSQRT(\"3+4i\")))", 3);     // sqrt(z)^2 = z
+    checkNum("=IMAGINARY(IMPRODUCT(IMSQRT(\"3+4i\"),IMSQRT(\"3+4i\")))", 4);
+    checkNum("=IMREAL(IMPOWER(\"2+i\",2))", 3);    // (2+i)^2 = 3+4i
+    checkNum("=IMAGINARY(IMPOWER(\"2+i\",2))", 4);
+    checkNum("=IMAGINARY(IMPOWER(\"1+i\",2))", 2); // (1+i)^2 = 2i
 
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);
     return g_fail == 0 ? 0 : 1;

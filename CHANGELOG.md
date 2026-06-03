@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v1.4.0 — Căn & lũy thừa số phức (Spec 12)
+
+- **Thêm hàm `IMSQRT`** — tính căn bậc hai của một số phức.
+- **Thêm hàm `IMPOWER`** — tính lũy thừa của một số phức với số mũ cho trước.
+
 ## v1.3.0 — Hàm mũ & logarit số phức (Spec 12)
 
 - **Thêm hàm `IMEXP`** — tính lũy thừa cơ số e của một số phức.

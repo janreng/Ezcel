@@ -1017,6 +1017,20 @@ QHash<QString, Fn> &fnMap() {
             if (c.first == 0 && c.second == 0) throw FormulaError(QStringLiteral("IMLN: logarit của 0"), ERR_NUM);
             return Value::str(formatComplex(std::log(std::hypot(c.first, c.second)), std::atan2(c.second, c.first)));
         };
+        // IMSQRT (căn bậc hai số phức) và IMPOWER (lũy thừa số phức) — qua dạng cực.
+        r["IMSQRT"] = [need, parseComplex, formatComplex](const Args &a) {
+            need(a,1,"IMSQRT");
+            auto c = parseComplex(toText(a[0]));
+            double r = std::hypot(c.first, c.second), th = std::atan2(c.second, c.first), sr = std::sqrt(r);
+            return Value::str(formatComplex(sr * std::cos(th/2), sr * std::sin(th/2)));
+        };
+        r["IMPOWER"] = [need, parseComplex, formatComplex](const Args &a) {
+            need(a,2,"IMPOWER");
+            auto c = parseComplex(toText(a[0]));
+            double n = toNumber(a[1]);
+            double r = std::hypot(c.first, c.second), th = std::atan2(c.second, c.first), rn = std::pow(r, n);
+            return Value::str(formatComplex(rn * std::cos(n*th), rn * std::sin(n*th)));
+        };
 
         // --- thống kê ---
         r["MEDIAN"] = [](const Args &a) { auto n = numbers(a); if (n.empty()) throw FormulaError(QStringLiteral("MEDIAN cần ít nhất một số")); std::sort(n.begin(), n.end()); size_t m = n.size(); return Value::number(m%2 ? n[m/2] : (n[m/2-1]+n[m/2])/2.0); };
