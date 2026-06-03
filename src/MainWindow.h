@@ -48,6 +48,7 @@ private slots:
     void flashFill();         // tự điền theo mẫu (Spec 05)
     void pickFromList();      // chọn từ danh sách trong cột (Alt+Down, Spec 05)
     void filterByValues();    // lọc theo giá trị chọn trong cột (Spec 15)
+    void filterByNumber();    // lọc theo điều kiện số (Spec 15)
     void removeDuplicates();  // xóa hàng trùng (Spec 27)
     void textToColumns();     // tách cột theo dấu phân cách (Spec 27)
     void subtotalRange();     // tổng phụ theo nhóm (Spec 27.6)

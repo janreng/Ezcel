@@ -1,5 +1,11 @@
 # Lịch sử thay đổi
 
+## v1.28.0 — Lọc theo điều kiện số (Spec 15)
+
+- **Thêm "Lọc theo số..."** trong menu Dữ liệu: ẩn/hiện hàng theo so sánh số trên cột đang chọn.
+- Hỗ trợ: Bằng, Khác, Lớn hơn, Lớn hơn hoặc bằng, Nhỏ hơn, Nhỏ hơn hoặc bằng, Trong khoảng [a, b], Ngoài khoảng.
+- Thêm **Trên/Dưới trung bình** — tự so với giá trị trung bình của cột.
+
 ## v1.27.0 — Xóa định dạng & xóa tất cả (Spec 09)
 
 - **Menu "Xóa..."** trong Sửa: tách 3 lựa chọn rõ ràng — Tất cả (nội dung + định dạng), Chỉ định dạng, Chỉ nội dung.

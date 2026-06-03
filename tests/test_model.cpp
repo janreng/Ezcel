@@ -333,6 +333,33 @@ int main(int argc, char **argv) {
         ok(!hv.contains(0), "header luon giu");
     }
 
+    // --- loc theo dieu kien so (Number Filters, Spec 15) ---
+    {
+        using filterutil::NumOp;
+        // header + 10,20,30,40,50
+        QVector<QString> col{"Diem", "10", "20", "30", "40", "50"};
+        auto gt = filterutil::rowsToHideByNumber(col, NumOp::Gt, 25);
+        ok(gt.size() == 2 && gt.contains(1) && gt.contains(2), ">25 an 10,20");
+        auto le = filterutil::rowsToHideByNumber(col, NumOp::Le, 20);
+        ok(le.size() == 3 && le.contains(3) && le.contains(5), "<=20 an 30,40,50");
+        auto bw = filterutil::rowsToHideByNumber(col, NumOp::Between, 20, 40);
+        ok(bw.size() == 2 && bw.contains(1) && bw.contains(5), "between 20..40 giu 20,30,40");
+        auto nb = filterutil::rowsToHideByNumber(col, NumOp::NotBetween, 20, 40);
+        ok(nb.size() == 3 && nb.contains(2) && nb.contains(3) && nb.contains(4), "not between an 20,30,40");
+        auto eq = filterutil::rowsToHideByNumber(col, NumOp::Eq, 30);
+        ok(eq.size() == 4 && !eq.contains(3), "=30 giu moi hang 30");
+        // trung binh = 30 -> above giu 40,50; an 10,20,30 (+header giu)
+        auto ab = filterutil::rowsToHideByNumber(col, NumOp::AboveAvg, 0);
+        ok(ab.size() == 3 && ab.contains(1) && ab.contains(2) && ab.contains(3), "aboveAvg an 10,20,30");
+        auto bl = filterutil::rowsToHideByNumber(col, NumOp::BelowAvg, 0);
+        ok(bl.size() == 3 && bl.contains(3) && bl.contains(4) && bl.contains(5), "belowAvg an 30,40,50");
+        ok(!ab.contains(0), "header luon giu (number filter)");
+        // o khong phai so -> luon an
+        QVector<QString> mix{"H", "5", "abc", "9"};
+        auto mh = filterutil::rowsToHideByNumber(mix, NumOp::Gt, 0);
+        ok(mh.contains(2) && !mh.contains(1) && !mh.contains(3), "o text bi an khi loc so");
+    }
+
     // --- dan dac biet: chuyen vi ---
     {
         QVector<QVector<QString>> blk{{"a", "b", "c"}, {"1", "2", "3"}};

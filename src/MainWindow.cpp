@@ -654,6 +654,7 @@ void MainWindow::buildMenus()
         statusBar()->showMessage(QStringLiteral("Đã lọc cột %1").arg(SpreadsheetModel::columnLabel(col)), 3000);
     });
     data->addAction(QStringLiteral("Lọc theo giá trị..."), this, &MainWindow::filterByValues);
+    data->addAction(QStringLiteral("Lọc theo số..."), this, &MainWindow::filterByNumber);
     data->addAction(QStringLiteral("Xóa hàng trùng"), this, &MainWindow::removeDuplicates);
     data->addAction(QStringLiteral("Tách cột theo dấu phân cách..."), this, &MainWindow::textToColumns);
     data->addAction(QStringLiteral("Tổng phụ theo nhóm..."), this, &MainWindow::subtotalRange);
@@ -1230,6 +1231,50 @@ void MainWindow::filterByValues()
     const auto hide = filterutil::rowsToHideByValues(colVals, keep);
     for (int r : hide) m_view->setRowHidden(r, true);
     statusBar()->showMessage(QStringLiteral("Đã lọc cột %1: ẩn %2 hàng")
+        .arg(SpreadsheetModel::columnLabel(col)).arg(hide.size()), 3000);
+}
+
+// Lọc theo điều kiện SỐ (Number Filters, Spec 15): chọn phép so sánh + nhập số.
+void MainWindow::filterByNumber()
+{
+    QModelIndex cur = m_view->currentIndex();
+    int col = cur.isValid() ? cur.column() : 0;
+    QVector<QString> colVals;
+    for (int r = 0; r < m_model->rowCount(); ++r)
+        colVals.push_back(m_model->data(m_model->index(r, col), Qt::DisplayRole).toString());
+
+    // Danh sách phép so sánh đồng bộ thứ tự với enum filterutil::NumOp.
+    const QStringList opNames{
+        QStringLiteral("Bằng (=)"), QStringLiteral("Khác (≠)"),
+        QStringLiteral("Lớn hơn (>)"), QStringLiteral("Lớn hơn hoặc bằng (≥)"),
+        QStringLiteral("Nhỏ hơn (<)"), QStringLiteral("Nhỏ hơn hoặc bằng (≤)"),
+        QStringLiteral("Trong khoảng [a, b]"), QStringLiteral("Ngoài khoảng [a, b]"),
+        QStringLiteral("Trên trung bình"), QStringLiteral("Dưới trung bình")};
+    bool ok = false;
+    QString choice = QInputDialog::getItem(this, QStringLiteral("Lọc theo số"),
+        QStringLiteral("Điều kiện:"), opNames, 2, false, &ok);
+    if (!ok) return;
+    auto op = static_cast<filterutil::NumOp>(qMax(0, opNames.indexOf(choice)));
+
+    double v1 = 0.0, v2 = 0.0;
+    if (op != filterutil::NumOp::AboveAvg && op != filterutil::NumOp::BelowAvg) {
+        v1 = QInputDialog::getDouble(this, QStringLiteral("Lọc theo số"),
+            QStringLiteral("Giá trị%1:").arg(
+                (op == filterutil::NumOp::Between || op == filterutil::NumOp::NotBetween)
+                    ? QStringLiteral(" a") : QString()),
+            0, -1e12, 1e12, 4, &ok);
+        if (!ok) return;
+        if (op == filterutil::NumOp::Between || op == filterutil::NumOp::NotBetween) {
+            v2 = QInputDialog::getDouble(this, QStringLiteral("Lọc theo số"),
+                QStringLiteral("Giá trị b:"), 0, -1e12, 1e12, 4, &ok);
+            if (!ok) return;
+        }
+    }
+
+    for (int r = 0; r < m_model->rowCount(); ++r) m_view->setRowHidden(r, false);
+    const auto hide = filterutil::rowsToHideByNumber(colVals, op, v1, v2);
+    for (int r : hide) m_view->setRowHidden(r, true);
+    statusBar()->showMessage(QStringLiteral("Đã lọc số cột %1: ẩn %2 hàng")
         .arg(SpreadsheetModel::columnLabel(col)).arg(hide.size()), 3000);
 }
 
