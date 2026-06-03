@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v0.77.0 — Hàm tổ hợp có lặp COMBINA & PERMUTATIONA (Spec 12)
+
+- **Thêm hàm `COMBINA`** — số tổ hợp có lặp lại khi chọn k phần tử từ n nhóm.
+- **Thêm hàm `PERMUTATIONA`** — số chỉnh hợp có lặp lại (n mũ k).
+
 ## v0.76.0 — Hàm phân phối chuẩn PHI & GAUSS (Spec 12)
 
 - **Thêm hàm `PHI`** — mật độ xác suất của phân phối chuẩn tắc tại một giá trị.

@@ -159,6 +159,13 @@ int main() {
     checkNum("=GAUSS(0)", 0);
     checkNum("=GAUSS(1)", 0.3413447460685429);
     checkNum("=GAUSS(-1)", -0.3413447460685429); // ham le
+    // COMBINA / PERMUTATIONA (Spec 12) — co lap
+    checkNum("=COMBINA(4,3)", 20);   // C(6,3)
+    checkNum("=COMBINA(3,2)", 6);    // C(4,2)
+    checkNum("=COMBINA(5,0)", 1);
+    checkNum("=PERMUTATIONA(3,2)", 9);  // 3^2
+    checkNum("=PERMUTATIONA(2,4)", 16); // 2^4
+    checkNum("=PERMUTATIONA(5,0)", 1);
     checkStr("=A1/0", "#DIV/0!");
     checkStr("=IFERROR(A1/0,\"err\")", "err");
     checkStr("=AND(A1>5,A2>5)", "true");
