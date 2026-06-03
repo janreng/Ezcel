@@ -299,6 +299,13 @@ int main(int argc, char **argv) {
         ok(!h.contains(0), "hang tieu de luon giu");
         ok(filterutil::rowsToHide(col, "").isEmpty(), "loc rong -> khong an");
         ok(filterutil::rowsToHide(col, "xyz").size() == 4, "loc khong khop -> an het (tru header)");
+        // loc theo gia tri (Spec 15)
+        auto uv = filterutil::uniqueValues(col); // bo header -> 4 gia tri unique sap xep
+        ok(uv.size() == 4 && uv.first() == "Banh", "uniqueValues sap xep, bo header");
+        QSet<QString> keep{"Cafe", "Banh"};
+        auto hv = filterutil::rowsToHideByValues(col, keep); // an Tra sua(2), cafe sua(4)
+        ok(hv.size() == 2 && hv.contains(2) && hv.contains(4), "rowsToHideByValues giu Cafe/Banh");
+        ok(!hv.contains(0), "header luon giu");
     }
 
     // --- dan dac biet: chuyen vi ---

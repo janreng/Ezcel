@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v1.20.0 — Lọc theo giá trị (Spec 15)
+
+- **Thêm "Lọc theo giá trị..."** trong menu Dữ liệu: mở hộp thoại liệt kê các giá trị duy nhất của cột với ô tích chọn — bỏ tích để ẩn các hàng có giá trị đó, giống bộ lọc cột quen thuộc. Bổ sung cho bộ lọc theo từ khóa đã có.
+
 ## v1.19.0 — Chọn từ danh sách & gợi ý tự động (Spec 05)
 
 - **Thêm "Chọn từ danh sách" (Alt + Mũi tên xuống)**: hiện menu liệt kê các giá trị văn bản đã có trong cột, chọn để điền nhanh vào ô — đỡ phải gõ lại.

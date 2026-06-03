@@ -37,6 +37,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QDialog>
+#include <QListWidget>
 #include <QTableWidget>
 #include <QTableWidgetItem>
 #include <QDialogButtonBox>
@@ -520,6 +521,7 @@ void MainWindow::buildMenus()
         for (int r : filterutil::rowsToHide(colVals, text)) m_view->setRowHidden(r, true);
         statusBar()->showMessage(QStringLiteral("Đã lọc cột %1").arg(SpreadsheetModel::columnLabel(col)), 3000);
     });
+    data->addAction(QStringLiteral("Lọc theo giá trị..."), this, &MainWindow::filterByValues);
     data->addAction(i18n::tr("data_clear_filter"), this, [this] {
         for (int r = 0; r < m_model->rowCount(); ++r) m_view->setRowHidden(r, false);
     });
@@ -984,6 +986,46 @@ void MainWindow::pickFromList()
         menu.addAction(it, this, [this, cur, it] { m_model->setData(cur, it, Qt::EditRole); });
     QRect rect = m_view->visualRect(cur);
     menu.exec(m_view->viewport()->mapToGlobal(rect.bottomLeft()));
+}
+
+// Lọc theo giá trị (Spec 15): hộp thoại checklist các giá trị duy nhất trong cột,
+// bỏ chọn để ẩn các hàng có giá trị đó.
+void MainWindow::filterByValues()
+{
+    QModelIndex cur = m_view->currentIndex();
+    int col = cur.isValid() ? cur.column() : 0;
+    QVector<QString> colVals;
+    for (int r = 0; r < m_model->rowCount(); ++r)
+        colVals.push_back(m_model->data(m_model->index(r, col), Qt::DisplayRole).toString());
+    const QVector<QString> values = filterutil::uniqueValues(colVals);
+    if (values.isEmpty()) { statusBar()->showMessage(QStringLiteral("Cột không có giá trị để lọc"), 2500); return; }
+
+    QDialog dlg(this);
+    dlg.setWindowTitle(QStringLiteral("Lọc cột %1").arg(SpreadsheetModel::columnLabel(col)));
+    auto *lay = new QVBoxLayout(&dlg);
+    auto *listw = new QListWidget(&dlg);
+    for (const QString &v : values) {
+        auto *it = new QListWidgetItem(v, listw);
+        it->setFlags(it->flags() | Qt::ItemIsUserCheckable);
+        it->setCheckState(Qt::Checked);
+    }
+    lay->addWidget(new QLabel(QStringLiteral("Chọn các giá trị muốn hiện:"), &dlg));
+    lay->addWidget(listw);
+    auto *box = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dlg);
+    connect(box, &QDialogButtonBox::accepted, &dlg, &QDialog::accept);
+    connect(box, &QDialogButtonBox::rejected, &dlg, &QDialog::reject);
+    lay->addWidget(box);
+    if (dlg.exec() != QDialog::Accepted) return;
+
+    QSet<QString> keep;
+    for (int i = 0; i < listw->count(); ++i)
+        if (listw->item(i)->checkState() == Qt::Checked) keep.insert(listw->item(i)->text());
+
+    for (int r = 0; r < m_model->rowCount(); ++r) m_view->setRowHidden(r, false);
+    const auto hide = filterutil::rowsToHideByValues(colVals, keep);
+    for (int r : hide) m_view->setRowHidden(r, true);
+    statusBar()->showMessage(QStringLiteral("Đã lọc cột %1: ẩn %2 hàng")
+        .arg(SpreadsheetModel::columnLabel(col)).arg(hide.size()), 3000);
 }
 
 void MainWindow::toggleShowFormulas(bool on)
