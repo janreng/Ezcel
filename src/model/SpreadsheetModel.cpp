@@ -369,6 +369,7 @@ void SpreadsheetModel::applyEntry(const UndoEntry &e, bool useOld) {
         else m_fmt.insert(key(fc.row, fc.col), f);
     }
     if (!e.fmts.isEmpty()) m_fontCache.clear();
+    if (e.hasMerges) { m_merges = useOld ? e.mergesOld : e.mergesNew; emit mergesChanged(); }
     recalculateAll();
 }
 
@@ -482,6 +483,98 @@ void SpreadsheetModel::autofillHorizontal(int row, int srcLeft, int srcRight, in
     applyCellChanges(std::move(changes));
 }
 
+// ---------------------------------------------------------------- gộp ô (merge)
+namespace {
+bool boxesOverlap(const MergeRange &a, const MergeRange &b) {
+    return !(a.right < b.left || b.right < a.left || a.bottom < b.top || b.bottom < a.top);
+}
+}
+
+std::optional<MergeRange> SpreadsheetModel::mergeAt(int row, int col) const {
+    for (const auto &m : m_merges)
+        if (m.contains(row, col)) return m;
+    return std::nullopt;
+}
+
+bool SpreadsheetModel::mergeBoxInto(const MergeRange &box, UndoEntry &e) {
+    if (box.top == box.bottom && box.left == box.right) return false; // 1 ô: khỏi gộp
+    // Bỏ các vùng gộp cũ giao với vùng mới.
+    QVector<MergeRange> kept;
+    for (const auto &m : m_merges) if (!boxesOverlap(m, box)) kept.push_back(m);
+    m_merges = kept;
+    // Xóa nội dung mọi ô trừ ô góc trên-trái (ghi lại để undo).
+    for (int r = box.top; r <= box.bottom; ++r) {
+        for (int c = box.left; c <= box.right; ++c) {
+            if (r == box.top && c == box.left) continue;
+            if (r >= m_data.size() || c >= m_data[r].size()) continue;
+            if (!m_data[r][c].isEmpty()) {
+                e.cells.push_back({r, c, m_data[r][c], QString()});
+                m_data[r][c].clear();
+                updateDeps(r, c);
+            }
+        }
+    }
+    m_merges.push_back(box);
+    return true;
+}
+
+bool SpreadsheetModel::unmergeBoxInto(const MergeRange &box) {
+    QVector<MergeRange> kept;
+    bool hit = false;
+    for (const auto &m : m_merges) {
+        if (boxesOverlap(m, box)) hit = true;
+        else kept.push_back(m);
+    }
+    if (!hit) return false;
+    m_merges = kept;
+    return true;
+}
+
+void SpreadsheetModel::mergeCells(int top, int left, int bottom, int right) {
+    toggleMergeRangesImpl({MergeRange{top, left, bottom, right}}, /*forceMerge*/ true);
+}
+
+void SpreadsheetModel::unmergeCells(int top, int left, int bottom, int right) {
+    QVector<MergeRange> before = m_merges;
+    UndoEntry e;
+    if (!unmergeBoxInto({top, left, bottom, right})) return;
+    e.hasMerges = true; e.mergesOld = before; e.mergesNew = m_merges;
+    pushUndo(std::move(e));
+    recalculateAll();
+    emit mergesChanged();
+}
+
+void SpreadsheetModel::toggleMerge(int top, int left, int bottom, int right) {
+    toggleMergeRanges({MergeRange{top, left, bottom, right}});
+}
+
+void SpreadsheetModel::toggleMergeRanges(const QVector<MergeRange> &boxes) {
+    toggleMergeRangesImpl(boxes, /*forceMerge*/ false);
+}
+
+void SpreadsheetModel::toggleMergeRangesImpl(const QVector<MergeRange> &boxes, bool forceMerge) {
+    if (boxes.isEmpty()) return;
+    // Nhất quán như Excel: nếu bất kỳ vùng nào đang gộp -> bỏ gộp tất cả.
+    bool anyMerged = false;
+    if (!forceMerge)
+        for (const auto &b : boxes)
+            for (const auto &m : m_merges)
+                if (boxesOverlap(m, b)) { anyMerged = true; break; }
+
+    QVector<MergeRange> before = m_merges;
+    UndoEntry e;
+    bool changed = false;
+    for (const auto &box : boxes) {
+        if (anyMerged) changed = unmergeBoxInto(box) || changed;
+        else changed = mergeBoxInto(box, e) || changed;
+    }
+    if (!changed) return;
+    e.hasMerges = true; e.mergesOld = before; e.mergesNew = m_merges;
+    pushUndo(std::move(e));
+    recalculateAll();
+    emit mergesChanged();
+}
+
 // ---------------------------------------------------------------- header / flags / kích thước
 QVariant SpreadsheetModel::headerData(int section, Qt::Orientation orientation, int role) const {
     if (role != Qt::DisplayRole) return {};
@@ -515,11 +608,13 @@ void SpreadsheetModel::loadGrid(const QVector<QVector<QString>> &rows) {
     m_evalCache.clear();
     m_evaluating.clear();
     m_fmt.clear();
+    m_merges.clear();
     m_undo.clear();
     m_redo.clear();
     rebuildDeps();
     endResetModel();
     emit contentChanged();
+    emit mergesChanged();
 }
 
 QString SpreadsheetModel::columnLabel(int col) {

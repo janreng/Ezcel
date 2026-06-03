@@ -97,6 +97,46 @@ int main(int argc, char **argv) {
     m.undo();
     ok(disp(m, 0, 3) == "zzz", "undo clear -> zzz");
 
+    // --- gop o (merge) ---
+    {
+        SpreadsheetModel mm;
+        mm.resizeGrid(8, 5);
+        put(mm, 0, 0, "Tieu de"); // A1
+        put(mm, 0, 1, "xoa di");  // B1 (se bi xoa khi gop)
+        put(mm, 1, 0, "xoa di");  // A2
+        mm.mergeCells(0, 0, 1, 1); // gop A1:B1:A2:B2
+        ok(mm.merges().size() == 1, "merge: 1 vung");
+        ok(disp(mm, 0, 0) == "Tieu de", "merge: giu noi dung goc trai");
+        ok(disp(mm, 0, 1) == "" && disp(mm, 1, 0) == "", "merge: xoa o khong phai goc");
+        auto at = mm.mergeAt(1, 1);
+        ok(at.has_value() && at->top == 0 && at->right == 1, "mergeAt tra dung vung");
+        ok(!mm.mergeAt(3, 3).has_value(), "mergeAt ngoai vung -> rong");
+
+        // undo: bo gop + khoi phuc noi dung
+        mm.undo();
+        ok(mm.merges().isEmpty(), "undo merge: het vung gop");
+        ok(disp(mm, 0, 1) == "xoa di" && disp(mm, 1, 0) == "xoa di", "undo merge: khoi phuc o");
+        mm.redo();
+        ok(mm.merges().size() == 1 && disp(mm, 0, 1) == "", "redo merge lai");
+
+        // toggle: dang gop -> bo gop
+        mm.toggleMerge(0, 0, 1, 1);
+        ok(mm.merges().isEmpty(), "toggle bo gop khi dang gop");
+        // toggle: chua gop -> gop
+        mm.toggleMerge(0, 0, 1, 1);
+        ok(mm.merges().size() == 1, "toggle gop khi chua gop");
+
+        // gop o don le -> khong tao vung
+        mm.unmergeCells(0, 0, 1, 1);
+        mm.mergeCells(3, 3, 3, 3);
+        ok(mm.merges().isEmpty(), "gop 1 o khong tao vung");
+
+        // gop vung moi giao vung cu -> thay the
+        mm.mergeCells(0, 0, 0, 2); // A1:C1
+        mm.mergeCells(0, 1, 0, 3); // B1:D1 (giao) -> bo A1:C1
+        ok(mm.merges().size() == 1 && mm.mergeAt(0, 3).has_value(), "vung moi thay vung giao");
+    }
+
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);
     return g_fail == 0 ? 0 : 1;
 }
