@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
-project(Ezcel VERSION 0.53.0 LANGUAGES CXX)
+project(Ezcel VERSION 0.54.0 LANGUAGES CXX)
 
 # Bản port C++ của Ezcel (gốc Python/PySide6). Dùng Qt6 Widgets + MinGW.
 set(CMAKE_CXX_STANDARD 20)
@@ -43,7 +43,8 @@ add_library(ezcel_model STATIC src/model/SpreadsheetModel.cpp src/model/Spreadsh
     src/model/PasteOps.cpp src/model/PasteOps.h
     src/model/Stats.cpp src/model/Stats.h
     src/model/AutoSum.cpp src/model/AutoSum.h
-    src/model/Validation.cpp src/model/Validation.h)
+    src/model/Validation.cpp src/model/Validation.h
+    src/model/CellStyles.cpp src/model/CellStyles.h)
 target_include_directories(ezcel_model PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(ezcel_model PUBLIC ezcel_formula ezcel_sort Qt6::Core Qt6::Gui)
 

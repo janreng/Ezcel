@@ -3,6 +3,7 @@
 // Viền ô cần delegate vẽ nên để ở đợt view/delegate sau.
 #include "MainWindow.h"
 #include "model/SpreadsheetModel.h"
+#include "model/CellStyles.h"
 #include "ui/Theme.h"
 
 #include <QTableView>
@@ -115,5 +116,25 @@ void MainWindow::buildFormatToolbar()
     connect(numBox, QOverload<int>::of(&QComboBox::activated), this, [this, numBox](int i) {
         QString code = numBox->itemData(i).toString();
         applyFormatAttr(QStringLiteral("number_format"), code.isEmpty() ? QVariant() : code);
+    });
+
+    tb->addSeparator();
+
+    // Kiểu ô dựng sẵn (Cell Styles).
+    auto *styleBox = new QComboBox(tb);
+    styleBox->addItem(QStringLiteral("Kiểu ô…")); // mục mặc định, không áp
+    for (const QString &nm : cellstyles::names()) styleBox->addItem(nm);
+    styleBox->setMaximumWidth(120);
+    tb->addWidget(styleBox);
+    connect(styleBox, QOverload<int>::of(&QComboBox::activated), this, [this, styleBox](int i) {
+        if (i <= 0) return;
+        int t, l, b, r;
+        if (selectionBox(t, l, b, r)) {
+            SpreadsheetModel::Format f;
+            const auto attrs = cellstyles::style(styleBox->itemText(i));
+            for (auto it = attrs.constBegin(); it != attrs.constEnd(); ++it) f.insert(it.key(), it.value());
+            m_model->setFormat(t, l, b, r, f);
+        }
+        styleBox->setCurrentIndex(0); // về lại "Kiểu ô…"
     });
 }

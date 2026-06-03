@@ -7,6 +7,7 @@
 #include "model/Stats.h"
 #include "model/AutoSum.h"
 #include "model/Validation.h"
+#include "model/CellStyles.h"
 #include <QGuiApplication>
 #include <QFont>
 #include <QColor>
@@ -365,6 +366,17 @@ int main(int argc, char **argv) {
         ok(out.top == 1 && out.left == 0 && out.bottom == 5 && out.right == 2, "lookupName tra dung vung");
         ok(!mm.lookupName("KhongCo", out), "ten khong co -> false");
         ok(mm.definedNames().contains("DoanhThu"), "definedNames liet ke");
+    }
+
+    // --- kieu o dung san (cell styles) ---
+    {
+        auto good = cellstyles::style(QString::fromUtf8("T\xE1\xBB\x91t")); // "Tốt"
+        ok(good.value("bg").toString() == "#C6EFCE", "kieu Tot -> bg xanh");
+        ok(good.value("color").toString() == "#006100", "kieu Tot -> chu xanh dam");
+        auto normal = cellstyles::style(QString::fromUtf8("B\xC3\xACnh th\xC6\xB0\xE1\xBB\x9Dng")); // "Bình thường"
+        ok(normal.contains("bg") && !normal.value("bg").isValid(), "kieu Binh thuong -> bg null (xoa)");
+        ok(cellstyles::names().size() >= 5, "co >=5 kieu");
+        ok(cellstyles::style("KhongCo").isEmpty(), "kieu la -> rong");
     }
 
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);

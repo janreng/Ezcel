@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v0.54.0 — Kiểu ô dựng sẵn
+
+- **Áp kiểu ô nhanh** (ô **Kiểu ô** trên thanh định dạng): chọn vùng rồi chọn kiểu **Tốt / Xấu / Trung tính / Tiêu đề / Tựa đề** để tô màu + chữ theo bộ có sẵn; chọn **Bình thường** để xóa định dạng.
+
 ## v0.53.0 — Đặt tên vùng (Named Range)
 
 - **Đặt tên cho vùng ô**: chọn vùng → gõ một cái tên (vd `DoanhThu`) vào ô địa chỉ rồi Enter để lưu tên. Sau này gõ lại tên đó vào ô địa chỉ là **nhảy tới và chọn đúng vùng** ngay.
