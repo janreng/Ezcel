@@ -145,6 +145,10 @@ QVariant SpreadsheetModel::data(const QModelIndex &index, int role) const {
     case Qt::DisplayRole:
         if (m_showFormulas) return m_data[row][col];
         return displayValue(row, col);
+    case Qt::ToolTipRole: {
+        auto it = m_notes.constFind(key(row, col));
+        return it != m_notes.constEnd() ? it.value() : QVariant();
+    }
     case Qt::TextAlignmentRole:
         return alignmentFlags(row, col);
     case Qt::FontRole:
@@ -324,6 +328,13 @@ void SpreadsheetModel::clearCondRules() {
 
 void SpreadsheetModel::addValidationRule(const validation::Rule &rule) { m_validationRules.push_back(rule); }
 void SpreadsheetModel::clearValidationRules() { m_validationRules.clear(); }
+
+void SpreadsheetModel::setNote(int row, int col, const QString &text) {
+    const qint64 k = key(row, col);
+    if (text.isEmpty()) m_notes.remove(k);
+    else m_notes.insert(k, text);
+    emit dataChanged(index(row, col), index(row, col), {Qt::ToolTipRole, Qt::DecorationRole});
+}
 
 QMap<QPair<int, int>, SpreadsheetModel::Format> SpreadsheetModel::cellFormats() const {
     QMap<QPair<int, int>, Format> m;
@@ -833,6 +844,7 @@ void SpreadsheetModel::loadGrid(const QVector<QVector<QString>> &rows) {
     m_merges.clear();
     m_condRules.clear();
     m_validationRules.clear();
+    m_notes.clear();
     m_undo.clear();
     m_redo.clear();
     rebuildDeps();

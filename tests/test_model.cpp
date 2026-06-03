@@ -343,6 +343,18 @@ int main(int argc, char **argv) {
         ok(disp(mm,1,0) == "", "validation: o van rong sau khi tu choi");
     }
 
+    // --- ghi chu o (note) ---
+    {
+        SpreadsheetModel mm;
+        mm.resizeGrid(3, 3);
+        mm.setNote(0, 0, "Ghi chu thu nghiem");
+        ok(mm.note(0, 0) == "Ghi chu thu nghiem", "setNote/note round-trip");
+        ok(mm.data(mm.index(0, 0), Qt::ToolTipRole).toString() == "Ghi chu thu nghiem", "ToolTipRole tra note");
+        ok(mm.note(1, 1).isEmpty(), "o khong co note -> rong");
+        mm.setNote(0, 0, "");
+        ok(mm.note(0, 0).isEmpty(), "setNote rong -> xoa");
+    }
+
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);
     return g_fail == 0 ? 0 : 1;
 }

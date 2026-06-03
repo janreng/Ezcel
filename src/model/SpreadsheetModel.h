@@ -64,6 +64,10 @@ public:
     void setFormat(int top, int left, int bottom, int right, const Format &attrs);
     // Định dạng hiện tại của 1 ô (để đồng bộ nút toolbar / chọn màu sẵn).
     Format formatAt(int row, int col) const { return m_fmt.value(key(row, col)); }
+
+    // Ghi chú ô (note): đặt (text rỗng -> xóa), lấy. Hiện tooltip + dấu tam giác.
+    void setNote(int row, int col, const QString &text);
+    QString note(int row, int col) const { return m_notes.value(key(row, col)); }
     // Toàn bộ định dạng theo (row,col) — để lưu ra file.
     QMap<QPair<int, int>, Format> cellFormats() const;
     // Nạp định dạng từ file (thay toàn bộ, KHÔNG undo — dùng khi mở file).
@@ -135,6 +139,7 @@ private:
     QVector<MergeRange> m_merges;                // vùng ô gộp
     QVector<cond::Rule> m_condRules;             // định dạng có điều kiện
     QVector<validation::Rule> m_validationRules; // kiểm tra dữ liệu nhập
+    QHash<qint64, QString> m_notes;              // ghi chú theo ô
     mutable QHash<QString, QFont> m_fontCache;   // QFont chia sẻ theo style
     mutable QHash<QString, bool> m_fontCacheNull;// style không có font
 

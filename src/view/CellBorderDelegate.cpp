@@ -11,6 +11,21 @@ void CellBorderDelegate::paint(QPainter *painter, const QStyleOptionViewItem &op
                                const QModelIndex &index) const
 {
     QStyledItemDelegate::paint(painter, option, index);
+
+    // Dấu tam giác đỏ góc trên-phải nếu ô có ghi chú (note).
+    if (!index.data(Qt::ToolTipRole).toString().isEmpty()) {
+        painter->save();
+        QPointF tip[3] = {
+            QPointF(option.rect.right() - 6, option.rect.top() + 1),
+            QPointF(option.rect.right() - 1, option.rect.top() + 1),
+            QPointF(option.rect.right() - 1, option.rect.top() + 6),
+        };
+        painter->setPen(Qt::NoPen);
+        painter->setBrush(QColor("#C0392B"));
+        painter->drawPolygon(tip, 3);
+        painter->restore();
+    }
+
     if (!m_view || index != m_view->currentIndex()) return;
 
     painter->save();

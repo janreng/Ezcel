@@ -281,6 +281,20 @@ void MainWindow::buildMenus()
     edit->addSeparator();
     edit->addAction(i18n::tr("edit_find"), QKeySequence::Find, this, &MainWindow::showFindReplace);
     edit->addAction(i18n::tr("edit_replace"), QKeySequence::Replace, this, &MainWindow::showFindReplace);
+    edit->addSeparator();
+    edit->addAction(QStringLiteral("Ghi chú ô..."), QKeySequence(QStringLiteral("Shift+F2")), this, [this] {
+        QModelIndex idx = m_view->currentIndex();
+        if (!idx.isValid()) return;
+        bool ok = false;
+        QString cur = m_model->note(idx.row(), idx.column());
+        QString n = QInputDialog::getMultiLineText(this, QStringLiteral("Ghi chú ô"),
+            QStringLiteral("Nội dung ghi chú (để trống = xóa):"), cur, &ok);
+        if (ok) m_model->setNote(idx.row(), idx.column(), n);
+    });
+    edit->addAction(QStringLiteral("Xóa ghi chú ô"), this, [this] {
+        QModelIndex idx = m_view->currentIndex();
+        if (idx.isValid()) m_model->setNote(idx.row(), idx.column(), QString());
+    });
 
     QMenu *st = menuBar()->addMenu(i18n::tr("menu_struct"));
     st->addAction(i18n::tr("st_ins_row"), this, [this] {

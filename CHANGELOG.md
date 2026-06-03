@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v0.52.0 — Ghi chú ô
+
+- **Thêm ghi chú cho ô** (menu **Sửa → Ghi chú ô**, hoặc Shift+F2): ô có ghi chú hiện **dấu tam giác đỏ** ở góc và nội dung ghi chú khi rê chuột vào. Có nút xóa ghi chú.
+
 ## v0.51.0 — Kiểm tra dữ liệu nhập
 
 - **Đặt quy tắc kiểm tra dữ liệu cho ô** (menu **Dữ liệu → Kiểm tra dữ liệu**): chọn vùng và yêu cầu giá trị là **số nguyên / số thập phân / độ dài văn bản** thỏa điều kiện (nằm giữa, lớn hơn, nhỏ hơn…). Nhập sai sẽ bị từ chối và báo ở thanh trạng thái. Có nút xóa quy tắc.
