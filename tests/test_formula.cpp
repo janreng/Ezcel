@@ -166,6 +166,11 @@ int main() {
     checkNum("=PERMUTATIONA(3,2)", 9);  // 3^2
     checkNum("=PERMUTATIONA(2,4)", 16); // 2^4
     checkNum("=PERMUTATIONA(5,0)", 1);
+    // STANDARDIZE / MULTINOMIAL (Spec 12)
+    checkNum("=STANDARDIZE(42,40,1.5)", 4.0/3.0);  // (42-40)/1.5
+    checkNum("=STANDARDIZE(40,40,2)", 0);
+    checkNum("=MULTINOMIAL(2,3,4)", 1260);  // 9!/(2!3!4!)
+    checkNum("=MULTINOMIAL(1,2,3)", 60);    // 6!/(1!2!3!)
     checkStr("=A1/0", "#DIV/0!");
     checkStr("=IFERROR(A1/0,\"err\")", "err");
     checkStr("=AND(A1>5,A2>5)", "true");

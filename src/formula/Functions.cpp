@@ -559,6 +559,17 @@ QHash<QString, Fn> &fnMap() {
         // COMBINA(n,k): tổ hợp CÓ lặp = C(n+k-1, k). PERMUTATIONA(n,k): chỉnh hợp có lặp = n^k.
         r["COMBINA"] = [need](const Args &a) { need(a,2,"COMBINA"); int n = toInt(a[0]), k = toInt(a[1]); if (n<0||k<0||(n==0&&k>0)) throw FormulaError(QStringLiteral("COMBINA đối số sai"), ERR_NUM); int m = n + k - 1; double c = 1; for (int i=0;i<k;++i) c = c*(m-i)/(i+1); return Value::number(std::round(c)); };
         r["PERMUTATIONA"] = [need](const Args &a) { need(a,2,"PERMUTATIONA"); int n = toInt(a[0]), k = toInt(a[1]); if (n<0||k<0) throw FormulaError(QStringLiteral("PERMUTATIONA đối số sai"), ERR_NUM); return Value::number(std::pow(double(n), k)); };
+        // STANDARDIZE(x, mean, sd): chuẩn hóa z = (x-mean)/sd, sd>0.
+        r["STANDARDIZE"] = [need](const Args &a) { need(a,3,"STANDARDIZE"); double x = toNumber(a[0]), m = toNumber(a[1]), s = toNumber(a[2]); if (s<=0) throw FormulaError(QStringLiteral("STANDARDIZE: sd>0"), ERR_NUM); return Value::number((x-m)/s); };
+        // MULTINOMIAL(a,b,...): (Σ)! / (a! b! ...). Hệ số đa thức.
+        r["MULTINOMIAL"] = [](const Args &a) {
+            auto v = numbers(a);
+            if (v.empty()) throw FormulaError(QStringLiteral("MULTINOMIAL: thiếu đối số"), ERR_NUM);
+            auto fact = [](int n) { double f = 1; for (int i=2;i<=n;++i) f*=i; return f; };
+            int sum = 0; double denom = 1;
+            for (double d : v) { int n = int(d); if (n<0) throw FormulaError(QStringLiteral("MULTINOMIAL: cần >=0"), ERR_NUM); sum += n; denom *= fact(n); }
+            return Value::number(std::round(fact(sum) / denom));
+        };
         r["MROUND"] = [need](const Args &a) { need(a,2,"MROUND"); double n = toNumber(a[0]), m = toNumber(a[1]); if (m==0) return Value::number(0); return Value::number(std::round(n/m)*m); };
         r["QUOTIENT"] = [need](const Args &a) { need(a,2,"QUOTIENT"); double d = toNumber(a[1]); if (d==0) throw FormulaError(QStringLiteral("QUOTIENT chia 0"), ERR_DIV0); return Value::number(std::trunc(toNumber(a[0])/d)); };
         r["EVEN"] = [need](const Args &a) { need(a,1,"EVEN"); double n = toNumber(a[0]); double c = std::ceil(std::abs(n)/2.0)*2; return Value::number(n<0 ? -c : c); };

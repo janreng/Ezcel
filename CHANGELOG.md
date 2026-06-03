@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v0.78.0 — Hàm STANDARDIZE & MULTINOMIAL (Spec 12)
+
+- **Thêm hàm `STANDARDIZE`** — chuẩn hóa một giá trị về điểm z dựa trên trung bình và độ lệch chuẩn.
+- **Thêm hàm `MULTINOMIAL`** — tính hệ số đa thức (tỉ lệ giai thừa của tổng so với tích các giai thừa).
+
 ## v0.77.0 — Hàm tổ hợp có lặp COMBINA & PERMUTATIONA (Spec 12)
 
 - **Thêm hàm `COMBINA`** — số tổ hợp có lặp lại khi chọn k phần tử từ n nhóm.
