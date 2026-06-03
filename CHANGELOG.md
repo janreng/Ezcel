@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v0.46.0 — Bật/tắt đường lưới
+
+- **Ẩn hoặc hiện đường kẻ ô** (menu **Xem → Hiện đường lưới**): tắt đi để xem dữ liệu sạch hơn, bật lại khi cần.
+
 ## v0.45.0 — Thanh công cụ chính bằng biểu tượng
 
 - **Thanh công cụ chính nhiều biểu tượng hơn**: Mới / Mở / Lưu, Hoàn tác / Làm lại, Cắt / Sao chép / Dán, Sắp xếp tăng-giảm, Tìm, Gộp ô — tất cả nay là biểu tượng trực quan, thao tác nhanh hơn.

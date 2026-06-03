@@ -389,6 +389,10 @@ void MainWindow::buildMenus()
     view->addAction(i18n::tr("view_zoom_out"), QKeySequence::ZoomOut, this, [this] { m_zoom -= 10; applyZoom(); });
     view->addAction(i18n::tr("view_zoom_reset"), QKeySequence(QStringLiteral("Ctrl+0")), this, [this] { m_zoom = 100; applyZoom(); });
     view->addSeparator();
+    QAction *gl = view->addAction(QStringLiteral("Hiện đường lưới"));
+    gl->setCheckable(true);
+    gl->setChecked(true);
+    connect(gl, &QAction::toggled, this, [this](bool on) { m_view->setShowGrid(on); });
     QAction *sf = view->addAction(i18n::tr("view_show_formulas"));
     sf->setCheckable(true);
     sf->setShortcut(QKeySequence(QStringLiteral("Ctrl+`")));
