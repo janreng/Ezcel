@@ -64,4 +64,37 @@ QPair<int, int> lastCell(const QVector<QVector<QString>> &grid) {
     return {maxRow, maxCol};
 }
 
+namespace {
+QString cellAt(const QVector<QVector<QString>> &grid, int r, int c) {
+    if (r < 0 || r >= grid.size() || c < 0 || c >= grid[r].size()) return QString();
+    return grid[r][c];
+}
+} // namespace
+
+QVector<QPair<int, int>> rowDifferences(const QVector<QVector<QString>> &grid,
+                                        int top, int left, int bottom, int right, int anchorCol) {
+    QVector<QPair<int, int>> out;
+    for (int r = top; r <= bottom; ++r) {
+        const QString ref = cellAt(grid, r, anchorCol);
+        for (int c = left; c <= right; ++c) {
+            if (c == anchorCol) continue;
+            if (cellAt(grid, r, c) != ref) out.push_back({r, c});
+        }
+    }
+    return out;
+}
+
+QVector<QPair<int, int>> colDifferences(const QVector<QVector<QString>> &grid,
+                                        int top, int left, int bottom, int right, int anchorRow) {
+    QVector<QPair<int, int>> out;
+    for (int c = left; c <= right; ++c) {
+        const QString ref = cellAt(grid, anchorRow, c);
+        for (int r = top; r <= bottom; ++r) {
+            if (r == anchorRow) continue;
+            if (cellAt(grid, r, c) != ref) out.push_back({r, c});
+        }
+    }
+    return out;
+}
+
 } // namespace gotospecial

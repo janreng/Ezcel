@@ -564,6 +564,24 @@ int main(int argc, char **argv) {
         ok(gotospecial::lastCell({{"", ""}, {"", ""}}).first == -1, "luoi rong -> last cell -1");
     }
 
+    // --- row/col differences (Spec 32) ---
+    {
+        // Cot 0 la moc. Hang 0: 5,5,9 -> (0,2) khac. Hang 1: 7,7,7 -> khong khac.
+        QVector<QVector<QString>> grid = {
+            {"5", "5", "9"},
+            {"7", "7", "7"},
+            {"3", "8", "3"},
+        };
+        auto rd = gotospecial::rowDifferences(grid, 0, 0, 2, 2, 0);
+        // hang 0: (0,2); hang 2: (2,1) khac moc "3"
+        ok(rd.size() == 2 && rd.contains(qMakePair(0, 2)) && rd.contains(qMakePair(2, 1)), "row diff (0,2)+(2,1)");
+        ok(!rd.contains(qMakePair(0, 0)), "o moc khong tinh");
+        // col differences voi moc hang 0: cot 0 moc 5 -> (1,0)=7,(2,0)=3 khac; cot1 moc5 ->(1,1)=7,(2,1)=8; cot2 moc9->(1,2)=7,(2,2)=3
+        auto cd = gotospecial::colDifferences(grid, 0, 0, 2, 2, 0);
+        ok(cd.size() == 6, "col diff 6 o khac moc hang 0");
+        ok(!cd.contains(qMakePair(0, 1)), "o moc hang khong tinh");
+    }
+
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);
     return g_fail == 0 ? 0 : 1;
 }

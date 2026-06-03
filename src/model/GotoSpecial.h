@@ -21,4 +21,14 @@ Region currentRegion(const QVector<QVector<QString>> &grid, int row, int col);
 // Trả {-1, -1} nếu lưới không có dữ liệu nào.
 QPair<int, int> lastCell(const QVector<QVector<QString>> &grid);
 
+// Khác biệt theo HÀNG (Row differences): trong vùng [top,left,bottom,right], với mỗi
+// hàng lấy ô mốc ở cột `anchorCol`; trả các ô có giá trị KHÁC ô mốc cùng hàng.
+QVector<QPair<int, int>> rowDifferences(const QVector<QVector<QString>> &grid,
+                                        int top, int left, int bottom, int right, int anchorCol);
+
+// Khác biệt theo CỘT (Column differences): với mỗi cột lấy ô mốc ở hàng `anchorRow`;
+// trả các ô có giá trị KHÁC ô mốc cùng cột.
+QVector<QPair<int, int>> colDifferences(const QVector<QVector<QString>> &grid,
+                                        int top, int left, int bottom, int right, int anchorRow);
+
 } // namespace gotospecial

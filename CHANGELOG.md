@@ -1,5 +1,11 @@
 # Lịch sử thay đổi
 
+## v1.32.0 — Tìm ô khác biệt theo hàng/cột (Spec 32)
+
+- **Khác biệt theo hàng**: trong vùng chọn, đánh dấu các ô có giá trị khác với ô mốc trên cùng hàng (cột của ô đang chọn).
+- **Khác biệt theo cột**: tương tự nhưng so theo cùng cột với ô mốc trên hàng đang chọn.
+- Hữu ích để soi nhanh các ô lệch dữ liệu trong một bảng.
+
 ## v1.31.0 — Chọn vùng dữ liệu & đi tới ô cuối (Spec 32)
 
 - **Chọn vùng dữ liệu (Ctrl+Shift+*)**: tự khoanh khối dữ liệu liên tục bao quanh ô đang chọn.

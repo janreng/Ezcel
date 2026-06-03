@@ -569,6 +569,24 @@ void MainWindow::buildMenus()
         statusBar()->showMessage(QStringLiteral("Ô cuối: %1%2")
             .arg(SpreadsheetModel::columnLabel(lc.second)).arg(lc.first + 1), 3000);
     });
+    // Chọn các ô khác biệt so với ô mốc (cùng hàng / cùng cột) trong vùng chọn.
+    auto selectDiffCells = [this](bool byRow) {
+        int t, l, b, r;
+        if (!selectionBox(t, l, b, r)) { statusBar()->showMessage(QStringLiteral("Hãy chọn vùng cần so sánh"), 2500); return; }
+        QModelIndex cur = m_view->currentIndex();
+        const int anchorCol = cur.isValid() ? qBound(l, cur.column(), r) : l;
+        const int anchorRow = cur.isValid() ? qBound(t, cur.row(), b) : t;
+        const auto cells = byRow
+            ? gotospecial::rowDifferences(m_model->grid(), t, l, b, r, anchorCol)
+            : gotospecial::colDifferences(m_model->grid(), t, l, b, r, anchorRow);
+        if (cells.isEmpty()) { statusBar()->showMessage(QStringLiteral("Không có ô nào khác biệt"), 3000); return; }
+        QItemSelection sel;
+        for (const auto &p : cells) { QModelIndex i = m_model->index(p.first, p.second); sel.select(i, i); }
+        m_view->selectionModel()->select(sel, QItemSelectionModel::ClearAndSelect);
+        statusBar()->showMessage(QStringLiteral("Đã chọn %1 ô khác biệt").arg(cells.size()), 3000);
+    };
+    edit->addAction(QStringLiteral("Khác biệt theo hàng"), this, [selectDiffCells] { selectDiffCells(true); });
+    edit->addAction(QStringLiteral("Khác biệt theo cột"), this, [selectDiffCells] { selectDiffCells(false); });
 
     QMenu *st = menuBar()->addMenu(i18n::tr("menu_struct"));
     st->addAction(i18n::tr("st_ins_row"), this, [this] {
