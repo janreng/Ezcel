@@ -3,6 +3,7 @@
 #include "model/TextSearch.h"
 #include "model/Sort.h"
 #include "model/Validation.h"
+#include "model/NumberFormat.h"
 
 #include <QColor>
 #include <QDate>
@@ -86,39 +87,9 @@ std::optional<QString> incrementTrailing(const QString &text, int pos) {
     return m.captured(1) + QString::number(n);
 }
 
-// Mã định dạng ngày -> format QDate.
-const QHash<QString, QString> kDateCodes = {
-    {"dd/mm/yyyy", "dd/MM/yyyy"}, {"mm/dd/yyyy", "MM/dd/yyyy"},
-    {"yyyy-mm-dd", "yyyy-MM-dd"}, {"hh:mm:ss", "HH:mm:ss"}, {"hh:mm", "HH:mm"},
-};
-const QDate kEpoch(1899, 12, 30);
-
-// Áp number_format cơ bản (ngày + % + số thập phân). null nếu không áp được.
+// Áp number_format -> chuỗi (chuyển sang module numfmt, test riêng được).
 QString applyNumberFormat(const QVariant &v, const QString &code) {
-    if (v.typeId() != QMetaType::Double && v.typeId() != QMetaType::Int) return QString();
-    double val = v.toDouble();
-    if (kDateCodes.contains(code)) {
-        QDateTime dt(kEpoch.startOfDay());
-        dt = dt.addMSecs(qint64(val * 86400000.0));
-        return dt.isValid() ? dt.toString(kDateCodes.value(code)) : QString();
-    }
-    bool percent = code.contains('%');
-    QString body = code; body.remove('%');
-    double v2 = percent ? val * 100 : val;
-    int decimals = 0;
-    int dot = body.indexOf('.');
-    if (dot >= 0) for (int i = dot + 1; i < body.size(); ++i) if (body[i] == '0') ++decimals;
-    bool thousands = body.left(dot < 0 ? body.size() : dot).contains(',');
-    QString core = QString::number(std::abs(v2), 'f', decimals);
-    if (thousands) {
-        // chèn dấu phẩy hàng nghìn vào phần nguyên
-        int dotPos = core.indexOf('.'); QString intPart = dotPos<0?core:core.left(dotPos);
-        QString frac = dotPos<0?QString():core.mid(dotPos);
-        for (int i = intPart.size() - 3; i > 0; i -= 3) intPart.insert(i, ',');
-        core = intPart + frac;
-    }
-    QString sign = v2 < 0 ? "-" : "";
-    return sign + core + (percent ? "%" : "");
+    return numfmt::apply(v, code);
 }
 
 } // namespace

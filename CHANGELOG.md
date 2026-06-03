@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v0.56.0 — Thêm kiểu định dạng số
+
+- **Thêm các kiểu định dạng số** trên thanh định dạng: **tiền tệ** ($1,234.00), **khoa học** (1.23E+04) và **phân số** (1/2, 1 1/2) — ngoài số nghìn, phần trăm, ngày đã có.
+
 ## v0.55.0 — Đi tới đặc biệt
 
 - **Chọn nhanh các ô theo loại** (menu **Sửa → Đi tới đặc biệt**): chọn để tô sáng toàn bộ ô **trống / công thức / số / văn bản / có dữ liệu** trong trang — tiện rà soát và thao tác hàng loạt.

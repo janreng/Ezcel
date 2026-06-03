@@ -111,6 +111,9 @@ void MainWindow::buildFormatToolbar()
     numBox->addItem(QStringLiteral("Phần trăm %"), QStringLiteral("0.00%"));
     numBox->addItem(QStringLiteral("Ngày dd/mm/yyyy"), QStringLiteral("dd/mm/yyyy"));
     numBox->addItem(QStringLiteral("Ngày yyyy-mm-dd"), QStringLiteral("yyyy-mm-dd"));
+    numBox->addItem(QStringLiteral("Tiền tệ $1,234.00"), QStringLiteral("$#,##0.00"));
+    numBox->addItem(QStringLiteral("Khoa học 0.00E+00"), QStringLiteral("0.00E+00"));
+    numBox->addItem(QStringLiteral("Phân số # ?/?"), QStringLiteral("# ?/?"));
     numBox->setMaximumWidth(150);
     tb->addWidget(numBox);
     connect(numBox, QOverload<int>::of(&QComboBox::activated), this, [this, numBox](int i) {

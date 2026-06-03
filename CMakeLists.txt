@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
-project(Ezcel VERSION 0.55.0 LANGUAGES CXX)
+project(Ezcel VERSION 0.56.0 LANGUAGES CXX)
 
 # Bản port C++ của Ezcel (gốc Python/PySide6). Dùng Qt6 Widgets + MinGW.
 set(CMAKE_CXX_STANDARD 20)
@@ -45,7 +45,8 @@ add_library(ezcel_model STATIC src/model/SpreadsheetModel.cpp src/model/Spreadsh
     src/model/AutoSum.cpp src/model/AutoSum.h
     src/model/Validation.cpp src/model/Validation.h
     src/model/CellStyles.cpp src/model/CellStyles.h
-    src/model/GotoSpecial.cpp src/model/GotoSpecial.h)
+    src/model/GotoSpecial.cpp src/model/GotoSpecial.h
+    src/model/NumberFormat.cpp src/model/NumberFormat.h)
 target_include_directories(ezcel_model PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(ezcel_model PUBLIC ezcel_formula ezcel_sort Qt6::Core Qt6::Gui)
 
@@ -96,6 +97,10 @@ add_executable(test_i18n tests/test_i18n.cpp src/ui/I18n.cpp)
 target_include_directories(test_i18n PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(test_i18n PRIVATE Qt6::Core)
 
+add_executable(test_numfmt tests/test_numfmt.cpp src/model/NumberFormat.cpp)
+target_include_directories(test_numfmt PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_link_libraries(test_numfmt PRIVATE Qt6::Core Qt6::Gui)
+
 enable_testing()
 add_test(NAME formula COMMAND test_formula)
 add_test(NAME model COMMAND test_model)
@@ -103,6 +108,7 @@ add_test(NAME io COMMAND test_io)
 add_test(NAME view COMMAND test_view)
 add_test(NAME version COMMAND test_version)
 add_test(NAME i18n COMMAND test_i18n)
+add_test(NAME numfmt COMMAND test_numfmt)
 
 # --- Sort (sắp xếp vùng dữ liệu) — module logic thuần (Qt Core) -> static lib + test.
 add_library(ezcel_sort STATIC src/model/Sort.cpp src/model/Sort.h)
