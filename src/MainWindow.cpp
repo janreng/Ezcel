@@ -393,6 +393,18 @@ void MainWindow::buildMenus()
     gl->setCheckable(true);
     gl->setChecked(true);
     connect(gl, &QAction::toggled, this, [this](bool on) { m_view->setShowGrid(on); });
+    QAction *wrap = view->addAction(QStringLiteral("Tự xuống dòng trong ô"));
+    wrap->setCheckable(true);
+    connect(wrap, &QAction::toggled, this, [this](bool on) {
+        m_view->setWordWrap(on);
+        if (on) {
+            m_view->resizeRowsToContents();
+        } else {
+            const int rh = theme::RowHeight * m_zoom / 100;
+            m_view->verticalHeader()->setDefaultSectionSize(rh);
+            for (int r = 0; r < m_model->rowCount(); ++r) m_view->setRowHeight(r, rh);
+        }
+    });
     QAction *sf = view->addAction(i18n::tr("view_show_formulas"));
     sf->setCheckable(true);
     sf->setShortcut(QKeySequence(QStringLiteral("Ctrl+`")));

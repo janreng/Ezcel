@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v0.47.0 — Tự xuống dòng trong ô
+
+- **Cho chữ tự xuống dòng trong ô** (menu **Xem → Tự xuống dòng trong ô**): bật để nội dung dài hiển thị nhiều dòng vừa bề rộng cột, không bị cắt.
+
 ## v0.46.0 — Bật/tắt đường lưới
 
 - **Ẩn hoặc hiện đường kẻ ô** (menu **Xem → Hiện đường lưới**): tắt đi để xem dữ liệu sạch hơn, bật lại khi cần.
