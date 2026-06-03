@@ -244,6 +244,14 @@ QHash<QString, Fn> &fnMap() {
         // PHI(x): mật độ phân phối chuẩn tắc. GAUSS(x): P(0<Z<x) = Φ(x) - 0.5.
         r["PHI"] = [need](const Args &a) { need(a,1,"PHI"); double x = toNumber(a[0]); return Value::number(std::exp(-x*x/2.0) / std::sqrt(2.0*M_PI)); };
         r["GAUSS"] = [need](const Args &a) { need(a,1,"GAUSS"); double x = toNumber(a[0]); return Value::number(0.5 * std::erf(x / std::sqrt(2.0))); };
+        // ERF(x,[y]): hàm sai số (tích phân từ 0). ERFC(x): phần bù 1 - ERF(x).
+        r["ERF"] = [](const Args &a) {
+            if (a.size() < 1 || a.size() > 2) argErr("ERF");
+            double x = toNumber(a[0]);
+            if (a.size() == 2) return Value::number(std::erf(toNumber(a[1])) - std::erf(x)); // ERF(dưới, trên)
+            return Value::number(std::erf(x));
+        };
+        r["ERFC"] = [need](const Args &a) { need(a,1,"ERFC"); return Value::number(std::erfc(toNumber(a[0]))); };
         // PERCENTRANK(array, x, [sig=3]): hạng của x theo tỉ lệ phần trăm trong tập (phương pháp INC).
         r["PERCENTRANK"] = [](const Args &a) {
             if (a.size() < 2 || a.size() > 3) argErr("PERCENTRANK");

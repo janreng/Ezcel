@@ -168,6 +168,13 @@ int main() {
     checkNum("=GAUSS(0)", 0);
     checkNum("=GAUSS(1)", 0.3413447460685429);
     checkNum("=GAUSS(-1)", -0.3413447460685429); // ham le
+    // ERF / ERFC (Spec 12)
+    checkNum("=ERF(0)", 0);
+    checkNum("=ERF(1)", 0.8427007929497149);
+    checkNum("=ERFC(0)", 1);
+    checkNum("=ERFC(1)", 0.1572992070502851);
+    checkNum("=ERF(0,1)", 0.8427007929497149); // erf(1)-erf(0)
+    checkNum("=ERF(1)+ERFC(1)", 1);            // bu nhau
     // COMBINA / PERMUTATIONA (Spec 12) — co lap
     checkNum("=COMBINA(4,3)", 20);   // C(6,3)
     checkNum("=COMBINA(3,2)", 6);    // C(4,2)

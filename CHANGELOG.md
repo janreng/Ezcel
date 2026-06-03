@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v1.13.0 — Hàm sai số ERF & ERFC (Spec 12)
+
+- **Thêm hàm `ERF`** — tính hàm sai số (error function), hỗ trợ cả dạng tích phân giữa hai cận.
+- **Thêm hàm `ERFC`** — tính hàm sai số bù (1 trừ ERF), thường dùng trong xác suất và kỹ thuật.
+
 ## v1.12.0 — Hàm mã hóa URL ENCODEURL (Spec 12)
 
 - **Thêm hàm `ENCODEURL`** — mã hóa một chuỗi theo kiểu URL (dấu cách thành `%20`, ký tự đặc biệt thành mã phần trăm), tiện khi ghép địa chỉ web.
