@@ -52,6 +52,9 @@ private slots:
     void groupRows();         // gom nhóm hàng đang chọn (Spec 09.4)
     void ungroupRows();       // bỏ nhóm hàng tại ô hiện hành
     void toggleGroupRows();   // thu gọn/mở rộng nhóm tại ô hiện hành
+    void groupCols();         // gom nhóm cột đang chọn (Spec 09.4)
+    void ungroupCols();       // bỏ nhóm cột tại ô hiện hành
+    void toggleGroupCols();   // thu gọn/mở rộng nhóm cột tại ô hiện hành
     void toggleMergeSelection();
     void toggleShowFormulas(bool on);
     void showShortcuts();     // hộp thoại bảng phím tắt (Spec 23)
@@ -118,4 +121,6 @@ private:
 
     outline::Outline m_rowOutline;   // nhóm/phác thảo hàng (Spec 09.4)
     void applyRowOutline();          // áp ẩn/hiện hàng theo nhóm đang thu gọn
+    outline::Outline m_colOutline;   // nhóm/phác thảo cột (Spec 09.4)
+    void applyColOutline();          // áp ẩn/hiện cột theo nhóm đang thu gọn
 };

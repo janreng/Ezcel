@@ -1,5 +1,11 @@
 # Lịch sử thay đổi
 
+## v1.26.0 — Gom nhóm & thu gọn cột (Spec 09)
+
+- **Gom nhóm cột**: chọn một dải cột rồi gom thành nhóm để gấp gọn theo chiều ngang.
+- **Thu gọn/Mở rộng nhóm cột**: ẩn nhanh các cột chi tiết trong nhóm rồi bung lại khi cần.
+- **Bỏ nhóm cột**: gỡ nhóm tại ô đang chọn. Hoàn thiện gom nhóm cho cả hàng lẫn cột.
+
 ## v1.25.0 — Gom nhóm & thu gọn hàng (Spec 09)
 
 - **Gom nhóm hàng** (Alt+Shift+→): chọn một dải hàng rồi gom thành nhóm để gấp gọn.

@@ -63,6 +63,15 @@ int main()
         ok(o.maxLevel() == 0, "rong -> maxLevel 0");
     }
 
+    // Mo hinh dung chung cho COT (chi so la cot B..D = 1..3).
+    {
+        Outline o;
+        o.add(1, 3);
+        o.toggle(2);
+        auto h = o.hiddenRows();
+        ok(h.size() == 3 && h.contains(1) && h.contains(3) && !h.contains(0), "nhom cot 1..3 thu gon");
+    }
+
     std::printf("%d passed, %d failed\n", g_pass, g_fail);
     return g_fail ? 1 : 0;
 }

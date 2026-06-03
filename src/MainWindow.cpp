@@ -658,6 +658,10 @@ void MainWindow::buildMenus()
         QAction *aUngroup = data->addAction(QStringLiteral("Bỏ nhóm hàng"), this, &MainWindow::ungroupRows);
         aUngroup->setShortcut(QKeySequence(Qt::ALT | Qt::SHIFT | Qt::Key_Left));
         data->addAction(QStringLiteral("Thu gọn/Mở rộng nhóm"), this, &MainWindow::toggleGroupRows);
+        data->addSeparator();
+        data->addAction(QStringLiteral("Gom nhóm cột"), this, &MainWindow::groupCols);
+        data->addAction(QStringLiteral("Bỏ nhóm cột"), this, &MainWindow::ungroupCols);
+        data->addAction(QStringLiteral("Thu gọn/Mở rộng nhóm cột"), this, &MainWindow::toggleGroupCols);
     }
     data->addAction(i18n::tr("data_clear_filter"), this, [this] {
         for (int r = 0; r < m_model->rowCount(); ++r) m_view->setRowHidden(r, false);
@@ -1356,6 +1360,44 @@ void MainWindow::toggleGroupRows()
     bool collapsed = m_rowOutline.toggle(row);
     applyRowOutline();
     statusBar()->showMessage(collapsed ? QStringLiteral("Đã thu gọn nhóm") : QStringLiteral("Đã mở rộng nhóm"), 2500);
+}
+
+// Nhóm cột — đối xứng với nhóm hàng, dùng chung mô hình outline::Outline.
+void MainWindow::applyColOutline()
+{
+    const QSet<int> hidden = m_colOutline.hiddenRows(); // "rows" ở đây là chỉ số cột
+    for (int c = 0; c < m_model->columnCount(); ++c)
+        m_view->setColumnHidden(c, hidden.contains(c));
+}
+
+void MainWindow::groupCols()
+{
+    int t, l, b, r;
+    if (!selectionBox(t, l, b, r)) return;
+    m_colOutline.add(l, r);
+    statusBar()->showMessage(QStringLiteral("Đã gom nhóm cột %1–%2").arg(l + 1).arg(r + 1), 3000);
+}
+
+void MainWindow::ungroupCols()
+{
+    QModelIndex cur = m_view->currentIndex();
+    int col = cur.isValid() ? cur.column() : 0;
+    if (m_colOutline.remove(col)) {
+        applyColOutline();
+        statusBar()->showMessage(QStringLiteral("Đã bỏ nhóm cột"), 2500);
+    } else {
+        statusBar()->showMessage(QStringLiteral("Ô hiện tại không nằm trong nhóm cột nào"), 2500);
+    }
+}
+
+void MainWindow::toggleGroupCols()
+{
+    QModelIndex cur = m_view->currentIndex();
+    int col = cur.isValid() ? cur.column() : 0;
+    if (m_colOutline.isEmpty()) { statusBar()->showMessage(QStringLiteral("Chưa có nhóm cột nào"), 2500); return; }
+    bool collapsed = m_colOutline.toggle(col);
+    applyColOutline();
+    statusBar()->showMessage(collapsed ? QStringLiteral("Đã thu gọn nhóm cột") : QStringLiteral("Đã mở rộng nhóm cột"), 2500);
 }
 
 void MainWindow::toggleShowFormulas(bool on)
