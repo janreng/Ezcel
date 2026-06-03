@@ -596,6 +596,7 @@ void MainWindow::buildMenus()
         int kc = m_view->currentIndex().isValid() ? m_view->currentIndex().column() : l;
         m_model->sortRange(t, l, b, r, qBound(l, kc, r), false);
     });
+    data->addAction(QStringLiteral("Sắp xếp nhiều cấp..."), this, &MainWindow::sortMultiLevel);
     data->addAction(QStringLiteral("AutoSum (∑)"), QKeySequence(QStringLiteral("Alt+=")), this, [this] {
         QModelIndex idx = m_view->currentIndex();
         if (!idx.isValid()) return;
@@ -1333,6 +1334,50 @@ void MainWindow::customFilter()
     for (int r : hide) m_view->setRowHidden(r, true);
     statusBar()->showMessage(QStringLiteral("Đã lọc tùy chỉnh cột %1: ẩn %2 hàng")
         .arg(SpreadsheetModel::columnLabel(col)).arg(hide.size()), 3000);
+}
+
+// Sắp xếp nhiều cấp (Spec 15): tối đa 3 cấp, mỗi cấp chọn cột + chiều tăng/giảm.
+void MainWindow::sortMultiLevel()
+{
+    int t, l, b, r;
+    if (!selectionBox(t, l, b, r)) { statusBar()->showMessage(QStringLiteral("Hãy chọn vùng cần sắp xếp"), 2500); return; }
+
+    // Danh sách cột trong vùng chọn (nhãn A, B, ... + "(không)").
+    QStringList colNames; colNames << QStringLiteral("(không)");
+    QVector<int> colIdx; colIdx << -1;
+    for (int c = l; c <= r; ++c) { colNames << SpreadsheetModel::columnLabel(c); colIdx << c; }
+
+    QDialog dlg(this);
+    dlg.setWindowTitle(QStringLiteral("Sắp xếp nhiều cấp"));
+    auto *lay = new QVBoxLayout(&dlg);
+    QVector<QComboBox *> cbCol; QVector<QComboBox *> cbOrd;
+    const int kLevels = 3;
+    for (int lv = 0; lv < kLevels; ++lv) {
+        auto *rowLay = new QHBoxLayout();
+        rowLay->addWidget(new QLabel(lv == 0 ? QStringLiteral("Sắp theo") : QStringLiteral("rồi theo"), &dlg));
+        auto *cc = new QComboBox(&dlg); cc->addItems(colNames);
+        if (lv == 0) cc->setCurrentIndex(1); // cấp 1 mặc định cột đầu
+        auto *oo = new QComboBox(&dlg);
+        oo->addItems({QStringLiteral("Tăng dần"), QStringLiteral("Giảm dần")});
+        rowLay->addWidget(cc); rowLay->addWidget(oo);
+        lay->addLayout(rowLay);
+        cbCol << cc; cbOrd << oo;
+    }
+    auto *box = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dlg);
+    connect(box, &QDialogButtonBox::accepted, &dlg, &QDialog::accept);
+    connect(box, &QDialogButtonBox::rejected, &dlg, &QDialog::reject);
+    lay->addWidget(box);
+    if (dlg.exec() != QDialog::Accepted) return;
+
+    QVector<QPair<int, bool>> keys;
+    for (int lv = 0; lv < kLevels; ++lv) {
+        int ci = colIdx[cbCol[lv]->currentIndex()];
+        if (ci < 0) continue; // bỏ cấp "(không)"
+        keys.push_back({ci, cbOrd[lv]->currentIndex() == 0}); // true = tăng
+    }
+    if (keys.isEmpty()) { statusBar()->showMessage(QStringLiteral("Chưa chọn cột để sắp xếp"), 2500); return; }
+    m_model->sortRangeMulti(t, l, b, r, keys);
+    statusBar()->showMessage(QStringLiteral("Đã sắp xếp %1 cấp").arg(keys.size()), 3000);
 }
 
 // Xóa hàng trùng (Spec 27): dùng toàn bộ cột làm khóa, giữ lần xuất hiện đầu, có tiêu đề.

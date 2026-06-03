@@ -290,6 +290,24 @@ int main(int argc, char **argv) {
         ok(disp(mm, 0, 0) == "3" && disp(mm, 2, 0) == "1", "sortRange giam: 3..1");
     }
 
+    // --- sortRangeMulti (sap nhieu cap, Spec 15) ---
+    {
+        SpreadsheetModel mm;
+        mm.resizeGrid(6, 3);
+        // cot A = nhom, cot B = diem. Sap A tang, roi B giam.
+        const char *A[] = {"Bac", "Nam", "Bac", "Nam", "Bac"};
+        const char *B[] = {"10",  "5",   "30",  "20",  "20"};
+        for (int i = 0; i < 5; ++i) { put(mm, i, 0, A[i]); put(mm, i, 1, B[i]); }
+        mm.sortRangeMulti(0, 0, 4, 1, {{0, true}, {1, false}});
+        // Bac truoc (tang chu): Bac/30, Bac/20, Bac/10, roi Nam/20, Nam/5
+        ok(disp(mm, 0, 0) == "Bac" && disp(mm, 0, 1) == "30", "cap1 Bac, cap2 diem giam -> 30 dau");
+        ok(disp(mm, 2, 0) == "Bac" && disp(mm, 2, 1) == "10", "Bac/10 cuoi nhom Bac");
+        ok(disp(mm, 3, 0) == "Nam" && disp(mm, 3, 1) == "20", "Nam/20 truoc Nam/5");
+        ok(disp(mm, 4, 0) == "Nam" && disp(mm, 4, 1) == "5",  "Nam/5 cuoi");
+        mm.undo();
+        ok(disp(mm, 0, 1) == "10", "undo sortRangeMulti ve nguyen");
+    }
+
     // --- dinh dang co dieu kien ---
     {
         using cond::Op;

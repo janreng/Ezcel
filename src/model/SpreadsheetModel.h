@@ -89,6 +89,9 @@ public:
     // Sắp xếp các hàng của vùng [top,left]..[bottom,right] theo cột keyCol
     // (chỉ số cột tuyệt đối, phải nằm trong vùng). Ổn định, kiểu Excel (undoable).
     void sortRange(int top, int left, int bottom, int right, int keyCol, bool ascending);
+    // Sắp xếp nhiều cấp (Spec 15): mỗi cấp = {cột tuyệt đối, tăng/giảm}. Áp theo thứ tự ưu tiên.
+    void sortRangeMulti(int top, int left, int bottom, int right,
+                        const QVector<QPair<int, bool>> &keyCols);
 
     // Thao tác vùng (đều undoable theo ô).
     void clearRange(int top, int left, int bottom, int right);     // chỉ xóa nội dung

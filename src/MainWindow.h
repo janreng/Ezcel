@@ -50,6 +50,7 @@ private slots:
     void filterByValues();    // lọc theo giá trị chọn trong cột (Spec 15)
     void filterByNumber();    // lọc theo điều kiện số (Spec 15)
     void customFilter();      // lọc tùy chỉnh 2 điều kiện AND/OR (Spec 15)
+    void sortMultiLevel();    // sắp xếp nhiều cấp (Spec 15)
     void removeDuplicates();  // xóa hàng trùng (Spec 27)
     void textToColumns();     // tách cột theo dấu phân cách (Spec 27)
     void subtotalRange();     // tổng phụ theo nhóm (Spec 27.6)

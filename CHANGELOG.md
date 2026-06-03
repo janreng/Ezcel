@@ -1,5 +1,11 @@
 # Lịch sử thay đổi
 
+## v1.30.0 — Sắp xếp nhiều cấp (Spec 15)
+
+- **Thêm "Sắp xếp nhiều cấp..."** trong menu Dữ liệu: sắp theo tối đa 3 cột liên tiếp ("sắp theo... rồi theo...").
+- Mỗi cấp chọn cột và chiều **Tăng dần / Giảm dần** riêng.
+- Hữu ích khi cần gom theo nhóm rồi xếp giá trị trong từng nhóm.
+
 ## v1.29.0 — Lọc tùy chỉnh 2 điều kiện (Spec 15)
 
 - **Thêm "Lọc tùy chỉnh (2 điều kiện)..."** trong menu Dữ liệu: kết hợp hai điều kiện bằng **VÀ / HOẶC**.

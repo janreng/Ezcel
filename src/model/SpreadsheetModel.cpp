@@ -497,6 +497,31 @@ void SpreadsheetModel::sortRange(int top, int left, int bottom, int right,
     applyCellChanges(std::move(changes));
 }
 
+void SpreadsheetModel::sortRangeMulti(int top, int left, int bottom, int right,
+                                      const QVector<QPair<int, bool>> &keyCols) {
+    if (top < 0 || left < 0 || bottom >= m_data.size() || keyCols.isEmpty()) return;
+    QVector<sort::SortKey> keys;
+    for (const auto &kc : keyCols) {
+        if (kc.first < left || kc.first > right) continue; // bỏ cấp ngoài vùng
+        keys.push_back({kc.first - left, kc.second ? sort::Order::Ascending : sort::Order::Descending});
+    }
+    if (keys.isEmpty()) return;
+
+    QVector<QVector<QString>> block;
+    for (int r = top; r <= bottom; ++r)
+        block.push_back(m_data[r].mid(left, right - left + 1));
+    QVector<QVector<QString>> sorted = sort::sortRows(block, keys);
+
+    QVector<CellChange> changes;
+    for (int i = 0; i < sorted.size(); ++i)
+        for (int j = 0; j < sorted[i].size(); ++j) {
+            int r = top + i, c = left + j;
+            if (m_data[r][c] != sorted[i][j])
+                changes.push_back({r, c, m_data[r][c], sorted[i][j]});
+        }
+    applyCellChanges(std::move(changes));
+}
+
 void SpreadsheetModel::clearRange(int top, int left, int bottom, int right) {
     QVector<CellChange> changes;
     for (int r = top; r <= bottom; ++r)
