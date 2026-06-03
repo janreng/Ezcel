@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v0.50.0 — Thêm hàm đổi hệ cơ số
+
+- **Bổ sung hàm đổi hệ cơ số**: `DECIMAL`, `DEC2BIN`, `DEC2HEX`, `BIN2DEC`, `HEX2DEC` — chuyển qua lại giữa số thập phân, nhị phân và thập lục phân.
+
 ## v0.49.0 — Thêm hàm định dạng số
 
 - **Bổ sung hàm** `FIXED` (định dạng số có dấu phẩy hàng nghìn), `DOLLAR` (định dạng tiền tệ) và `BASE` (đổi số sang hệ cơ số khác, ví dụ nhị phân/thập lục).

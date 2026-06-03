@@ -134,6 +134,12 @@ int main() {
     checkStr("=DOLLAR(1234.5,2)", "$1,234.50");
     checkStr("=BASE(255,16)", "FF");
     checkStr("=BASE(5,2,8)", "00000101");
+    checkNum("=DECIMAL(\"FF\",16)", 255);
+    checkNum("=DECIMAL(\"101\",2)", 5);
+    checkStr("=DEC2BIN(5)", "101");
+    checkStr("=DEC2HEX(255)", "FF");
+    checkNum("=BIN2DEC(\"1010\")", 10);
+    checkNum("=HEX2DEC(\"1F\")", 31);
 
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);
     return g_fail == 0 ? 0 : 1;

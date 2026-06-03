@@ -340,6 +340,13 @@ QHash<QString, Fn> &fnMap() {
         r["FIXED"] = [withCommas](const Args &a) { if (a.size()<1||a.size()>3) argErr("FIXED"); double n = toNumber(a[0]); int dec = a.size()>=2 ? toInt(a[1]) : 2; bool noComma = a.size()>=3 && toBool(a[2]); QString s = QString::number(n, 'f', qMax(0, dec)); return Value::str(noComma ? s : withCommas(s)); };
         r["DOLLAR"] = [withCommas](const Args &a) { if (a.size()<1||a.size()>2) argErr("DOLLAR"); double n = toNumber(a[0]); int dec = a.size()>=2 ? toInt(a[1]) : 2; QString s = QString::number(std::abs(n), 'f', qMax(0, dec)); return Value::str((n<0?"-$":"$") + withCommas(s)); };
         r["BASE"] = [](const Args &a) { if (a.size()<2||a.size()>3) argErr("BASE"); long long n = (long long)toNumber(a[0]); int radix = toInt(a[1]); if (radix<2||radix>36) throw FormulaError(QStringLiteral("BASE: cơ số 2-36")); int minLen = a.size()>=3 ? toInt(a[2]) : 0; QString s = QString::number(n, radix).toUpper(); while (s.size() < minLen) s.prepend('0'); return Value::str(s); };
+        // Đổi hệ cơ số: DECIMAL (chuỗi->số), DEC2BIN/DEC2HEX (số->chuỗi), BIN2DEC/HEX2DEC (chuỗi->số).
+        auto pad = [](QString s, const Args &a, int idx) { int p = (int)a.size() > idx ? toInt(a[idx]) : 0; while (s.size() < p) s.prepend('0'); return s; };
+        r["DECIMAL"] = [need](const Args &a) { need(a,2,"DECIMAL"); int radix = toInt(a[1]); if (radix<2||radix>36) throw FormulaError(QStringLiteral("DECIMAL: cơ số 2-36")); bool ok=false; long long n = toText(a[0]).toLongLong(&ok, radix); if (!ok) throw FormulaError(QStringLiteral("DECIMAL: chuỗi không hợp lệ")); return Value::number(n); };
+        r["DEC2BIN"] = [pad](const Args &a) { if (a.size()<1||a.size()>2) argErr("DEC2BIN"); return Value::str(pad(QString::number((long long)toNumber(a[0]), 2), a, 1)); };
+        r["DEC2HEX"] = [pad](const Args &a) { if (a.size()<1||a.size()>2) argErr("DEC2HEX"); return Value::str(pad(QString::number((long long)toNumber(a[0]), 16).toUpper(), a, 1)); };
+        r["BIN2DEC"] = [need](const Args &a) { need(a,1,"BIN2DEC"); bool ok=false; long long n = toText(a[0]).toLongLong(&ok, 2); if (!ok) throw FormulaError(QStringLiteral("BIN2DEC: chuỗi nhị phân không hợp lệ")); return Value::number(n); };
+        r["HEX2DEC"] = [need](const Args &a) { need(a,1,"HEX2DEC"); bool ok=false; long long n = toText(a[0]).toLongLong(&ok, 16); if (!ok) throw FormulaError(QStringLiteral("HEX2DEC: chuỗi thập lục không hợp lệ")); return Value::number(n); };
 
         // --- thống kê ---
         r["MEDIAN"] = [](const Args &a) { auto n = numbers(a); if (n.empty()) throw FormulaError(QStringLiteral("MEDIAN cần ít nhất một số")); std::sort(n.begin(), n.end()); size_t m = n.size(); return Value::number(m%2 ? n[m/2] : (n[m/2-1]+n[m/2])/2.0); };
