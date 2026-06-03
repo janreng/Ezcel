@@ -2,19 +2,19 @@
 
 ## v0.28.0 — Ô địa chỉ (Name Box)
 
-- **Ô địa chỉ bên trái thanh công thức** (giống Excel): luôn hiện vị trí ô đang chọn (vd `A1`). Gõ một địa chỉ (`B10`) hoặc một vùng (`A1:C5`) rồi Enter để **nhảy/chọn nhanh** tới đó.
+- **Ô địa chỉ bên trái thanh công thức**: luôn hiện vị trí ô đang chọn (vd `A1`). Gõ một địa chỉ (`B10`) hoặc một vùng (`A1:C5`) rồi Enter để **nhảy/chọn nhanh** tới đó.
 
-## v0.27.0 — Viền ô đang chọn kiểu Excel
+## v0.27.0 — Viền ô đang chọn nổi bật
 
-- **Ô đang chọn có viền xanh đậm** (màu xanh Excel) bao quanh — giống hệt con trỏ ô của Excel, dễ nhìn thấy mình đang ở ô nào.
+- **Ô đang chọn có viền xanh đậm bao quanh** — con trỏ ô rõ ràng, dễ thấy mình đang ở ô nào.
 
-## v0.26.0 — Phông chữ giống Excel
+## v0.26.0 — Phông chữ chuyên nghiệp
 
-- **Phông chữ đồng bộ với Excel**: giao diện dùng Segoe UI, nội dung ô dùng Aptos Narrow cỡ 11 (tự lùi về Calibri nếu máy chưa có) — chữ nhìn quen và gọn như Excel.
+- **Phông chữ chuẩn**: giao diện dùng Segoe UI, nội dung ô dùng Aptos Narrow cỡ 11 (tự lùi về Calibri nếu máy chưa có) — chữ nhìn quen và gọn.
 
-## v0.25.0 — Bảng màu giống Excel
+## v0.25.0 — Bảng màu mới
 
-- **Giao diện lưới sát Excel hơn**: đường kẻ ô màu xám nhạt, vùng chọn tô xanh nhạt với chữ xanh Excel, tiêu đề cột/dòng nền xám và sáng lên màu xanh khi đang chọn — nhìn quen mắt như Excel.
+- **Giao diện lưới chuyên nghiệp hơn**: đường kẻ ô màu xám nhạt, vùng chọn tô xanh nhạt với chữ xanh, tiêu đề cột/dòng nền xám và sáng lên màu xanh khi đang chọn — nhìn dễ chịu hơn.
 
 ## v0.24.0 — Biểu tượng ứng dụng
 
@@ -26,7 +26,7 @@
 
 ## v0.22.0 — Sắp xếp dữ liệu
 
-- **Sắp xếp vùng dữ liệu** (menu **Dữ liệu → Sắp xếp tăng dần / giảm dần**): sắp các hàng của vùng đang chọn theo cột đang đứng, kiểu Excel — số đứng trước chữ, ô trống dồn xuống cuối, các cột còn lại đi theo hàng. Hoàn tác được.
+- **Sắp xếp vùng dữ liệu** (menu **Dữ liệu → Sắp xếp tăng dần / giảm dần**): sắp các hàng của vùng đang chọn theo cột đang đứng — số đứng trước chữ, ô trống dồn xuống cuối, các cột còn lại đi theo hàng. Hoàn tác được.
 
 ## v0.21.0 — Tự động cập nhật
 
@@ -41,7 +41,7 @@ Ezcel viết lại hoàn toàn bằng C++/Qt6 cho nhẹ và mượt hơn. Bản 
 - **Công thức**: hơn 120 hàm (toán, thống kê, ngày giờ, dò tìm, văn bản, logic…) tính lại tức thì
 - **Định dạng**: phông chữ, cỡ chữ, in đậm/nghiêng/gạch, màu chữ–nền, căn lề, định dạng số (số nghìn, phần trăm, ngày)
 - **Ô gộp**: gộp/bỏ gộp, hiển thị span trực quan
-- **Chỉnh sửa**: hoàn tác/làm lại, sao chép–cắt–dán (dán được từ Excel), điền chuỗi xuống/sang phải
+- **Chỉnh sửa**: hoàn tác/làm lại, sao chép–cắt–dán (dán được từ ứng dụng bảng tính khác), điền chuỗi xuống/sang phải
 - **Cấu trúc**: chèn/xóa hàng và cột (tự dời dữ liệu, định dạng, ô gộp theo)
 - **Tìm & Thay thế** (Ctrl+F / Ctrl+H), có phân biệt hoa/thường
 - **Thanh công thức** sửa nhanh nội dung ô, **Hiện công thức** (Ctrl+`)
