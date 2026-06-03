@@ -18,6 +18,7 @@
 #include "ui/SheetNav.h"
 #include "ui/CellMode.h"
 #include "ui/WorkbookStats.h"
+#include "model/FlashFill.h"
 
 #include <QTableView>
 #include <QHeaderView>
@@ -497,6 +498,7 @@ void MainWindow::buildMenus()
     data->addAction(i18n::tr("data_clear_cond"), this, [this] { m_model->clearCondRules(); });
     data->addSeparator();
     data->addAction(QStringLiteral("Kiểm tra dữ liệu..."), this, &MainWindow::showDataValidation);
+    data->addAction(QStringLiteral("Flash Fill (tự điền theo mẫu)"), QKeySequence(QStringLiteral("Ctrl+E")), this, &MainWindow::flashFill);
     data->addAction(QStringLiteral("Xóa kiểm tra dữ liệu"), this, [this] { m_model->clearValidationRules(); });
     data->addSeparator();
     data->addAction(i18n::tr("data_filter"), this, [this] {
@@ -919,6 +921,45 @@ void MainWindow::toggleMergeSelection()
 {
     int t, l, b, r;
     if (selectionBox(t, l, b, r)) m_model->toggleMerge(t, l, b, r);
+}
+
+// Flash Fill (Spec 05): cột đích = cột ô hiện tại (chứa 1-2 ví dụ ở đầu),
+// cột nguồn = cột bên trái. Suy luật rồi điền các ô còn lại.
+void MainWindow::flashFill()
+{
+    QModelIndex cur = m_view->currentIndex();
+    if (!cur.isValid()) return;
+    int tcol = cur.column(), scol = tcol - 1;
+    if (scol < 0) { statusBar()->showMessage(QStringLiteral("Flash Fill cần cột dữ liệu bên trái"), 2500); return; }
+
+    std::vector<QString> sources;
+    std::vector<int> rowIdx;
+    const int rows = m_model->rowCount();
+    for (int r = 0; r < rows; ++r) {
+        QString s = m_model->data(m_model->index(r, scol), Qt::EditRole).toString();
+        if (s.trimmed().isEmpty()) break; // chỉ lấy khối dữ liệu liền mạch từ trên xuống
+        sources.push_back(s);
+        rowIdx.push_back(r);
+    }
+    if (sources.empty()) { statusBar()->showMessage(QStringLiteral("Flash Fill: cột nguồn trống"), 2500); return; }
+
+    std::vector<QString> examples;
+    for (size_t i = 0; i < sources.size(); ++i) {
+        QString e = m_model->data(m_model->index(rowIdx[i], tcol), Qt::EditRole).toString();
+        if (e.trimmed().isEmpty()) break;
+        examples.push_back(e);
+    }
+    if (examples.empty()) { statusBar()->showMessage(QStringLiteral("Flash Fill: hãy gõ 1-2 ví dụ ở đầu cột"), 3000); return; }
+
+    auto out = flashfill::infer(sources, examples);
+    if (!out) { statusBar()->showMessage(QStringLiteral("Flash Fill: không nhận ra mẫu"), 3000); return; }
+
+    int filled = 0;
+    for (size_t i = examples.size(); i < out->size(); ++i) {
+        m_model->setData(m_model->index(rowIdx[i], tcol), (*out)[i], Qt::EditRole);
+        ++filled;
+    }
+    statusBar()->showMessage(QStringLiteral("Flash Fill: đã điền %1 ô").arg(filled), 2500);
 }
 
 void MainWindow::toggleShowFormulas(bool on)

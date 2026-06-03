@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
-project(Ezcel VERSION 1.17.0 LANGUAGES CXX)
+project(Ezcel VERSION 1.18.0 LANGUAGES CXX)
 
 # Bản port C++ của Ezcel (gốc Python/PySide6). Dùng Qt6 Widgets + MinGW.
 set(CMAKE_CXX_STANDARD 20)
@@ -47,7 +47,8 @@ add_library(ezcel_model STATIC src/model/SpreadsheetModel.cpp src/model/Spreadsh
     src/model/CellStyles.cpp src/model/CellStyles.h
     src/model/GotoSpecial.cpp src/model/GotoSpecial.h
     src/model/NumberFormat.cpp src/model/NumberFormat.h
-    src/model/SeriesFill.cpp src/model/SeriesFill.h)
+    src/model/SeriesFill.cpp src/model/SeriesFill.h
+    src/model/FlashFill.cpp src/model/FlashFill.h)
 target_include_directories(ezcel_model PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(ezcel_model PUBLIC ezcel_formula ezcel_sort Qt6::Core Qt6::Gui)
 
@@ -126,6 +127,10 @@ add_executable(test_seriesfill tests/test_seriesfill.cpp src/model/SeriesFill.cp
 target_include_directories(test_seriesfill PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(test_seriesfill PRIVATE Qt6::Core)
 
+add_executable(test_flashfill tests/test_flashfill.cpp src/model/FlashFill.cpp)
+target_include_directories(test_flashfill PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_link_libraries(test_flashfill PRIVATE Qt6::Core)
+
 enable_testing()
 add_test(NAME formula COMMAND test_formula)
 add_test(NAME model COMMAND test_model)
@@ -140,6 +145,7 @@ add_test(NAME sheetnav COMMAND test_sheetnav)
 add_test(NAME cellmode COMMAND test_cellmode)
 add_test(NAME wbstats COMMAND test_wbstats)
 add_test(NAME seriesfill COMMAND test_seriesfill)
+add_test(NAME flashfill COMMAND test_flashfill)
 
 # --- Sort (sắp xếp vùng dữ liệu) — module logic thuần (Qt Core) -> static lib + test.
 add_library(ezcel_sort STATIC src/model/Sort.cpp src/model/Sort.h)

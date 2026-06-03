@@ -42,6 +42,7 @@ private slots:
     void clearSelection();
     void fillDown();
     void fillRight();
+    void flashFill();         // tự điền theo mẫu (Spec 05)
     void toggleMergeSelection();
     void toggleShowFormulas(bool on);
     void showShortcuts();     // hộp thoại bảng phím tắt (Spec 23)

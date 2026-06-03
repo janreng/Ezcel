@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v1.18.0 — Tự điền theo mẫu Flash Fill (Spec 05)
+
+- **Thêm Flash Fill (Ctrl + E)**: gõ 1–2 ví dụ ở đầu một cột, ứng dụng tự nhận ra quy luật tách/ghép từ cột dữ liệu bên trái và điền nốt cả cột — ví dụ tách họ ("Nguyễn Văn A" → "Nguyễn"), tách tên miền email ("user@gmail.com" → "gmail.com") hay cắt tiền tố.
+
 ## v1.17.0 — Tự điền chuỗi lịch & quý (Spec 05)
 
 - **Kéo để tự điền chuỗi thứ, tháng và quý**: từ `Mon` ra `Tue, Wed…`, `Jan` ra `Feb, Mar…`, `Q1` ra `Q2, Q3, Q4` (tự xoay vòng), giữ nguyên kiểu chữ hoa/thường — bổ sung cho tự điền dãy số và chuỗi có số sẵn có.
