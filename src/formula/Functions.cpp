@@ -2,6 +2,8 @@
 #include "formula/Formula.h"
 
 #include <QRegularExpression>
+#include <QDate>
+#include <QDateTime>
 #include <cmath>
 #include <algorithm>
 #include <numeric>
@@ -22,6 +24,15 @@ double sumv(const std::vector<double> &v) { return std::accumulate(v.begin(), v.
 std::vector<Value> critValues(const Value &a) {
     if (a.isRange()) return a.range.flat();
     return {a};
+}
+
+// --- ngày tháng: serial Excel (epoch 1899-12-30) <-> QDate ---
+const QDate kExcelEpoch(1899, 12, 30);
+double dateToSerial(const QDate &d) { return double(kExcelEpoch.daysTo(d)); }
+QDate serialToDate(double n) {
+    QDate d = kExcelEpoch.addDays(qint64(std::floor(n)));
+    if (!d.isValid()) throw FormulaError(QStringLiteral("Ngày ngoài phạm vi"), ERR_NUM);
+    return d;
 }
 
 // Regex wildcard kiểu Excel cho XLOOKUP match_mode=2.
@@ -301,6 +312,33 @@ QHash<QString, Fn> &fnMap() {
         };
         r["ROWS"]    = [need](const Args &a) { need(a,1,"ROWS"); return Value::number(a[0].isRange() ? a[0].range.height() : 1); };
         r["COLUMNS"] = [need](const Args &a) { need(a,1,"COLUMNS"); return Value::number(a[0].isRange() ? a[0].range.width() : 1); };
+
+        // --- ngày / giờ (serial Excel) ---
+        r["TODAY"] = [](const Args &a) { if (!a.empty()) argErr("TODAY"); return Value::number(dateToSerial(QDate::currentDate())); };
+        r["NOW"]   = [](const Args &a) { if (!a.empty()) argErr("NOW"); QDateTime n = QDateTime::currentDateTime(); double s = dateToSerial(n.date()); QTime t = n.time(); return Value::number(s + (t.hour()*3600 + t.minute()*60 + t.second())/86400.0); };
+        r["DATE"]  = [need](const Args &a) { need(a,3,"DATE"); QDate d(toInt(a[0]), toInt(a[1]), toInt(a[2])); if (!d.isValid()) throw FormulaError(QStringLiteral("DATE không hợp lệ")); return Value::number(dateToSerial(d)); };
+        r["YEAR"]  = [need](const Args &a) { need(a,1,"YEAR"); return Value::number(serialToDate(toNumber(a[0])).year()); };
+        r["MONTH"] = [need](const Args &a) { need(a,1,"MONTH"); return Value::number(serialToDate(toNumber(a[0])).month()); };
+        r["DAY"]   = [need](const Args &a) { need(a,1,"DAY"); return Value::number(serialToDate(toNumber(a[0])).day()); };
+        r["HOUR"]   = [need](const Args &a) { need(a,1,"HOUR"); double s = toNumber(a[0]); int sec = int(std::round((s - std::floor(s)) * 86400)); return Value::number((sec/3600) % 24); };
+        r["MINUTE"] = [need](const Args &a) { need(a,1,"MINUTE"); double s = toNumber(a[0]); int sec = int(std::round((s - std::floor(s)) * 86400)); return Value::number((sec/60) % 60); };
+        r["SECOND"] = [need](const Args &a) { need(a,1,"SECOND"); double s = toNumber(a[0]); int sec = int(std::round((s - std::floor(s)) * 86400)); return Value::number(sec % 60); };
+        r["DAYS"]   = [need](const Args &a) { need(a,2,"DAYS"); return Value::number(serialToDate(toNumber(a[1])).daysTo(serialToDate(toNumber(a[0])))); };
+        r["WEEKDAY"] = [](const Args &a) { if (a.size()<1||a.size()>2) argErr("WEEKDAY"); int iso = serialToDate(toNumber(a[0])).dayOfWeek(); int t = a.size()==2 ? toInt(a[1]) : 1; if (t==1) return Value::number(iso % 7 + 1); if (t==2) return Value::number(iso); if (t==3) return Value::number(iso - 1); throw FormulaError(QStringLiteral("WEEKDAY: type không hỗ trợ")); };
+        r["DATEDIF"] = [need](const Args &a) { need(a,3,"DATEDIF"); QDate s = serialToDate(toNumber(a[0])), e = serialToDate(toNumber(a[1])); QString u = toText(a[2]).toUpper(); if (u=="D") return Value::number(s.daysTo(e)); if (u=="Y") return Value::number(e.year()-s.year() - ((e.month()<s.month()||(e.month()==s.month()&&e.day()<s.day()))?1:0)); if (u=="M") return Value::number((e.year()-s.year())*12 + (e.month()-s.month()) - (e.day()<s.day()?1:0)); throw FormulaError(QStringLiteral("DATEDIF: unit phải D/M/Y")); };
+
+        // --- thống kê ---
+        r["MEDIAN"] = [](const Args &a) { auto n = numbers(a); if (n.empty()) throw FormulaError(QStringLiteral("MEDIAN cần ít nhất một số")); std::sort(n.begin(), n.end()); size_t m = n.size(); return Value::number(m%2 ? n[m/2] : (n[m/2-1]+n[m/2])/2.0); };
+        r["MODE"]   = [](const Args &a) { auto n = numbers(a); if (n.empty()) throw FormulaError(QStringLiteral("MODE cần ít nhất một số")); std::sort(n.begin(), n.end()); double best = n[0]; int bestc = 0, cur = 1; for (size_t i=1;i<=n.size();++i) { if (i<n.size() && n[i]==n[i-1]) ++cur; else { if (cur>bestc) { bestc=cur; best=n[i-1]; } cur=1; } } return Value::number(best); };
+        r["STDEV"]  = [](const Args &a) { auto n = numbers(a); if (n.size()<2) throw FormulaError(QStringLiteral("STDEV cần ít nhất hai số")); double m = sumv(n)/n.size(), s = 0; for (double x : n) s += (x-m)*(x-m); return Value::number(std::sqrt(s/(n.size()-1))); };
+        r["STDEVP"] = [](const Args &a) { auto n = numbers(a); if (n.empty()) throw FormulaError(QStringLiteral("STDEVP cần ít nhất một số")); double m = sumv(n)/n.size(), s = 0; for (double x : n) s += (x-m)*(x-m); return Value::number(std::sqrt(s/n.size())); };
+        r["VAR"]    = [](const Args &a) { auto n = numbers(a); if (n.size()<2) throw FormulaError(QStringLiteral("VAR cần ít nhất hai số")); double m = sumv(n)/n.size(), s = 0; for (double x : n) s += (x-m)*(x-m); return Value::number(s/(n.size()-1)); };
+        r["VARP"]   = [](const Args &a) { auto n = numbers(a); if (n.empty()) throw FormulaError(QStringLiteral("VARP cần ít nhất một số")); double m = sumv(n)/n.size(), s = 0; for (double x : n) s += (x-m)*(x-m); return Value::number(s/n.size()); };
+        r["LARGE"]  = [need](const Args &a) { need(a,2,"LARGE"); auto n = numbers({a[0]}); int k = toInt(a[1]); if (k<1||k>int(n.size())) throw FormulaError(QStringLiteral("LARGE: k vượt phạm vi")); std::sort(n.begin(), n.end(), std::greater<double>()); return Value::number(n[k-1]); };
+        r["SMALL"]  = [need](const Args &a) { need(a,2,"SMALL"); auto n = numbers({a[0]}); int k = toInt(a[1]); if (k<1||k>int(n.size())) throw FormulaError(QStringLiteral("SMALL: k vượt phạm vi")); std::sort(n.begin(), n.end()); return Value::number(n[k-1]); };
+        r["RANK"]   = [](const Args &a) { if (a.size()<2||a.size()>3) argErr("RANK"); double x = toNumber(a[0]); auto n = numbers({a[1]}); int order = a.size()==3 ? toInt(a[2]) : 0; if (order) std::sort(n.begin(), n.end()); else std::sort(n.begin(), n.end(), std::greater<double>()); for (int i=0;i<int(n.size());++i) if (n[i]==x) return Value::number(i+1); throw FormulaError(QStringLiteral("RANK: không tìm thấy")); };
+        r["GEOMEAN"]= [](const Args &a) { auto n = numbers(a); if (n.empty()) throw FormulaError(QStringLiteral("GEOMEAN cần số")); double p = 1; for (double x : n) { if (x<=0) throw FormulaError(QStringLiteral("GEOMEAN cần số dương"), ERR_NUM); p *= x; } return Value::number(std::pow(p, 1.0/n.size())); };
+        r["HARMEAN"]= [](const Args &a) { auto n = numbers(a); if (n.empty()) throw FormulaError(QStringLiteral("HARMEAN cần số")); double s = 0; for (double x : n) { if (x==0) throw FormulaError(QStringLiteral("HARMEAN cần khác 0"), ERR_NUM); s += 1.0/x; } return Value::number(n.size()/s); };
 
         return r;
     }();

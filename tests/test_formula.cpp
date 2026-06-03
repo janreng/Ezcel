@@ -84,6 +84,22 @@ int main() {
     checkStr("=XLOOKUP(3,D1:D3,E1:E3)", "three");
     checkStr("=XLOOKUP(9,D1:D3,E1:E3,\"none\")", "none");
 
+    // --- ngay/gio ---
+    checkNum("=YEAR(DATE(2020,6,15))", 2020);
+    checkNum("=MONTH(DATE(2020,6,15))", 6);
+    checkNum("=DAY(DATE(2020,6,15))", 15);
+    checkNum("=DATEDIF(DATE(2020,1,1),DATE(2020,12,31),\"M\")", 11);
+    checkNum("=DAYS(DATE(2020,1,11),DATE(2020,1,1))", 10);
+    checkNum("=WEEKDAY(DATE(2020,6,14),2)", 7); // 2020-06-14 la Chu Nhat -> type2 CN=7
+
+    // --- thong ke ---
+    checkNum("=MEDIAN(A1:A3)", 20);
+    checkNum("=STDEV(A1:A3)", 10);
+    checkNum("=VAR(A1:A3)", 100);
+    checkNum("=LARGE(A1:A3,1)", 30);
+    checkNum("=SMALL(A1:A3,2)", 20);
+    checkNum("=RANK(20,A1:A3)", 2);
+
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);
     return g_fail == 0 ? 0 : 1;
 }
