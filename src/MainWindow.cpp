@@ -7,6 +7,7 @@
 #include "view/Visibility.h"
 #include "model/Filter.h"
 #include "model/PasteOps.h"
+#include "ui/I18n.h"
 #include "update/Updater.h"
 #include "ui/Theme.h"
 
@@ -173,16 +174,17 @@ void MainWindow::onFormulaBarCommitted()
 // ---------------------------------------------------------------- menu / toolbar
 void MainWindow::buildMenus()
 {
-    QMenu *file = menuBar()->addMenu(QStringLiteral("&Tệp"));
-    file->addAction(QStringLiteral("&Mới"), QKeySequence::New, this, &MainWindow::newFile);
-    file->addAction(QStringLiteral("&Mở..."), QKeySequence::Open, this, &MainWindow::openFile);
+    menuBar()->clear(); // cho phép dựng lại khi đổi ngôn ngữ
+    QMenu *file = menuBar()->addMenu(i18n::tr("menu_file"));
+    file->addAction(i18n::tr("file_new"), QKeySequence::New, this, &MainWindow::newFile);
+    file->addAction(i18n::tr("file_open"), QKeySequence::Open, this, &MainWindow::openFile);
     file->addSeparator();
-    file->addAction(QStringLiteral("&Lưu"), QKeySequence::Save, this, [this] { saveFile(); });
-    file->addAction(QStringLiteral("Lưu &thành..."), QKeySequence::SaveAs, this, [this] { saveFileAs(); });
+    file->addAction(i18n::tr("file_save"), QKeySequence::Save, this, [this] { saveFile(); });
+    file->addAction(i18n::tr("file_saveas"), QKeySequence::SaveAs, this, [this] { saveFileAs(); });
     file->addSeparator();
-    file->addAction(QStringLiteral("T&hoát"), QKeySequence::Quit, this, &QWidget::close);
+    file->addAction(i18n::tr("file_quit"), QKeySequence::Quit, this, &QWidget::close);
 
-    QMenu *edit = menuBar()->addMenu(QStringLiteral("&Sửa"));
+    QMenu *edit = menuBar()->addMenu(i18n::tr("menu_edit"));
     edit->addAction(QStringLiteral("&Hoàn tác"), QKeySequence::Undo, this, [this] {
         if (!m_model->undo()) statusBar()->showMessage(QStringLiteral("Không có gì để hoàn tác"), 2000);
     });
@@ -203,7 +205,7 @@ void MainWindow::buildMenus()
     edit->addAction(QStringLiteral("Tìm && Thay thế..."), QKeySequence::Find, this, &MainWindow::showFindReplace);
     edit->addAction(QStringLiteral("Thay thế..."), QKeySequence::Replace, this, &MainWindow::showFindReplace);
 
-    QMenu *st = menuBar()->addMenu(QStringLiteral("&Cấu trúc"));
+    QMenu *st = menuBar()->addMenu(i18n::tr("menu_struct"));
     st->addAction(QStringLiteral("Chèn hàng trên"), this, [this] {
         int t, l, b, r; if (selectionBox(t, l, b, r)) m_model->insertRows(t, b - t + 1);
     });
@@ -239,7 +241,7 @@ void MainWindow::buildMenus()
         else m_view->resizeRowsToContents();
     });
 
-    QMenu *data = menuBar()->addMenu(QStringLiteral("&Dữ liệu"));
+    QMenu *data = menuBar()->addMenu(i18n::tr("menu_data"));
     data->addAction(QStringLiteral("Sắp xếp tăng dần"), this, [this] {
         int t, l, b, r; if (!selectionBox(t, l, b, r)) return;
         int kc = m_view->currentIndex().isValid() ? m_view->currentIndex().column() : l;
@@ -273,18 +275,23 @@ void MainWindow::buildMenus()
         for (int r = 0; r < m_model->rowCount(); ++r) m_view->setRowHidden(r, false);
     });
 
-    QMenu *view = menuBar()->addMenu(QStringLiteral("&Xem"));
-    view->addAction(QStringLiteral("Phóng to"), QKeySequence::ZoomIn, this, [this] { m_zoom += 10; applyZoom(); });
-    view->addAction(QStringLiteral("Thu nhỏ"), QKeySequence::ZoomOut, this, [this] { m_zoom -= 10; applyZoom(); });
-    view->addAction(QStringLiteral("Thu phóng 100%"), QKeySequence(QStringLiteral("Ctrl+0")), this, [this] { m_zoom = 100; applyZoom(); });
+    QMenu *view = menuBar()->addMenu(i18n::tr("menu_view"));
+    view->addAction(i18n::tr("view_zoom_in"), QKeySequence::ZoomIn, this, [this] { m_zoom += 10; applyZoom(); });
+    view->addAction(i18n::tr("view_zoom_out"), QKeySequence::ZoomOut, this, [this] { m_zoom -= 10; applyZoom(); });
+    view->addAction(i18n::tr("view_zoom_reset"), QKeySequence(QStringLiteral("Ctrl+0")), this, [this] { m_zoom = 100; applyZoom(); });
     view->addSeparator();
-    QAction *sf = view->addAction(QStringLiteral("Hiện công thức"));
+    QAction *sf = view->addAction(i18n::tr("view_show_formulas"));
     sf->setCheckable(true);
     sf->setShortcut(QKeySequence(QStringLiteral("Ctrl+`")));
     connect(sf, &QAction::toggled, this, &MainWindow::toggleShowFormulas);
 
-    QMenu *help = menuBar()->addMenu(QStringLiteral("&Trợ giúp"));
-    help->addAction(QStringLiteral("Kiểm tra cập nhật"), this, [this] {
+    QMenu *settings = menuBar()->addMenu(i18n::tr("menu_settings"));
+    QMenu *langMenu = settings->addMenu(i18n::tr("menu_lang"));
+    langMenu->addAction(i18n::tr("lang_vi"), this, [this] { i18n::setLang(i18n::Lang::Vi); buildMenus(); });
+    langMenu->addAction(i18n::tr("lang_en"), this, [this] { i18n::setLang(i18n::Lang::En); buildMenus(); });
+
+    QMenu *help = menuBar()->addMenu(i18n::tr("menu_help"));
+    help->addAction(i18n::tr("help_check_update"), this, [this] {
 #ifdef EZCEL_VERSION
         const QString ver = QStringLiteral(EZCEL_VERSION);
 #else
@@ -293,7 +300,7 @@ void MainWindow::buildMenus()
         auto *up = new Updater(ver, this);
         up->checkForUpdates(/*silentIfNone*/ false);
     });
-    help->addAction(QStringLiteral("Giới thiệu Ezcel"), this, [this] {
+    help->addAction(i18n::tr("help_about"), this, [this] {
 #ifdef EZCEL_VERSION
         const QString ver = QStringLiteral(EZCEL_VERSION);
 #else

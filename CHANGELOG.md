@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v0.35.0 — Song ngữ Việt / Anh
+
+- **Đổi ngôn ngữ giao diện** (menu **Cài đặt → Ngôn ngữ → Tiếng Việt / English**): thanh menu chuyển sang tiếng Anh hoặc tiếng Việt. Các phần còn lại của giao diện sẽ được dịch dần ở các bản sau.
+
 ## v0.34.0 — Dán đặc biệt
 
 - **Dán đặc biệt** (menu **Sửa → Dán đặc biệt**, hoặc Ctrl+Alt+V): chọn kiểu dán, hỗ trợ **chuyển vị** — đổi hàng thành cột và ngược lại khi dán.
