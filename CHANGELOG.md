@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v0.95.0 — Hàm tương quan CORREL, PEARSON & RSQ (Spec 12)
+
+- **Thêm hàm `CORREL` và `PEARSON`** — tính hệ số tương quan giữa hai vùng dữ liệu (giá trị từ -1 đến 1).
+- **Thêm hàm `RSQ`** — tính hệ số xác định R² của đường hồi quy, cho biết mức độ phù hợp của mô hình.
+
 ## v0.94.0 — Hàm hồi quy SLOPE & INTERCEPT (Spec 12)
 
 - **Thêm hàm `SLOPE`** — tính hệ số góc của đường hồi quy tuyến tính qua hai vùng dữ liệu.

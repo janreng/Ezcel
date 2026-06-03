@@ -631,6 +631,24 @@ QHash<QString, Fn> &fnMap() {
         };
         r["SLOPE"] = [regression](const Args &a) { if (a.size()!=2) argErr("SLOPE"); return Value::number(regression(a, "SLOPE", true)); };
         r["INTERCEPT"] = [regression](const Args &a) { if (a.size()!=2) argErr("INTERCEPT"); return Value::number(regression(a, "INTERCEPT", false)); };
+        // CORREL/PEARSON: hệ số tương quan Pearson giữa hai vùng. RSQ: bình phương của nó (R²).
+        auto correlVal = [](const Args &a, const char *fn) {
+            auto y = numbers(std::vector<Value>{a[0]});
+            auto x = numbers(std::vector<Value>{a[1]});
+            if (x.size() != y.size() || x.empty())
+                throw FormulaError(QString::fromUtf8(fn) + QStringLiteral(": hai vùng phải cùng kích thước"), ERR_NA);
+            int n = int(x.size());
+            double mx = 0, my = 0;
+            for (int i = 0; i < n; ++i) { mx += x[i]; my += y[i]; }
+            mx /= n; my /= n;
+            double sxy = 0, sxx = 0, syy = 0;
+            for (int i = 0; i < n; ++i) { double dx = x[i]-mx, dy = y[i]-my; sxy += dx*dy; sxx += dx*dx; syy += dy*dy; }
+            if (sxx == 0 || syy == 0) throw FormulaError(QString::fromUtf8(fn) + QStringLiteral(": phương sai bằng 0"), ERR_DIV0);
+            return sxy / std::sqrt(sxx * syy);
+        };
+        r["CORREL"]  = [correlVal](const Args &a) { if (a.size()!=2) argErr("CORREL");  return Value::number(correlVal(a, "CORREL")); };
+        r["PEARSON"] = [correlVal](const Args &a) { if (a.size()!=2) argErr("PEARSON"); return Value::number(correlVal(a, "PEARSON")); };
+        r["RSQ"]     = [correlVal](const Args &a) { if (a.size()!=2) argErr("RSQ"); double c = correlVal(a, "RSQ"); return Value::number(c*c); };
         // NUMBERVALUE(text, [dấu_thập_phân="."], [dấu_nhóm=","]): đổi chuỗi thành số theo dấu phân cách tùy chọn.
         r["NUMBERVALUE"] = [](const Args &a) {
             if (a.size() < 1 || a.size() > 3) argErr("NUMBERVALUE");

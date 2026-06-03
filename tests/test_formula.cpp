@@ -20,6 +20,8 @@ static QVariant resolver(int row, int col) {
         {"4,5", "-100"}, {"5,5", "110"},
         // G1:G3 (cot 6) = 2*A + 1 cho test hoi quy: x=A1:A3{10,20,30}, y=G1:G3{21,41,61}
         {"0,6", "21"}, {"1,6", "41"}, {"2,6", "61"},
+        // H1:H3 (cot 7) = {1,3,2} cho tuong quan khong hoan hao (CORREL voi A = 0.5)
+        {"0,7", "1"}, {"1,7", "3"}, {"2,7", "2"},
     };
     auto it = cells.constFind(QString("%1,%2").arg(row).arg(col));
     return it == cells.constEnd() ? QVariant(QString()) : QVariant(it.value());
@@ -235,6 +237,11 @@ int main() {
     // SLOPE / INTERCEPT (Spec 12): y=G1:G3{21,41,61} = 2*x+1, x=A1:A3{10,20,30}
     checkNum("=SLOPE(G1:G3,A1:A3)", 2);
     checkNum("=INTERCEPT(G1:G3,A1:A3)", 1);
+    // CORREL / PEARSON / RSQ (Spec 12)
+    checkNum("=CORREL(A1:A3,G1:G3)", 1);   // tuyen tinh hoan hao
+    checkNum("=CORREL(A1:A3,H1:H3)", 0.5); // tuong quan 0.5
+    checkNum("=PEARSON(A1:A3,H1:H3)", 0.5);
+    checkNum("=RSQ(A1:A3,H1:H3)", 0.25);   // 0.5^2
     // IPMT / PPMT (Spec 12): vay 8000, lai 10%/nam, 36 ky
     checkNum("=IPMT(0.1/12,1,36,8000)", -66.6666666666667); // ky 1: -pv*rate
     checkNum("=IPMT(0.1/12,2,36,8000)", -65.0710764092997);
