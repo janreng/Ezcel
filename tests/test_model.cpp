@@ -309,8 +309,13 @@ int main(int argc, char **argv) {
         ok(r.numCount == 3, "3 o so");
         ok(r.sum == 60.0, "tong 60");
         ok(r.avg == 20.0, "trung binh 20");
+        ok(r.min == 10.0, "nho nhat 10");
+        ok(r.max == 30.0, "lon nhat 30");
         stats::Result e = stats::compute({"x", "y"});
         ok(e.count == 2 && e.numCount == 0 && e.avg == 0, "khong co so -> avg 0");
+        ok(e.min == 0 && e.max == 0, "khong co so -> min/max 0");
+        stats::Result neg = stats::compute({"-5", "-1", "-9"});
+        ok(neg.min == -9.0 && neg.max == -1.0, "so am: min -9 max -1");
     }
 
     // --- AutoSum: dem run so cuoi danh sach ---

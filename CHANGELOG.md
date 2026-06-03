@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v0.58.0 — Thanh trạng thái hiện thêm thống kê
+
+- **Thanh trạng thái hiện thêm Nhỏ nhất, Lớn nhất và Đếm số** khi chọn nhiều ô: ngoài Đếm, Tổng và Trung bình đã có, nay xem nhanh được giá trị nhỏ nhất, lớn nhất và số lượng ô chứa số trong vùng chọn.
+
 ## v0.57.0 — Bảng tra cứu phím tắt
 
 - **Thêm hộp thoại "Phím tắt"** trong menu Trợ giúp (hoặc nhấn **F1**): liệt kê đầy đủ phím tắt theo nhóm — Di chuyển, Chọn, Soạn thảo, Định dạng, Công thức, Tệp & Trang tính — kèm mô tả tiếng Việt cho từng tổ hợp.

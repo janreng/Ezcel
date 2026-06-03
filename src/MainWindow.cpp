@@ -861,8 +861,10 @@ void MainWindow::updateStats()
     if (r.count == 0) { m_statsLabel->clear(); return; }
     QString s = QStringLiteral("Đếm: %1").arg(r.count);
     if (r.numCount > 0)
-        s += QStringLiteral("   Tổng: %1   TB: %2")
-                 .arg(r.sum, 0, 'g', 10).arg(r.avg, 0, 'g', 10);
+        s += QStringLiteral("   Đếm số: %1   Tổng: %2   TB: %3   Nhỏ nhất: %4   Lớn nhất: %5")
+                 .arg(r.numCount)
+                 .arg(r.sum, 0, 'g', 10).arg(r.avg, 0, 'g', 10)
+                 .arg(r.min, 0, 'g', 10).arg(r.max, 0, 'g', 10);
     m_statsLabel->setText(s);
 }
 
