@@ -153,6 +153,22 @@ int main(int argc, char **argv) {
         ok(r1.value("italic").toBool(), "xlsx giu italic");
     }
 
+    // --- XLSX NHIEU sheet round-trip ---
+    {
+        QTemporaryDir dir;
+        QString path = dir.path() + "/multi.xlsx";
+        QVector<xlsxio::Sheet> sheets;
+        xlsxio::Sheet s1; s1.name = "Mot"; s1.rows = g({{"a", "1"}}); sheets.push_back(s1);
+        xlsxio::Sheet s2; s2.name = "Hai"; s2.rows = g({{"x"}, {"=1+1"}}); sheets.push_back(s2);
+        ok(xlsxio::saveSheets(path, sheets), "saveSheets tra true");
+
+        QVector<xlsxio::Sheet> back = xlsxio::loadAllSheets(path);
+        ok(back.size() == 2, "doc lai 2 sheet");
+        ok(back[0].name == "Mot" && back[1].name == "Hai", "giu ten 2 sheet");
+        ok(back[0].rows[0][0] == "a" && back[0].rows[0][1] == "1", "sheet 1 du lieu");
+        ok(back[1].rows[1][0] == "=1+1", "sheet 2 giu cong thuc");
+    }
+
     // --- XLSX load file khong ton tai ---
     {
         xlsxio::Sheet sh;

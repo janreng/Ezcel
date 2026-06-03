@@ -111,6 +111,88 @@ static std::optional<QVariant> tryNumber(const QString &text) {
     return std::nullopt;
 }
 
+// Đọc sheet đang chọn của doc -> Sheet.
+static Sheet readCurrentSheet(QXlsx::Document &doc, const QString &name) {
+    Sheet out;
+    out.name = name;
+    QXlsx::Worksheet *ws = doc.currentWorksheet();
+    QXlsx::CellRange dim = doc.dimension();
+    int lastRow = qMax(dim.lastRow(), 1);
+    int lastCol = qMax(dim.lastColumn(), 1);
+    csvio::Grid grid;
+    for (int r = 1; r <= lastRow; ++r) {
+        QVector<QString> row;
+        for (int c = 1; c <= lastCol; ++c) {
+            QString text;
+            auto cell = doc.cellAt(r, c);
+            if (cell) {
+                QXlsx::CellFormula f = cell->formula();
+                if (f.isValid() && !f.formulaText().isEmpty())
+                    text = QLatin1Char('=') + f.formulaText();
+                else {
+                    QVariant v = cell->value();
+                    if (!v.isNull()) text = v.toString();
+                }
+                Attrs a = xlsxToAttrs(cell->format());
+                if (!a.isEmpty()) out.formats.insert({r - 1, c - 1}, a);
+            }
+            row.push_back(text);
+        }
+        grid.push_back(row);
+    }
+    out.rows = csvio::normalize(grid);
+    if (ws)
+        for (const QXlsx::CellRange &m : ws->mergedCells())
+            out.merges.push_back({m.firstRow() - 1, m.firstColumn() - 1,
+                                  m.lastRow() - 1, m.lastColumn() - 1});
+    return out;
+}
+
+// Ghi 1 sheet vào sheet ĐANG CHỌN của doc (giá trị + định dạng + ô gộp).
+static void writeCells(QXlsx::Document &doc, const csvio::Grid &rows,
+                       const QVector<Merge> &merges,
+                       const QMap<QPair<int, int>, Attrs> &formats) {
+    for (int r = 0; r < rows.size(); ++r)
+        for (int c = 0; c < rows[r].size(); ++c) {
+            const QString &val = rows[r][c];
+            auto fit = formats.constFind({r, c});
+            const bool hasFmt = (fit != formats.constEnd());
+            if (val.isEmpty() && !hasFmt) continue;
+            QXlsx::Format xf = hasFmt ? attrsToXlsx(*fit) : QXlsx::Format();
+            if (val.isEmpty()) doc.write(r + 1, c + 1, QVariant(), xf);
+            else if (val.startsWith(QLatin1Char('=')) && val.size() > 1) doc.write(r + 1, c + 1, val, xf);
+            else if (auto num = tryNumber(val)) doc.write(r + 1, c + 1, *num, xf);
+            else doc.write(r + 1, c + 1, val, xf);
+        }
+    for (const Merge &m : merges)
+        doc.mergeCells(QXlsx::CellRange(m.top + 1, m.left + 1, m.bottom + 1, m.right + 1));
+}
+
+QVector<Sheet> loadAllSheets(const QString &path) {
+    QVector<Sheet> sheets;
+    QXlsx::Document doc(path);
+    if (!doc.load()) return sheets;
+    for (const QString &name : doc.sheetNames()) {
+        doc.selectSheet(name);
+        sheets.push_back(readCurrentSheet(doc, name));
+    }
+    return sheets;
+}
+
+bool saveSheets(const QString &path, const QVector<Sheet> &sheets) {
+    if (sheets.isEmpty()) return false;
+    QXlsx::Document doc;
+    for (int i = 0; i < sheets.size(); ++i) {
+        if (i > 0) doc.addSheet(safeSheetName(sheets[i].name)); // tạo + chọn sheet mới
+        writeCells(doc, sheets[i].rows, sheets[i].merges, sheets[i].formats);
+        if (i == 0) {
+            const QStringList names = doc.sheetNames();
+            if (!names.isEmpty()) doc.renameSheet(names.first(), safeSheetName(sheets[0].name));
+        }
+    }
+    return doc.saveAs(path);
+}
+
 bool loadXlsx(const QString &path, Sheet &out) {
     QXlsx::Document doc(path);
     if (!doc.load()) return false;

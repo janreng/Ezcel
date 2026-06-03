@@ -462,12 +462,26 @@ void MainWindow::openPath(const QString &path)
         csvio::Grid rows = csvio::loadCsv(path, &ok);
         if (ok) m_model->loadGrid(rows);
     } else if (suffix == "xlsx" || suffix == "xlsm") {
-        xlsxio::Sheet sh;
-        if ((ok = xlsxio::loadXlsx(path, sh))) {
-            m_model->loadGrid(sh.rows);
-            for (const auto &m : sh.merges)
-                m_model->mergeCells(m.top, m.left, m.bottom, m.right);
-            if (!sh.formats.isEmpty()) m_model->setCellFormats(sh.formats);
+        QVector<xlsxio::Sheet> sheets = xlsxio::loadAllSheets(path);
+        if (!sheets.isEmpty()) {
+            ok = true;
+            // Dựng lại danh sách trang tính + tab theo các sheet trong file.
+            m_sheetTabs->blockSignals(true);
+            while (m_sheetTabs->count() > 0) m_sheetTabs->removeTab(0);
+            for (auto *old : m_sheets) old->deleteLater();
+            m_sheets.clear();
+            for (const auto &sh : sheets) {
+                auto *m = new SpreadsheetModel(this);
+                m->loadGrid(sh.rows);
+                for (const auto &mr : sh.merges) m->mergeCells(mr.top, mr.left, mr.bottom, mr.right);
+                if (!sh.formats.isEmpty()) m->setCellFormats(sh.formats);
+                m_sheets.push_back(m);
+                m_sheetTabs->addTab(sh.name.isEmpty()
+                    ? QStringLiteral("Trang %1").arg(m_sheets.size()) : sh.name);
+            }
+            m_sheetTabs->blockSignals(false);
+            m_sheetTabs->setCurrentIndex(0);
+            switchToSheet(0);
         }
     } else {
         QMessageBox::warning(this, QStringLiteral("Ezcel"),
@@ -509,10 +523,17 @@ bool MainWindow::saveTo(const QString &path)
     if (suffix == "csv" || suffix == "txt" || suffix == "tsv") {
         ok = csvio::saveCsv(path, m_model->grid());
     } else if (suffix == "xlsx" || suffix == "xlsm") {
-        QVector<xlsxio::Merge> merges;
-        for (const auto &m : m_model->merges()) merges.push_back({m.top, m.left, m.bottom, m.right});
-        ok = xlsxio::saveXlsx(path, QFileInfo(path).completeBaseName(), m_model->grid(),
-                              merges, m_model->cellFormats());
+        QVector<xlsxio::Sheet> sheets;
+        for (int i = 0; i < m_sheets.size(); ++i) {
+            xlsxio::Sheet sh;
+            sh.name = m_sheetTabs->tabText(i);
+            sh.rows = m_sheets[i]->grid();
+            for (const auto &m : m_sheets[i]->merges())
+                sh.merges.push_back({m.top, m.left, m.bottom, m.right});
+            sh.formats = m_sheets[i]->cellFormats();
+            sheets.push_back(sh);
+        }
+        ok = xlsxio::saveSheets(path, sheets);
     } else {
         QMessageBox::warning(this, QStringLiteral("Ezcel"),
                              QStringLiteral("Định dạng không hỗ trợ: .%1").arg(suffix));

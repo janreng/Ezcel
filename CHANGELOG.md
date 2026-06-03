@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v0.42.0 — Lưu nhiều trang vào một file
+
+- **Mở và lưu nhiều trang tính trong cùng một file `.xlsx`**: khi lưu, tất cả các trang đều được ghi vào file; khi mở file nhiều trang, các tab sẽ hiện đầy đủ theo đúng tên trang.
+
 ## v0.41.0 — Nhiều trang tính
 
 - **Làm việc với nhiều trang tính trong cùng cửa sổ**: thanh tab ở dưới cùng, bấm **+** để thêm trang, nhấp đúp vào tab để đổi tên, chuyển qua lại giữa các trang. Mỗi trang có dữ liệu riêng.

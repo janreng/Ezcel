@@ -38,4 +38,10 @@ bool saveXlsx(const QString &path, const QString &sheetName,
               const csvio::Grid &rows, const QVector<Merge> &merges,
               const QMap<QPair<int, int>, Attrs> &formats = {});
 
+// Đọc TẤT CẢ sheet trong workbook (cho nhiều trang tính). Rỗng nếu lỗi.
+QVector<Sheet> loadAllSheets(const QString &path);
+
+// Ghi NHIỀU sheet vào một file XLSX. Trả false nếu lỗi.
+bool saveSheets(const QString &path, const QVector<Sheet> &sheets);
+
 } // namespace xlsxio
