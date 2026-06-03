@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v1.8.0 — Hàm lượng giác nghịch đảo số phức (Spec 12)
+
+- **Thêm hàm `IMCSC`, `IMSEC` và `IMCOT`** — tính cosec, sec và cotang của một số phức (nghịch đảo của sin, cos và tang).
+
 ## v1.7.0 — Sinh & cosh số phức (Spec 12)
 
 - **Thêm hàm `IMSINH`** — tính sin hyperbolic của một số phức.

@@ -440,6 +440,11 @@ int main() {
     checkNum("=IMREAL(IMCOSH(\"0\"))", 1);   // cosh(0)=1
     checkNum("=IMAGINARY(IMSINH(\"i\"))", 0.8414709848078965); // sinh(i)=i*sin(1)
     checkNum("=IMREAL(IMCOSH(\"i\"))", 0.5403023058681398);    // cosh(i)=cos(1)
+    // IMCSC / IMSEC / IMCOT (Spec 12)
+    checkNum("=IMREAL(IMSEC(\"0\"))", 1);   // 1/cos(0)=1
+    checkNum("=IMAGINARY(IMCSC(\"i\"))", -0.8509181282393216); // 1/sin(i) = -i/sinh(1)
+    checkNum("=IMREAL(IMSEC(\"i\"))", 0.6480542736638853);     // 1/cosh(1)
+    checkNum("=IMAGINARY(IMCOT(\"i\"))", -1.3130352854993312); // -1/tanh(1)
 
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);
     return g_fail == 0 ? 0 : 1;

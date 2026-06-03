@@ -1071,6 +1071,30 @@ QHash<QString, Fn> &fnMap() {
             auto c = parseComplex(toText(a[0]));
             return Value::str(formatComplex(std::cosh(c.first)*std::cos(c.second), std::sinh(c.first)*std::sin(c.second)));
         };
+        // IMCSC/IMSEC/IMCOT: nghịch đảo của sin/cos/tan số phức.
+        auto recip = [](double re, double im, const char *fn) -> std::pair<double,double> {
+            double d = re*re + im*im;
+            if (d == 0) throw FormulaError(QString::fromUtf8(fn) + QStringLiteral(": chia cho 0"), ERR_DIV0);
+            return {re/d, -im/d};
+        };
+        r["IMCSC"] = [need, parseComplex, formatComplex, recip](const Args &a) {
+            need(a,1,"IMCSC"); auto c = parseComplex(toText(a[0]));
+            auto r = recip(std::sin(c.first)*std::cosh(c.second), std::cos(c.first)*std::sinh(c.second), "IMCSC");
+            return Value::str(formatComplex(r.first, r.second));
+        };
+        r["IMSEC"] = [need, parseComplex, formatComplex, recip](const Args &a) {
+            need(a,1,"IMSEC"); auto c = parseComplex(toText(a[0]));
+            auto r = recip(std::cos(c.first)*std::cosh(c.second), -std::sin(c.first)*std::sinh(c.second), "IMSEC");
+            return Value::str(formatComplex(r.first, r.second));
+        };
+        r["IMCOT"] = [need, parseComplex, formatComplex, recip](const Args &a) {
+            need(a,1,"IMCOT"); auto c = parseComplex(toText(a[0]));
+            double sr = std::sin(c.first)*std::cosh(c.second), si = std::cos(c.first)*std::sinh(c.second);
+            double cr = std::cos(c.first)*std::cosh(c.second), ci = -std::sin(c.first)*std::sinh(c.second);
+            double d = sr*sr + si*si;
+            if (d == 0) throw FormulaError(QStringLiteral("IMCOT: chia cho 0"), ERR_DIV0);
+            return Value::str(formatComplex((cr*sr + ci*si)/d, (ci*sr - cr*si)/d)); // cos/sin
+        };
 
         // --- thống kê ---
         r["MEDIAN"] = [](const Args &a) { auto n = numbers(a); if (n.empty()) throw FormulaError(QStringLiteral("MEDIAN cần ít nhất một số")); std::sort(n.begin(), n.end()); size_t m = n.size(); return Value::number(m%2 ? n[m/2] : (n[m/2-1]+n[m/2])/2.0); };
