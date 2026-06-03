@@ -224,6 +224,8 @@ int main() {
     checkNum("=NPV(0.1,F2:F4)", 1243.42599549211);
     checkNum("=IRR(F1:F4)", 0.233751928528259);
     checkNum("=IRR(F5:F6)", 0.1);
+    // MIRR (Spec 12): F1:F4 = {-1000,500,500,500}, lai vay 10%, tai dau tu 12%
+    checkNum("=MIRR(F1:F4,0.1,0.12)", 0.190480233637062);
     // IPMT / PPMT (Spec 12): vay 8000, lai 10%/nam, 36 ky
     checkNum("=IPMT(0.1/12,1,36,8000)", -66.6666666666667); // ky 1: -pv*rate
     checkNum("=IPMT(0.1/12,2,36,8000)", -65.0710764092997);

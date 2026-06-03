@@ -571,6 +571,21 @@ QHash<QString, Fn> &fnMap() {
             if (eff <= 0 || npery < 1) throw FormulaError(QStringLiteral("NOMINAL: đối số sai"), ERR_NUM);
             return Value::number(npery * (std::pow(1 + eff, 1.0 / npery) - 1));
         };
+        // MIRR(dòng_tiền, lãi_vay, lãi_tái_đầu_tư): tỉ suất hoàn vốn nội bộ điều chỉnh.
+        r["MIRR"] = [need](const Args &a) {
+            need(a,3,"MIRR");
+            auto v = numbers(std::vector<Value>{a[0]});
+            int n = int(v.size());
+            if (n < 2) throw FormulaError(QStringLiteral("MIRR: cần ít nhất 2 dòng tiền"), ERR_NUM);
+            double fin = toNumber(a[1]), rei = toNumber(a[2]);
+            double fvp = 0, pvn = 0;
+            for (int i = 0; i < n; ++i) {
+                if (v[i] > 0) fvp += v[i] * std::pow(1 + rei, n - 1 - i);
+                else pvn += v[i] / std::pow(1 + fin, i);
+            }
+            if (pvn == 0 || fvp == 0) throw FormulaError(QStringLiteral("MIRR: cần cả dòng tiền âm và dương"), ERR_DIV0);
+            return Value::number(std::pow(-fvp / pvn, 1.0 / (n - 1)) - 1);
+        };
         // NUMBERVALUE(text, [dấu_thập_phân="."], [dấu_nhóm=","]): đổi chuỗi thành số theo dấu phân cách tùy chọn.
         r["NUMBERVALUE"] = [](const Args &a) {
             if (a.size() < 1 || a.size() > 3) argErr("NUMBERVALUE");

@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v0.92.0 — Hàm tài chính MIRR (Spec 12)
+
+- **Thêm hàm `MIRR`** — tính tỉ suất hoàn vốn nội bộ điều chỉnh, tách riêng lãi suất vay vốn và lãi suất tái đầu tư để đánh giá dự án thực tế hơn so với IRR.
+
 ## v0.91.0 — Hàm lãi suất EFFECT & NOMINAL (Spec 12)
 
 - **Thêm hàm `EFFECT`** — tính lãi suất hiệu dụng năm từ lãi suất danh nghĩa và số kỳ ghép lãi mỗi năm.
