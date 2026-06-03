@@ -43,6 +43,7 @@ private slots:
     void fillRight();
     void toggleMergeSelection();
     void toggleShowFormulas(bool on);
+    void showShortcuts();     // hộp thoại bảng phím tắt (Spec 23)
     void showFindReplace();   // định nghĩa ở MainWindowFind.cpp
     void showCondFormat();    // định dạng có điều kiện (MainWindowFind.cpp)
     void showDataValidation();// kiểm tra dữ liệu (MainWindowFind.cpp)

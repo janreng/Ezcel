@@ -13,6 +13,7 @@
 #include "ui/Theme.h"
 #include "model/Stats.h"
 #include "model/AutoSum.h"
+#include "ui/Shortcuts.h"
 
 #include <QTableView>
 #include <QHeaderView>
@@ -29,6 +30,11 @@
 #include <climits>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QDialog>
+#include <QTableWidget>
+#include <QTableWidgetItem>
+#include <QDialogButtonBox>
+#include <QAbstractItemView>
 #include <QInputDialog>
 #include <QApplication>
 #include <QClipboard>
@@ -492,6 +498,8 @@ void MainWindow::buildMenus()
         auto *up = new Updater(ver, this);
         up->checkForUpdates(/*silentIfNone*/ false);
     });
+    QAction *shAct = help->addAction(i18n::tr("help_shortcuts"), this, [this] { showShortcuts(); });
+    shAct->setShortcut(QKeySequence(Qt::Key_F1));
     help->addAction(i18n::tr("help_about"), this, [this] {
 #ifdef EZCEL_VERSION
         const QString ver = QStringLiteral(EZCEL_VERSION);
@@ -501,6 +509,50 @@ void MainWindow::buildMenus()
         QMessageBox::about(this, QStringLiteral("Ezcel"),
             QStringLiteral("Ezcel %1\nBảng tính gọn nhẹ viết bằng C++/Qt6.").arg(ver));
     });
+}
+
+// Hộp thoại tra cứu phím tắt (Spec 23) — bảng nhóm + phím + mô tả.
+void MainWindow::showShortcuts()
+{
+    QDialog dlg(this);
+    dlg.setWindowTitle(i18n::tr("help_shortcuts"));
+    dlg.resize(520, 560);
+    auto *lay = new QVBoxLayout(&dlg);
+
+    auto *tbl = new QTableWidget(&dlg);
+    const auto rows = shortcuts::all();
+    tbl->setColumnCount(2);
+    tbl->setRowCount(rows.size());
+    tbl->setHorizontalHeaderLabels({i18n::tr("col_shortcut_keys"), i18n::tr("col_shortcut_desc")});
+    tbl->verticalHeader()->setVisible(false);
+    tbl->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    tbl->setSelectionMode(QAbstractItemView::NoSelection);
+    tbl->setShowGrid(false);
+
+    QString lastCat;
+    for (int i = 0; i < rows.size(); ++i) {
+        const auto &e = rows.at(i);
+        QString keyText = e.keys;
+        if (e.category != lastCat) { // chèn tiêu đề nhóm vào cột phím
+            keyText = QStringLiteral("【 %1 】\n%2").arg(e.category, e.keys);
+            lastCat = e.category;
+        }
+        auto *kItem = new QTableWidgetItem(keyText);
+        QFont kf = kItem->font(); kf.setBold(true); kItem->setFont(kf);
+        tbl->setItem(i, 0, kItem);
+        tbl->setItem(i, 1, new QTableWidgetItem(e.desc));
+    }
+    tbl->resizeColumnsToContents();
+    tbl->resizeRowsToContents();
+    tbl->horizontalHeader()->setStretchLastSection(true);
+    lay->addWidget(tbl);
+
+    auto *box = new QDialogButtonBox(QDialogButtonBox::Close, &dlg);
+    connect(box, &QDialogButtonBox::rejected, &dlg, &QDialog::reject);
+    connect(box, &QDialogButtonBox::accepted, &dlg, &QDialog::accept);
+    lay->addWidget(box);
+
+    dlg.exec();
 }
 
 void MainWindow::buildToolbar()

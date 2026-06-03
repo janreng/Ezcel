@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v0.57.0 — Bảng tra cứu phím tắt
+
+- **Thêm hộp thoại "Phím tắt"** trong menu Trợ giúp (hoặc nhấn **F1**): liệt kê đầy đủ phím tắt theo nhóm — Di chuyển, Chọn, Soạn thảo, Định dạng, Công thức, Tệp & Trang tính — kèm mô tả tiếng Việt cho từng tổ hợp.
+
 ## v0.56.0 — Thêm kiểu định dạng số
 
 - **Thêm các kiểu định dạng số** trên thanh định dạng: **tiền tệ** ($1,234.00), **khoa học** (1.23E+04) và **phân số** (1/2, 1 1/2) — ngoài số nghìn, phần trăm, ngày đã có.

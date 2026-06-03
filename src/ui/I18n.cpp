@@ -36,6 +36,9 @@ static const QHash<QString, QPair<QString, QString>> &table() {
         {"view_show_formulas", {QStringLiteral("Hiện công thức"), QStringLiteral("Show Formulas")}},
         {"help_check_update", {QStringLiteral("Kiểm tra cập nhật"), QStringLiteral("Check for Updates")}},
         {"help_about",  {QStringLiteral("Giới thiệu Ezcel"), QStringLiteral("About Ezcel")}},
+        {"help_shortcuts", {QStringLiteral("Phím tắt"), QStringLiteral("Keyboard Shortcuts")}},
+        {"col_shortcut_keys", {QStringLiteral("Phím"), QStringLiteral("Keys")}},
+        {"col_shortcut_desc", {QStringLiteral("Hành vi"), QStringLiteral("Action")}},
         {"lang_vi",     {QStringLiteral("Tiếng Việt"),  QStringLiteral("Tiếng Việt")}},
         {"lang_en",     {QStringLiteral("English"),     QStringLiteral("English")}},
         // Sửa
