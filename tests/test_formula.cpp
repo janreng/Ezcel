@@ -154,6 +154,11 @@ int main() {
     checkNum("=FISHERINV(0)", 0);
     checkNum("=FISHERINV(FISHER(0.5))", 0.5);      // khu hoi
     checkNum("=FISHER(FISHERINV(1.2))", 1.2);
+    // PHI / GAUSS (Spec 12) — phan phoi chuan tac
+    checkNum("=PHI(0)", 0.3989422804014327);   // 1/can(2pi)
+    checkNum("=GAUSS(0)", 0);
+    checkNum("=GAUSS(1)", 0.3413447460685429);
+    checkNum("=GAUSS(-1)", -0.3413447460685429); // ham le
     checkStr("=A1/0", "#DIV/0!");
     checkStr("=IFERROR(A1/0,\"err\")", "err");
     checkStr("=AND(A1>5,A2>5)", "true");

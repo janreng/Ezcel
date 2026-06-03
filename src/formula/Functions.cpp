@@ -219,6 +219,9 @@ QHash<QString, Fn> &fnMap() {
         // FISHER(x): biến đổi Fisher z = atanh(x), miền -1<x<1. FISHERINV(y) = tanh(y) (nghịch đảo).
         r["FISHER"] = [need](const Args &a) { need(a,1,"FISHER"); double x = toNumber(a[0]); if (x<=-1||x>=1) throw FormulaError(QStringLiteral("FISHER: miền (-1,1)"), ERR_NUM); return Value::number(0.5 * std::log((1+x)/(1-x))); };
         r["FISHERINV"] = [need](const Args &a) { need(a,1,"FISHERINV"); double y = toNumber(a[0]); double e = std::exp(2*y); return Value::number((e-1)/(e+1)); };
+        // PHI(x): mật độ phân phối chuẩn tắc. GAUSS(x): P(0<Z<x) = Φ(x) - 0.5.
+        r["PHI"] = [need](const Args &a) { need(a,1,"PHI"); double x = toNumber(a[0]); return Value::number(std::exp(-x*x/2.0) / std::sqrt(2.0*M_PI)); };
+        r["GAUSS"] = [need](const Args &a) { need(a,1,"GAUSS"); double x = toNumber(a[0]); return Value::number(0.5 * std::erf(x / std::sqrt(2.0))); };
         // TEXTBEFORE/TEXTAFTER(text, delim, [instance=1], [match_mode=0]): lấy phần trước/sau dấu phân cách.
         // instance âm -> đếm từ cuối; match_mode 1 -> không phân biệt hoa thường.
         auto matchPositions = [](const QString &s, const QString &d, Qt::CaseSensitivity cs) {

@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v0.76.0 — Hàm phân phối chuẩn PHI & GAUSS (Spec 12)
+
+- **Thêm hàm `PHI`** — mật độ xác suất của phân phối chuẩn tắc tại một giá trị.
+- **Thêm hàm `GAUSS`** — xác suất một biến chuẩn tắc rơi vào khoảng từ 0 đến giá trị cho trước.
+
 ## v0.75.0 — Hàm biến đổi Fisher FISHER & FISHERINV (Spec 12)
 
 - **Thêm hàm `FISHER`** — biến đổi Fisher một giá trị (trong khoảng -1 đến 1), thường dùng để chuẩn hóa hệ số tương quan.
