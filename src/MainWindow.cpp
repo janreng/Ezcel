@@ -5,6 +5,7 @@
 #include "view/MergeSpans.h"
 #include "view/CellBorderDelegate.h"
 #include "view/Visibility.h"
+#include "view/HeaderMenu.h"
 #include "model/Filter.h"
 #include "model/PasteOps.h"
 #include "model/GotoSpecial.h"
@@ -86,6 +87,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_view->verticalHeader()->setHighlightSections(true);
     m_view->setItemDelegate(new CellBorderDelegate(m_view, m_view)); // viền xanh ô đang chọn
     m_view->viewport()->installEventFilter(this); // bắt Ctrl+wheel để zoom
+    buildContextMenus(); // menu chuột phải: ô + đầu hàng/cột (Spec 06)
 
     buildFormulaBar();
 
@@ -231,6 +233,124 @@ void MainWindow::closeSheet(int i)
     m_sheetTabs->setCurrentIndex(cur);
     m_sheetTabs->blockSignals(false);
     switchToSheet(cur);
+}
+
+// -------------------------------------------------- menu chuột phải (Spec 06)
+// Cờ ẩn của các section trên một header (để quyết định bật "Hiện lại").
+static QVector<bool> hiddenFlags(QHeaderView *hdr, int count)
+{
+    QVector<bool> f(count, false);
+    for (int i = 0; i < count; ++i) f[i] = hdr->isSectionHidden(i);
+    return f;
+}
+
+void MainWindow::buildContextMenus()
+{
+    // --- Menu trên ô (vùng dữ liệu) ---
+    m_view->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(m_view, &QTableView::customContextMenuRequested, this, [this](const QPoint &p) {
+        // Nếu phải chuột ngoài vùng chọn -> chuyển ô hiện hành tới ô bị bấm.
+        QModelIndex at = m_view->indexAt(p);
+        if (at.isValid() && !m_view->selectionModel()->isSelected(at))
+            m_view->setCurrentIndex(at);
+        QMenu menu(this);
+        menu.addAction(i18n::tr("ctx_cut"), this, &MainWindow::cutSelection);
+        menu.addAction(i18n::tr("ctx_copy"), this, &MainWindow::copySelection);
+        menu.addAction(i18n::tr("ctx_paste"), this, &MainWindow::pasteClipboard);
+        menu.addAction(i18n::tr("ctx_paste_special"), this, &MainWindow::pasteSpecial);
+        menu.addSeparator();
+        menu.addAction(i18n::tr("st_ins_row"), this, [this] {
+            int t, l, b, r; if (selectionBox(t, l, b, r)) m_model->insertRows(t, b - t + 1);
+        });
+        menu.addAction(i18n::tr("st_ins_col"), this, [this] {
+            int t, l, b, r; if (selectionBox(t, l, b, r)) m_model->insertColumns(l, r - l + 1);
+        });
+        menu.addAction(i18n::tr("st_del_row"), this, [this] {
+            int t, l, b, r; if (selectionBox(t, l, b, r)) m_model->removeRows(t, b - t + 1);
+        });
+        menu.addAction(i18n::tr("st_del_col"), this, [this] {
+            int t, l, b, r; if (selectionBox(t, l, b, r)) m_model->removeColumns(l, r - l + 1);
+        });
+        menu.addAction(i18n::tr("ctx_clear"), this, &MainWindow::clearSelection);
+        menu.addSeparator();
+        menu.addAction(i18n::tr("data_filter_values"), this, &MainWindow::filterByValues);
+        menu.addAction(i18n::tr("data_sort_asc"), this, [this] {
+            int t, l, b, r; if (!selectionBox(t, l, b, r)) return;
+            int kc = m_view->currentIndex().isValid() ? m_view->currentIndex().column() : l;
+            m_model->sortRange(t, l, b, r, qBound(l, kc, r), true);
+        });
+        menu.addAction(i18n::tr("data_sort_desc"), this, [this] {
+            int t, l, b, r; if (!selectionBox(t, l, b, r)) return;
+            int kc = m_view->currentIndex().isValid() ? m_view->currentIndex().column() : l;
+            m_model->sortRange(t, l, b, r, qBound(l, kc, r), false);
+        });
+        menu.addAction(i18n::tr("ctx_pick_list"), this, &MainWindow::pickFromList);
+        menu.exec(m_view->viewport()->mapToGlobal(p));
+    });
+
+    // --- Menu trên ô đầu HÀNG (vertical header) ---
+    QHeaderView *vh = m_view->verticalHeader();
+    vh->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(vh, &QHeaderView::customContextMenuRequested, this, [this, vh](const QPoint &p) {
+        int sec = vh->logicalIndexAt(p);
+        if (sec < 0) return;
+        int t, l, b, r;
+        if (!selectionBox(t, l, b, r) || sec < t || sec > b) { t = b = sec; }
+        QMenu menu(this);
+        menu.addAction(i18n::tr("hdr_insert_row"), this, [this, t, b] { m_model->insertRows(t, b - t + 1); });
+        menu.addAction(i18n::tr("hdr_delete_row"), this, [this, t, b] { m_model->removeRows(t, b - t + 1); });
+        menu.addAction(i18n::tr("ctx_clear"), this, &MainWindow::clearSelection);
+        menu.addSeparator();
+        menu.addAction(i18n::tr("hdr_row_height"), this, [this, t, b] {
+            bool ok = false;
+            int cur = m_view->rowHeight(t);
+            int h = QInputDialog::getInt(this, i18n::tr("hdr_row_height"),
+                                         i18n::tr("hdr_row_height_prompt"), cur, 1, 2000, 1, &ok);
+            if (ok) for (int row = t; row <= b; ++row) m_view->setRowHeight(row, h);
+        });
+        menu.addAction(i18n::tr("hdr_autofit_row"), this, [this, t, b] {
+            for (int row = t; row <= b; ++row) m_view->resizeRowToContents(row);
+        });
+        menu.addSeparator();
+        menu.addAction(i18n::tr("hdr_hide_row"), this, [this, t, b] { viewutil::hideRows(m_view, t, b); });
+        QAction *un = menu.addAction(i18n::tr("hdr_unhide_row"), this, [this, t, b] {
+            viewutil::unhideRange(m_view, t, 0, b, 0);
+        });
+        un->setEnabled(headermenu::canUnhide(hiddenFlags(vh, m_model->rowCount()), t, b));
+        menu.exec(vh->mapToGlobal(p));
+    });
+
+    // --- Menu trên ô đầu CỘT (horizontal header) ---
+    QHeaderView *hh = m_view->horizontalHeader();
+    hh->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(hh, &QHeaderView::customContextMenuRequested, this, [this, hh](const QPoint &p) {
+        int sec = hh->logicalIndexAt(p);
+        if (sec < 0) return;
+        int t, l, b, r;
+        if (!selectionBox(t, l, b, r) || sec < l || sec > r) { l = r = sec; }
+        QMenu menu(this);
+        menu.addAction(i18n::tr("hdr_insert_col"), this, [this, l, r] { m_model->insertColumns(l, r - l + 1); });
+        menu.addAction(i18n::tr("hdr_delete_col"), this, [this, l, r] { m_model->removeColumns(l, r - l + 1); });
+        menu.addAction(i18n::tr("ctx_clear"), this, &MainWindow::clearSelection);
+        menu.addSeparator();
+        menu.addAction(i18n::tr("hdr_col_width"), this, [this, l, r] {
+            bool ok = false;
+            int cur = m_view->columnWidth(l);
+            int w = QInputDialog::getInt(this, i18n::tr("hdr_col_width"),
+                                         i18n::tr("hdr_col_width_prompt"), cur, 1, 4000, 1, &ok);
+            if (ok) for (int c = l; c <= r; ++c) m_view->setColumnWidth(c, w);
+        });
+        menu.addAction(i18n::tr("hdr_autofit_col"), this, [this, l, r] {
+            for (int c = l; c <= r; ++c) m_view->resizeColumnToContents(c);
+        });
+        menu.addSeparator();
+        menu.addAction(i18n::tr("hdr_hide_col"), this, [this, l, r] { viewutil::hideCols(m_view, l, r); });
+        QAction *un = menu.addAction(i18n::tr("hdr_unhide_col"), this, [this, l, r] {
+            viewutil::unhideRange(m_view, 0, l, 0, r);
+        });
+        un->setEnabled(headermenu::canUnhide(hiddenFlags(hh, m_model->columnCount()), l, r));
+        menu.exec(hh->mapToGlobal(p));
+    });
 }
 
 // ---------------------------------------------------------------- thanh công thức

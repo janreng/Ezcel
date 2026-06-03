@@ -63,6 +63,7 @@ private slots:
 
 private:
     void buildMenus();
+    void buildContextMenus();    // menu chuột phải ô + đầu hàng/cột (Spec 06)
     void buildToolbar();
     void buildFormatToolbar();   // định nghĩa ở MainWindowFormat.cpp
     void buildFormulaBar();

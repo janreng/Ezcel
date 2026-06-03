@@ -64,6 +64,28 @@ static const QHash<QString, QPair<QString, QString>> &table() {
         {"data_clear_cond", {QStringLiteral("Xóa định dạng có điều kiện"), QStringLiteral("Clear Conditional Formatting")}},
         {"data_filter", {QStringLiteral("Lọc theo cột hiện tại..."), QStringLiteral("Filter by Current Column...")}},
         {"data_clear_filter", {QStringLiteral("Bỏ lọc (hiện tất cả)"), QStringLiteral("Clear Filter (Show All)")}},
+        {"data_filter_values", {QStringLiteral("Lọc theo giá trị..."), QStringLiteral("Filter by Values...")}},
+        // Menu chuột phải (Spec 06)
+        {"ctx_cut",     {QStringLiteral("Cắt"),            QStringLiteral("Cut")}},
+        {"ctx_copy",    {QStringLiteral("Sao chép"),       QStringLiteral("Copy")}},
+        {"ctx_paste",   {QStringLiteral("Dán"),            QStringLiteral("Paste")}},
+        {"ctx_paste_special", {QStringLiteral("Dán đặc biệt..."), QStringLiteral("Paste Special...")}},
+        {"ctx_clear",   {QStringLiteral("Xóa nội dung"),   QStringLiteral("Clear Contents")}},
+        {"ctx_pick_list", {QStringLiteral("Chọn từ danh sách..."), QStringLiteral("Pick From List...")}},
+        {"hdr_insert_row", {QStringLiteral("Chèn hàng phía trên"), QStringLiteral("Insert Rows Above")}},
+        {"hdr_delete_row", {QStringLiteral("Xóa hàng"),    QStringLiteral("Delete Rows")}},
+        {"hdr_row_height", {QStringLiteral("Chiều cao hàng..."), QStringLiteral("Row Height...")}},
+        {"hdr_row_height_prompt", {QStringLiteral("Chiều cao (điểm ảnh):"), QStringLiteral("Height (pixels):")}},
+        {"hdr_autofit_row", {QStringLiteral("Tự khít chiều cao hàng"), QStringLiteral("AutoFit Row Height")}},
+        {"hdr_hide_row", {QStringLiteral("Ẩn hàng"),       QStringLiteral("Hide Rows")}},
+        {"hdr_unhide_row", {QStringLiteral("Hiện lại hàng"), QStringLiteral("Unhide Rows")}},
+        {"hdr_insert_col", {QStringLiteral("Chèn cột phía trước"), QStringLiteral("Insert Columns Left")}},
+        {"hdr_delete_col", {QStringLiteral("Xóa cột"),     QStringLiteral("Delete Columns")}},
+        {"hdr_col_width", {QStringLiteral("Độ rộng cột..."), QStringLiteral("Column Width...")}},
+        {"hdr_col_width_prompt", {QStringLiteral("Độ rộng (điểm ảnh):"), QStringLiteral("Width (pixels):")}},
+        {"hdr_autofit_col", {QStringLiteral("Tự khít độ rộng cột"), QStringLiteral("AutoFit Column Width")}},
+        {"hdr_hide_col", {QStringLiteral("Ẩn cột"),        QStringLiteral("Hide Columns")}},
+        {"hdr_unhide_col", {QStringLiteral("Hiện lại cột"), QStringLiteral("Unhide Columns")}},
     };
     return t;
 }

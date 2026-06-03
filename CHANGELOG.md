@@ -1,5 +1,12 @@
 # Lịch sử thay đổi
 
+## v1.22.0 — Menu chuột phải trên ô và đầu hàng/cột (Spec 06)
+
+- **Bấm chuột phải vào ô** mở menu nhanh: Cắt, Sao chép, Dán, Dán đặc biệt, Chèn/Xóa hàng-cột, Xóa nội dung, Lọc theo giá trị, Sắp xếp tăng/giảm, Chọn từ danh sách.
+- **Bấm chuột phải vào ô đầu hàng** mở menu: Chèn hàng phía trên, Xóa hàng, Xóa nội dung, Chiều cao hàng... (nhập số), Tự khít chiều cao, Ẩn/Hiện lại hàng.
+- **Bấm chuột phải vào ô đầu cột** mở menu: Chèn cột phía trước, Xóa cột, Độ rộng cột... (nhập số), Tự khít độ rộng, Ẩn/Hiện lại cột.
+- Mục **"Hiện lại"** chỉ bật khi trong vùng chọn thật sự có hàng/cột đang ẩn.
+
 ## v1.21.0 — Công cụ dữ liệu: xóa hàng trùng & tách cột (Spec 27)
 
 - **Thêm "Xóa hàng trùng"** trong menu Dữ liệu: tự tìm và xóa các hàng có nội dung trùng nhau (giữ lần xuất hiện đầu, giữ hàng tiêu đề).
