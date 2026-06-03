@@ -6,6 +6,8 @@
 #include <QSet>
 #include <QVariant>
 #include <QFont>
+#include <QMap>
+#include <QPair>
 #include <optional>
 
 // Vùng ô gộp [top,left]..[bottom,right] (port tuple (t,l,b,r) của Python).
@@ -60,6 +62,10 @@ public:
     void setFormat(int top, int left, int bottom, int right, const Format &attrs);
     // Định dạng hiện tại của 1 ô (để đồng bộ nút toolbar / chọn màu sẵn).
     Format formatAt(int row, int col) const { return m_fmt.value(key(row, col)); }
+    // Toàn bộ định dạng theo (row,col) — để lưu ra file.
+    QMap<QPair<int, int>, Format> cellFormats() const;
+    // Nạp định dạng từ file (thay toàn bộ, KHÔNG undo — dùng khi mở file).
+    void setCellFormats(const QMap<QPair<int, int>, Format> &fmts);
 
     // Hiện công thức gốc thay vì kết quả (Ctrl+`).
     bool showFormulas() const { return m_showFormulas; }

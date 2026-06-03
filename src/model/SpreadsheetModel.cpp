@@ -281,6 +281,22 @@ void SpreadsheetModel::setFormat(int top, int left, int bottom, int right, const
     emit dataChanged(index(top, left), index(bottom, right));
 }
 
+QMap<QPair<int, int>, SpreadsheetModel::Format> SpreadsheetModel::cellFormats() const {
+    QMap<QPair<int, int>, Format> m;
+    for (auto it = m_fmt.constBegin(); it != m_fmt.constEnd(); ++it)
+        if (!it.value().isEmpty()) m.insert({keyRow(it.key()), keyCol(it.key())}, it.value());
+    return m;
+}
+
+void SpreadsheetModel::setCellFormats(const QMap<QPair<int, int>, Format> &fmts) {
+    m_fmt.clear();
+    for (auto it = fmts.constBegin(); it != fmts.constEnd(); ++it)
+        if (!it.value().isEmpty()) m_fmt.insert(key(it.key().first, it.key().second), it.value());
+    m_fontCache.clear();
+    if (rowCount() && columnCount())
+        emit dataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1));
+}
+
 // ---------------------------------------------------------------- hiện công thức
 void SpreadsheetModel::setShowFormulas(bool on) {
     if (on == m_showFormulas) return;

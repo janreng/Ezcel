@@ -251,6 +251,7 @@ void MainWindow::openPath(const QString &path)
             m_model->loadGrid(sh.rows);
             for (const auto &m : sh.merges)
                 m_model->mergeCells(m.top, m.left, m.bottom, m.right);
+            if (!sh.formats.isEmpty()) m_model->setCellFormats(sh.formats);
         }
     } else {
         QMessageBox::warning(this, QStringLiteral("Ezcel"),
@@ -294,7 +295,8 @@ bool MainWindow::saveTo(const QString &path)
     } else if (suffix == "xlsx" || suffix == "xlsm") {
         QVector<xlsxio::Merge> merges;
         for (const auto &m : m_model->merges()) merges.push_back({m.top, m.left, m.bottom, m.right});
-        ok = xlsxio::saveXlsx(path, QFileInfo(path).completeBaseName(), m_model->grid(), merges);
+        ok = xlsxio::saveXlsx(path, QFileInfo(path).completeBaseName(), m_model->grid(),
+                              merges, m_model->cellFormats());
     } else {
         QMessageBox::warning(this, QStringLiteral("Ezcel"),
                              QStringLiteral("Định dạng không hỗ trợ: .%1").arg(suffix));

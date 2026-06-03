@@ -128,6 +128,31 @@ int main(int argc, char **argv) {
         ok(sh.merges[0] == (xlsxio::Merge{0, 0, 0, 2}), "xlsx vung gop A1:C1");
     }
 
+    // --- XLSX round-trip ĐỊNH DẠNG (font/bold/bg/halign/number_format) ---
+    {
+        QTemporaryDir dir;
+        QString path = dir.path() + "/fmt.xlsx";
+        Grid src = g({{"A", "B"}, {"1", "2"}});
+        QMap<QPair<int,int>, xlsxio::Attrs> fmts;
+        xlsxio::Attrs a0; a0.insert("bold", true); a0.insert("bg", "#ff0000");
+        a0.insert("halign", "center"); a0.insert("size", 14);
+        fmts.insert({0, 0}, a0);
+        xlsxio::Attrs a1; a1.insert("number_format", "0.00%"); a1.insert("italic", true);
+        fmts.insert({1, 1}, a1);
+
+        ok(xlsxio::saveXlsx(path, "F", src, {}, fmts), "saveXlsx co dinh dang");
+        xlsxio::Sheet sh;
+        ok(xlsxio::loadXlsx(path, sh), "loadXlsx co dinh dang");
+        xlsxio::Attrs r0 = sh.formats.value({0, 0});
+        ok(r0.value("bold").toBool(), "xlsx giu bold");
+        ok(r0.value("bg").toString().toLower() == "#ff0000", "xlsx giu mau nen do");
+        ok(r0.value("halign").toString() == "center", "xlsx giu can giua");
+        ok(r0.value("size").toInt() == 14, "xlsx giu co chu 14");
+        xlsxio::Attrs r1 = sh.formats.value({1, 1});
+        ok(r1.value("number_format").toString() == "0.00%", "xlsx giu number_format");
+        ok(r1.value("italic").toBool(), "xlsx giu italic");
+    }
+
     // --- XLSX load file khong ton tai ---
     {
         xlsxio::Sheet sh;
