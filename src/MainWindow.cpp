@@ -15,6 +15,7 @@
 #include "model/AutoSum.h"
 #include "ui/Shortcuts.h"
 #include "ui/Zoom.h"
+#include "ui/SheetNav.h"
 
 #include <QTableView>
 #include <QHeaderView>
@@ -38,6 +39,8 @@
 #include <QAbstractItemView>
 #include <QSlider>
 #include <QToolButton>
+#include <QShortcut>
+#include <QColorDialog>
 #include <QInputDialog>
 #include <QApplication>
 #include <QClipboard>
@@ -97,23 +100,31 @@ MainWindow::MainWindow(QWidget *parent)
     tabLay->addStretch();
     connect(addSheetBtn, &QToolButton::clicked, this, [this] { addSheet(); });
     connect(m_sheetTabs, &QTabBar::currentChanged, this, &MainWindow::switchToSheet);
-    connect(m_sheetTabs, &QTabBar::tabBarDoubleClicked, this, [this](int i) {
-        bool ok = false;
-        QString n = QInputDialog::getText(this, QStringLiteral("Đổi tên trang"),
-            QStringLiteral("Tên trang:"), QLineEdit::Normal, m_sheetTabs->tabText(i), &ok);
-        if (ok && !n.isEmpty()) m_sheetTabs->setTabText(i, n);
+    connect(m_sheetTabs, &QTabBar::tabBarDoubleClicked, this, [this](int i) { renameSheet(i); });
+    connect(m_sheetTabs, &QTabBar::tabCloseRequested, this, &MainWindow::closeSheet);
+
+    // Menu chuột phải trên tab: Đổi tên / Màu tab / Xóa (Spec 10).
+    m_sheetTabs->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(m_sheetTabs, &QTabBar::customContextMenuRequested, this, [this](const QPoint &p) {
+        int i = m_sheetTabs->tabAt(p);
+        if (i < 0) return;
+        QMenu menu(this);
+        menu.addAction(QStringLiteral("Đổi tên…"), this, [this, i] { renameSheet(i); });
+        menu.addAction(QStringLiteral("Màu tab…"), this, [this, i] {
+            QColor c = QColorDialog::getColor(m_sheetTabs->tabTextColor(i), this, QStringLiteral("Màu tab"));
+            if (c.isValid()) m_sheetTabs->setTabTextColor(i, c);
+        });
+        menu.addSeparator();
+        QAction *del = menu.addAction(QStringLiteral("Xóa trang"), this, [this, i] { closeSheet(i); });
+        del->setEnabled(m_sheets.size() > 1);
+        menu.exec(m_sheetTabs->mapToGlobal(p));
     });
-    connect(m_sheetTabs, &QTabBar::tabCloseRequested, this, [this](int i) {
-        if (m_sheets.size() <= 1) return; // luôn giữ ít nhất 1 trang
-        m_sheetTabs->blockSignals(true);
-        m_sheets[i]->deleteLater();
-        m_sheets.remove(i);
-        m_sheetTabs->removeTab(i);
-        int cur = qBound(0, m_sheetTabs->currentIndex(), m_sheets.size() - 1);
-        m_sheetTabs->setCurrentIndex(cur);
-        m_sheetTabs->blockSignals(false);
-        switchToSheet(cur);
-    });
+
+    // Ctrl+PageDown / Ctrl+PageUp: chuyển trang sau / trước (quay vòng).
+    auto *nextSh = new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_PageDown), this);
+    connect(nextSh, &QShortcut::activated, this, [this] { gotoSheetRelative(1); });
+    auto *prevSh = new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_PageUp), this);
+    connect(prevSh, &QShortcut::activated, this, [this] { gotoSheetRelative(-1); });
 
     auto *central = new QWidget(this);
     auto *lay = new QVBoxLayout(central);
@@ -176,6 +187,37 @@ void MainWindow::switchToSheet(int i)
     bindActiveModel();
     onCurrentCellChanged(m_view->currentIndex(), QModelIndex());
     updateStats();
+}
+
+// Chuyển trang theo bước (Ctrl+PageDown/Up), quay vòng — dùng sheetnav::wrapIndex.
+void MainWindow::gotoSheetRelative(int delta)
+{
+    int next = sheetnav::wrapIndex(m_sheetTabs->currentIndex(), m_sheets.size(), delta);
+    m_sheetTabs->setCurrentIndex(next); // kích hoạt switchToSheet
+}
+
+// Đổi tên trang (double-click hoặc menu chuột phải).
+void MainWindow::renameSheet(int i)
+{
+    if (i < 0 || i >= m_sheets.size()) return;
+    bool ok = false;
+    QString n = QInputDialog::getText(this, QStringLiteral("Đổi tên trang"),
+        QStringLiteral("Tên trang:"), QLineEdit::Normal, m_sheetTabs->tabText(i), &ok);
+    if (ok && !n.isEmpty()) m_sheetTabs->setTabText(i, n);
+}
+
+// Xóa trang (giữ tối thiểu 1 trang).
+void MainWindow::closeSheet(int i)
+{
+    if (i < 0 || i >= m_sheets.size() || m_sheets.size() <= 1) return;
+    m_sheetTabs->blockSignals(true);
+    m_sheets[i]->deleteLater();
+    m_sheets.remove(i);
+    m_sheetTabs->removeTab(i);
+    int cur = qBound(0, m_sheetTabs->currentIndex(), m_sheets.size() - 1);
+    m_sheetTabs->setCurrentIndex(cur);
+    m_sheetTabs->blockSignals(false);
+    switchToSheet(cur);
 }
 
 // ---------------------------------------------------------------- thanh công thức

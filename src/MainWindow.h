@@ -65,6 +65,9 @@ private:
     // --- nhiều trang tính (multi-sheet) ---
     void addSheet(const QString &name = QString());
     void switchToSheet(int i);
+    void gotoSheetRelative(int delta); // Ctrl+PageDown/Up (Spec 10)
+    void renameSheet(int i);
+    void closeSheet(int i);
     void bindActiveModel();                    // nối tín hiệu cho model đang hoạt động
     bool saveTo(const QString &path);          // ghi theo phần mở rộng
     void doCopy(bool cut);                      // copy/cut chung một đường

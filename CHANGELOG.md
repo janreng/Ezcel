@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v0.60.0 — Điều hướng & quản lý trang tính (Spec 10)
+
+- **Chuyển nhanh giữa các trang tính bằng Ctrl + Page Down / Page Up** (quay vòng khi tới trang cuối/đầu).
+- **Bấm chuột phải vào tab trang tính** để Đổi tên, đặt **Màu tab**, hoặc Xóa trang.
+
 ## v0.59.0 — Thanh trượt thu phóng (Spec 11)
 
 - **Thêm thanh trượt thu phóng** ở góc phải thanh trạng thái: nút **−** / **+** đổi 10% mỗi nấc, kéo trượt từ 10% đến 400%, bấm vào số **%** để chọn nhanh mức dựng sẵn (25, 50, 75, 100, 150, 200, 400). Cuộn **Ctrl + lăn chuột** vẫn thu phóng như cũ.
