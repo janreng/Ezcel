@@ -1,4 +1,6 @@
 /build/
+/dist/
+/installer/
 *.user
 *.exe
 *.o
