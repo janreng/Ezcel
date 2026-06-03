@@ -671,6 +671,30 @@ QHash<QString, Fn> &fnMap() {
             double intercept = regression(reg, "FORECAST", false);
             return Value::number(intercept + slope * xv);
         };
+        // TREND(known_y, known_x, new_x): dự báo tuyến tính tại new_x.
+        r["TREND"] = [regression](const Args &a) {
+            if (a.size() != 3) argErr("TREND");
+            Args reg = { a[0], a[1] };
+            double slope = regression(reg, "TREND", true), intercept = regression(reg, "TREND", false);
+            return Value::number(intercept + slope * toNumber(a[2]));
+        };
+        // GROWTH(known_y, known_x, new_x): dự báo theo hàm mũ (hồi quy trên ln y).
+        r["GROWTH"] = [](const Args &a) {
+            if (a.size() != 3) argErr("GROWTH");
+            auto y = numbers(std::vector<Value>{a[0]});
+            auto x = numbers(std::vector<Value>{a[1]});
+            if (x.size() != y.size() || x.empty()) throw FormulaError(QStringLiteral("GROWTH: hai vùng phải cùng kích thước"), ERR_NA);
+            int n = int(x.size());
+            double mx = 0, mly = 0;
+            std::vector<double> ly(n);
+            for (int i = 0; i < n; ++i) { if (y[i] <= 0) throw FormulaError(QStringLiteral("GROWTH: cần y > 0"), ERR_NUM); ly[i] = std::log(y[i]); mx += x[i]; mly += ly[i]; }
+            mx /= n; mly /= n;
+            double sxy = 0, sxx = 0;
+            for (int i = 0; i < n; ++i) { sxy += (x[i]-mx)*(ly[i]-mly); sxx += (x[i]-mx)*(x[i]-mx); }
+            if (sxx == 0) throw FormulaError(QStringLiteral("GROWTH: phương sai x bằng 0"), ERR_DIV0);
+            double slope = sxy / sxx, intercept = mly - slope * mx;
+            return Value::number(std::exp(intercept + slope * toNumber(a[2])));
+        };
         // STEYX(known_y, known_x): sai số chuẩn của giá trị y dự báo theo đường hồi quy.
         r["STEYX"] = [](const Args &a) {
             if (a.size() != 2) argErr("STEYX");

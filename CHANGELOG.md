@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v1.9.0 — Hàm dự báo TREND & GROWTH (Spec 12)
+
+- **Thêm hàm `TREND`** — dự báo giá trị theo xu hướng tuyến tính từ dữ liệu đã biết.
+- **Thêm hàm `GROWTH`** — dự báo giá trị theo xu hướng tăng trưởng hàm mũ.
+
 ## v1.8.0 — Hàm lượng giác nghịch đảo số phức (Spec 12)
 
 - **Thêm hàm `IMCSC`, `IMSEC` và `IMCOT`** — tính cosec, sec và cotang của một số phức (nghịch đảo của sin, cos và tang).
