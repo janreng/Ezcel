@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v0.87.0 — Hàm tài chính RATE (Spec 12)
+
+- **Thêm hàm `RATE`** — tính lãi suất mỗi kỳ của một khoản vay hoặc khoản đầu tư, hoàn thiện bộ hàm giá trị thời gian của tiền (FV, PV, PMT, NPER, RATE).
+
 ## v0.86.0 — Hàm tài chính IPMT & PPMT (Spec 12)
 
 - **Thêm hàm `IPMT`** — tính phần tiền lãi trong khoản trả của một kỳ nhất định.

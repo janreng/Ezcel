@@ -229,6 +229,9 @@ int main() {
     checkNum("=IPMT(0.1/12,2,36,8000)", -65.0710764092997);
     checkNum("=PPMT(0.1/12,1,36,8000)", -191.470830884034);
     checkNum("=IPMT(0.1/12,1,36,8000)+PPMT(0.1/12,1,36,8000)", -258.137497550701); // = PMT
+    // RATE (Spec 12) — lai suat moi ky (khu hoi PMT/PV)
+    checkNum("=RATE(1,0,-100,110)", 0.1);  // -100*(1+r)+110=0
+    checkNum("=RATE(36,-258.137497550701,8000)", 0.1/12); // khu hoi PMT
     checkStr("=A1/0", "#DIV/0!");
     checkStr("=IFERROR(A1/0,\"err\")", "err");
     checkStr("=AND(A1>5,A2>5)", "true");

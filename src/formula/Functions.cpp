@@ -487,6 +487,30 @@ QHash<QString, Fn> &fnMap() {
             }
             return Value::number(pmt - ip);
         };
+        // RATE(nper, pmt, pv, [fv=0], [type=0], [guess=0.1]): lãi suất mỗi kỳ — lặp Newton.
+        r["RATE"] = [](const Args &a) {
+            if (a.size() < 3 || a.size() > 6) argErr("RATE");
+            double n = toNumber(a[0]), pmt = toNumber(a[1]), pv = toNumber(a[2]);
+            double fv = a.size() >= 4 ? toNumber(a[3]) : 0.0;
+            int type = a.size() >= 5 ? toInt(a[4]) : 0;
+            double rate = a.size() >= 6 ? toNumber(a[5]) : 0.1;
+            auto f = [&](double rr) {
+                if (std::abs(rr) < 1e-15) return pv + pmt * n + fv;
+                double p = std::pow(1 + rr, n);
+                return pv * p + pmt * (1 + rr * type) * (p - 1) / rr + fv;
+            };
+            for (int it = 0; it < 100; ++it) {
+                double f0 = f(rate);
+                if (std::abs(f0) < 1e-9) return Value::number(rate);
+                double h = 1e-6;
+                double d = (f(rate + h) - f(rate - h)) / (2 * h);
+                if (d == 0) break;
+                double nr = rate - f0 / d;
+                if (std::abs(nr - rate) < 1e-11) return Value::number(nr);
+                rate = nr;
+            }
+            throw FormulaError(QStringLiteral("RATE: không hội tụ"), ERR_NUM);
+        };
         // NUMBERVALUE(text, [dấu_thập_phân="."], [dấu_nhóm=","]): đổi chuỗi thành số theo dấu phân cách tùy chọn.
         r["NUMBERVALUE"] = [](const Args &a) {
             if (a.size() < 1 || a.size() > 3) argErr("NUMBERVALUE");
