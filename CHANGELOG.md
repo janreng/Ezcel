@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v0.96.0 — Hàm COVAR & FORECAST (Spec 12)
+
+- **Thêm hàm `COVAR`** — tính hiệp phương sai tổng thể giữa hai vùng dữ liệu.
+- **Thêm hàm `FORECAST`** — dự báo một giá trị theo đường hồi quy tuyến tính từ dữ liệu đã biết.
+
 ## v0.95.0 — Hàm tương quan CORREL, PEARSON & RSQ (Spec 12)
 
 - **Thêm hàm `CORREL` và `PEARSON`** — tính hệ số tương quan giữa hai vùng dữ liệu (giá trị từ -1 đến 1).

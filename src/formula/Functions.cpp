@@ -649,6 +649,28 @@ QHash<QString, Fn> &fnMap() {
         r["CORREL"]  = [correlVal](const Args &a) { if (a.size()!=2) argErr("CORREL");  return Value::number(correlVal(a, "CORREL")); };
         r["PEARSON"] = [correlVal](const Args &a) { if (a.size()!=2) argErr("PEARSON"); return Value::number(correlVal(a, "PEARSON")); };
         r["RSQ"]     = [correlVal](const Args &a) { if (a.size()!=2) argErr("RSQ"); double c = correlVal(a, "RSQ"); return Value::number(c*c); };
+        // COVAR(mảng1, mảng2): hiệp phương sai tổng thể (chia cho n).
+        r["COVAR"] = [](const Args &a) {
+            if (a.size() != 2) argErr("COVAR");
+            auto y = numbers(std::vector<Value>{a[0]});
+            auto x = numbers(std::vector<Value>{a[1]});
+            if (x.size() != y.size() || x.empty()) throw FormulaError(QStringLiteral("COVAR: hai vùng phải cùng kích thước"), ERR_NA);
+            int n = int(x.size());
+            double mx = 0, my = 0;
+            for (int i = 0; i < n; ++i) { mx += x[i]; my += y[i]; }
+            mx /= n; my /= n;
+            double s = 0; for (int i = 0; i < n; ++i) s += (x[i]-mx)*(y[i]-my);
+            return Value::number(s / n);
+        };
+        // FORECAST(x, known_y, known_x): dự báo y theo đường hồi quy tuyến tính.
+        r["FORECAST"] = [regression](const Args &a) {
+            if (a.size() != 3) argErr("FORECAST");
+            double xv = toNumber(a[0]);
+            Args reg = { a[1], a[2] };
+            double slope = regression(reg, "FORECAST", true);
+            double intercept = regression(reg, "FORECAST", false);
+            return Value::number(intercept + slope * xv);
+        };
         // NUMBERVALUE(text, [dấu_thập_phân="."], [dấu_nhóm=","]): đổi chuỗi thành số theo dấu phân cách tùy chọn.
         r["NUMBERVALUE"] = [](const Args &a) {
             if (a.size() < 1 || a.size() > 3) argErr("NUMBERVALUE");
