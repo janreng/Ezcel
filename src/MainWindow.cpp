@@ -2,6 +2,7 @@
 #include "model/SpreadsheetModel.h"
 #include "io/Csv.h"
 #include "io/Xlsx.h"
+#include "view/MergeSpans.h"
 
 #include <QTableView>
 #include <QHeaderView>
@@ -59,6 +60,10 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_model, &SpreadsheetModel::contentChanged, this, [this] {
         // Cập nhật thanh công thức khi nội dung ô hiện tại đổi (vd undo/redo).
         onCurrentCellChanged(m_view->currentIndex(), QModelIndex());
+    });
+    // Ô gộp đổi -> cập nhật span của lưới (hiện gộp trực quan).
+    connect(m_model, &SpreadsheetModel::mergesChanged, this, [this] {
+        viewutil::applyMergeSpans(m_view, m_model->merges());
     });
 
     updateTitle();

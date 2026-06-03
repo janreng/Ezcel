@@ -45,10 +45,15 @@ add_library(ezcel_io STATIC src/io/Csv.cpp src/io/Csv.h src/io/Xlsx.cpp src/io/X
 target_include_directories(ezcel_io PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(ezcel_io PUBLIC Qt6::Core Qt6::Gui QXlsx::QXlsx)
 
+# --- Tiện ích view (span ô gộp...) — cần Widgets -> static lib (test headless được).
+add_library(ezcel_view STATIC src/view/MergeSpans.cpp src/view/MergeSpans.h)
+target_include_directories(ezcel_view PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_link_libraries(ezcel_view PUBLIC Qt6::Core Qt6::Gui Qt6::Widgets)
+
 # --- App GUI ---
 qt_add_executable(Ezcel WIN32 src/main.cpp src/MainWindow.cpp src/MainWindowFormat.cpp src/MainWindow.h)
 target_include_directories(Ezcel PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
-target_link_libraries(Ezcel PRIVATE ezcel_model ezcel_io ezcel_formula Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Svg)
+target_link_libraries(Ezcel PRIVATE ezcel_model ezcel_io ezcel_view ezcel_formula Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Svg)
 
 # --- Tests (console, headless) ---
 add_executable(test_formula tests/test_formula.cpp)
@@ -60,7 +65,11 @@ target_link_libraries(test_model PRIVATE ezcel_model Qt6::Core Qt6::Gui)
 add_executable(test_io tests/test_io.cpp)
 target_link_libraries(test_io PRIVATE ezcel_io Qt6::Core)
 
+add_executable(test_view tests/test_view.cpp)
+target_link_libraries(test_view PRIVATE ezcel_view ezcel_model Qt6::Core Qt6::Gui Qt6::Widgets)
+
 enable_testing()
 add_test(NAME formula COMMAND test_formula)
 add_test(NAME model COMMAND test_model)
 add_test(NAME io COMMAND test_io)
+add_test(NAME view COMMAND test_view)
