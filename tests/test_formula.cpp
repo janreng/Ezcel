@@ -188,6 +188,14 @@ int main() {
     checkNum("=CONVERT(100,\"C\",\"F\")", 212);
     checkNum("=CONVERT(300,\"K\",\"C\")", 26.85);
     checkStr("=CONVERT(1,\"kg\",\"m\")", "#N/A"); // khac nhom
+    // CONVERT mo rong dien tich + the tich (Spec 12)
+    checkNum("=CONVERT(1,\"km2\",\"m2\")", 1000000);
+    checkNum("=CONVERT(1,\"ha\",\"m2\")", 10000);
+    checkNum("=CONVERT(1,\"ft2\",\"in2\")", 144);
+    checkNum("=CONVERT(1,\"m3\",\"l\")", 1000);
+    checkNum("=CONVERT(1,\"gal\",\"qt\")", 4);
+    checkNum("=CONVERT(1,\"l\",\"ml\")", 1000);
+    checkStr("=CONVERT(1,\"m2\",\"l\")", "#N/A"); // dien tich vs the tich
     checkStr("=A1/0", "#DIV/0!");
     checkStr("=IFERROR(A1/0,\"err\")", "err");
     checkStr("=AND(A1>5,A2>5)", "true");

@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v0.81.0 — Mở rộng đổi đơn vị diện tích & thể tích (Spec 12)
+
+- **`CONVERT` hỗ trợ thêm đơn vị diện tích** (m², km², cm², ft², in², héc-ta) và **thể tích** (lít, ml, m³, gallon, quart, pint, ft³, in³) — bổ sung cho khối lượng, độ dài, thời gian và nhiệt độ đã có.
+
 ## v0.80.0 — Hàm đổi đơn vị CONVERT (Spec 12)
 
 - **Thêm hàm `CONVERT`** — đổi đơn vị đo lường: khối lượng (g, kg, mg, lbm, ozm), độ dài (m, km, cm, mm, mi, yd, ft, in), thời gian (giây, phút, giờ, ngày) và nhiệt độ (C, F, K).
