@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v0.44.0 — Biểu tượng cho thanh định dạng
+
+- **Nút định dạng có biểu tượng**: in đậm/nghiêng/gạch chân/gạch ngang, màu chữ, màu nền, căn lề trên thanh định dạng nay hiển thị bằng biểu tượng trực quan thay cho chữ — gọn và dễ nhận biết hơn.
+
 ## v0.43.0 — Xóa trang tính
 
 - **Đóng/xóa trang tính**: mỗi tab có nút ✕ để xóa trang không cần nữa (luôn giữ lại ít nhất một trang).

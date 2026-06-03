@@ -1,5 +1,33 @@
 <RCC>
   <qresource prefix="/">
     <file alias="icon.png">assets/icon.png</file>
+    <file alias="icons/align_center.svg">assets/icons/align_center.svg</file>
+    <file alias="icons/align_left.svg">assets/icons/align_left.svg</file>
+    <file alias="icons/align_right.svg">assets/icons/align_right.svg</file>
+    <file alias="icons/bold.svg">assets/icons/bold.svg</file>
+    <file alias="icons/borders.svg">assets/icons/borders.svg</file>
+    <file alias="icons/cond_format.svg">assets/icons/cond_format.svg</file>
+    <file alias="icons/copy.svg">assets/icons/copy.svg</file>
+    <file alias="icons/cut.svg">assets/icons/cut.svg</file>
+    <file alias="icons/fill_color.svg">assets/icons/fill_color.svg</file>
+    <file alias="icons/filter.svg">assets/icons/filter.svg</file>
+    <file alias="icons/find.svg">assets/icons/find.svg</file>
+    <file alias="icons/font_color.svg">assets/icons/font_color.svg</file>
+    <file alias="icons/italic.svg">assets/icons/italic.svg</file>
+    <file alias="icons/merge.svg">assets/icons/merge.svg</file>
+    <file alias="icons/number_format.svg">assets/icons/number_format.svg</file>
+    <file alias="icons/paste.svg">assets/icons/paste.svg</file>
+    <file alias="icons/redo.svg">assets/icons/redo.svg</file>
+    <file alias="icons/sort_asc.svg">assets/icons/sort_asc.svg</file>
+    <file alias="icons/sort_desc.svg">assets/icons/sort_desc.svg</file>
+    <file alias="icons/strike.svg">assets/icons/strike.svg</file>
+    <file alias="icons/underline.svg">assets/icons/underline.svg</file>
+    <file alias="icons/undo.svg">assets/icons/undo.svg</file>
+    <file alias="icons/valign_bottom.svg">assets/icons/valign_bottom.svg</file>
+    <file alias="icons/valign_middle.svg">assets/icons/valign_middle.svg</file>
+    <file alias="icons/valign_top.svg">assets/icons/valign_top.svg</file>
+    <file alias="icons/wrap_clip.svg">assets/icons/wrap_clip.svg</file>
+    <file alias="icons/wrap_overflow.svg">assets/icons/wrap_overflow.svg</file>
+    <file alias="icons/wrap_text.svg">assets/icons/wrap_text.svg</file>
   </qresource>
 </RCC>

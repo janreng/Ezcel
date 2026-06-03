@@ -12,6 +12,8 @@
 #include <QColorDialog>
 #include <QColor>
 #include <QAction>
+#include <QIcon>
+#include <QSize>
 
 using Format = SpreadsheetModel::Format;
 
@@ -50,6 +52,8 @@ void MainWindow::buildFormatToolbar()
     QToolBar *tb = addToolBar(QStringLiteral("Định dạng"));
     tb->setMovable(false);
     tb->setStyleSheet(theme::toolbarStyle()); // dải kiểu ribbon
+    tb->setToolButtonStyle(Qt::ToolButtonIconOnly);
+    tb->setIconSize(QSize(18, 18));
 
     // Font + cỡ chữ.
     auto *fontBox = new QFontComboBox(tb);
@@ -72,32 +76,30 @@ void MainWindow::buildFormatToolbar()
 
     tb->addSeparator();
 
-    // Kiểu chữ (toggle).
-    auto addToggle = [&](const QString &label, const QString &key) {
-        QAction *a = tb->addAction(label, this, [this, key] { toggleFormatAttr(key); });
-        a->setToolTip(label);
+    // Kiểu chữ (toggle) — icon Lucide.
+    auto ic = [](const QString &name) { return QIcon(QStringLiteral(":/icons/%1.svg").arg(name)); };
+    auto addToggle = [&](const QString &icon, const QString &tip, const QString &key) {
+        QAction *a = tb->addAction(ic(icon), tip, this, [this, key] { toggleFormatAttr(key); });
+        a->setToolTip(tip);
         return a;
     };
-    addToggle(QStringLiteral("B"), QStringLiteral("bold"));
-    addToggle(QStringLiteral("I"), QStringLiteral("italic"));
-    addToggle(QStringLiteral("U"), QStringLiteral("underline"));
-    addToggle(QStringLiteral("S"), QStringLiteral("strike"));
+    addToggle(QStringLiteral("bold"), QStringLiteral("In đậm"), QStringLiteral("bold"));
+    addToggle(QStringLiteral("italic"), QStringLiteral("In nghiêng"), QStringLiteral("italic"));
+    addToggle(QStringLiteral("underline"), QStringLiteral("Gạch chân"), QStringLiteral("underline"));
+    addToggle(QStringLiteral("strike"), QStringLiteral("Gạch ngang"), QStringLiteral("strike"));
 
     tb->addSeparator();
 
     // Màu chữ / nền.
-    tb->addAction(QStringLiteral("Màu chữ"), this, [this] { pickColor(QStringLiteral("color")); });
-    tb->addAction(QStringLiteral("Màu nền"), this, [this] { pickColor(QStringLiteral("bg")); });
+    tb->addAction(ic(QStringLiteral("font_color")), QStringLiteral("Màu chữ"), this, [this] { pickColor(QStringLiteral("color")); });
+    tb->addAction(ic(QStringLiteral("fill_color")), QStringLiteral("Màu nền"), this, [this] { pickColor(QStringLiteral("bg")); });
 
     tb->addSeparator();
 
     // Căn lề.
-    tb->addAction(QStringLiteral("◧"), this, [this] { applyFormatAttr(QStringLiteral("halign"), QStringLiteral("left")); })
-        ->setToolTip(QStringLiteral("Căn trái"));
-    tb->addAction(QStringLiteral("◫"), this, [this] { applyFormatAttr(QStringLiteral("halign"), QStringLiteral("center")); })
-        ->setToolTip(QStringLiteral("Căn giữa"));
-    tb->addAction(QStringLiteral("◨"), this, [this] { applyFormatAttr(QStringLiteral("halign"), QStringLiteral("right")); })
-        ->setToolTip(QStringLiteral("Căn phải"));
+    tb->addAction(ic(QStringLiteral("align_left")), QStringLiteral("Căn trái"), this, [this] { applyFormatAttr(QStringLiteral("halign"), QStringLiteral("left")); });
+    tb->addAction(ic(QStringLiteral("align_center")), QStringLiteral("Căn giữa"), this, [this] { applyFormatAttr(QStringLiteral("halign"), QStringLiteral("center")); });
+    tb->addAction(ic(QStringLiteral("align_right")), QStringLiteral("Căn phải"), this, [this] { applyFormatAttr(QStringLiteral("halign"), QStringLiteral("right")); });
 
     tb->addSeparator();
 
