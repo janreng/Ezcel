@@ -326,6 +326,10 @@ QHash<QString, Fn> &fnMap() {
         r["DAYS"]   = [need](const Args &a) { need(a,2,"DAYS"); return Value::number(serialToDate(toNumber(a[1])).daysTo(serialToDate(toNumber(a[0])))); };
         r["WEEKDAY"] = [](const Args &a) { if (a.size()<1||a.size()>2) argErr("WEEKDAY"); int iso = serialToDate(toNumber(a[0])).dayOfWeek(); int t = a.size()==2 ? toInt(a[1]) : 1; if (t==1) return Value::number(iso % 7 + 1); if (t==2) return Value::number(iso); if (t==3) return Value::number(iso - 1); throw FormulaError(QStringLiteral("WEEKDAY: type không hỗ trợ")); };
         r["DATEDIF"] = [need](const Args &a) { need(a,3,"DATEDIF"); QDate s = serialToDate(toNumber(a[0])), e = serialToDate(toNumber(a[1])); QString u = toText(a[2]).toUpper(); if (u=="D") return Value::number(s.daysTo(e)); if (u=="Y") return Value::number(e.year()-s.year() - ((e.month()<s.month()||(e.month()==s.month()&&e.day()<s.day()))?1:0)); if (u=="M") return Value::number((e.year()-s.year())*12 + (e.month()-s.month()) - (e.day()<s.day()?1:0)); throw FormulaError(QStringLiteral("DATEDIF: unit phải D/M/Y")); };
+        // TIME(giờ,phút,giây) -> phần lẻ của ngày. T(v) -> chuỗi nếu là text. N(v) -> số.
+        r["TIME"] = [need](const Args &a) { need(a,3,"TIME"); double s = toNumber(a[0])*3600 + toNumber(a[1])*60 + toNumber(a[2]); return Value::number(std::fmod(s/86400.0 + 1.0, 1.0)); };
+        r["T"]    = [need](const Args &a) { need(a,1,"T"); return a[0].type == Type::Text ? a[0] : Value::str(QString()); };
+        r["N"]    = [need](const Args &a) { need(a,1,"N"); const Value &v = a[0]; if (v.type == Type::Number) return v; if (v.type == Type::Bool) return Value::number(v.boolean ? 1 : 0); return Value::number(0); };
 
         // --- thống kê ---
         r["MEDIAN"] = [](const Args &a) { auto n = numbers(a); if (n.empty()) throw FormulaError(QStringLiteral("MEDIAN cần ít nhất một số")); std::sort(n.begin(), n.end()); size_t m = n.size(); return Value::number(m%2 ? n[m/2] : (n[m/2-1]+n[m/2])/2.0); };

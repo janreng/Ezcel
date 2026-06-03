@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v0.48.0 — Thêm hàm công thức
+
+- **Bổ sung hàm** `TIME` (tạo giờ từ giờ/phút/giây), `T` (lấy phần văn bản) và `N` (đổi sang số) — nâng tổng số hàm tính toán hỗ trợ.
+
 ## v0.47.0 — Tự xuống dòng trong ô
 
 - **Cho chữ tự xuống dòng trong ô** (menu **Xem → Tự xuống dòng trong ô**): bật để nội dung dài hiển thị nhiều dòng vừa bề rộng cột, không bị cắt.

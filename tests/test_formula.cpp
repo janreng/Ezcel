@@ -121,6 +121,15 @@ int main() {
     checkStr("=REPLACE(\"abcdef\",2,3,\"XY\")", "aXYef");
     checkStr("=ISODD(4)", "false");
 
+    // Ham moi: TIME / T / N
+    checkNum("=TIME(6,0,0)", 0.25);
+    checkNum("=TIME(12,0,0)", 0.5);
+    checkNum("=N(5)", 5);
+    checkNum("=N(TRUE)", 1);
+    checkNum("=N(\"abc\")", 0);
+    checkStr("=T(\"hello\")", "hello");
+    checkStr("=T(123)", "");
+
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);
     return g_fail == 0 ? 0 : 1;
 }
