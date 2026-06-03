@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v0.90.0 — Hàm giá kiểu phân số DOLLARDE & DOLLARFR (Spec 12)
+
+- **Thêm hàm `DOLLARDE`** — đổi giá ghi theo kiểu phân số (ví dụ 1.02 nghĩa là 1 và 2/16) thành số thập phân.
+- **Thêm hàm `DOLLARFR`** — đổi ngược số thập phân về cách ghi kiểu phân số, thường dùng cho giá chứng khoán.
+
 ## v0.89.0 — Hàm khấu hao nhanh DDB (Spec 12)
 
 - **Thêm hàm `DDB`** — tính khấu hao theo phương pháp số dư giảm dần kép cho từng kỳ, có hệ số tăng tốc tùy chọn và tự dừng khi chạm giá trị thanh lý.

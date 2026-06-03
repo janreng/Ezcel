@@ -538,6 +538,26 @@ QHash<QString, Fn> &fnMap() {
             }
             return Value::number(dep);
         };
+        // DOLLARDE(giá_phân_số, mẫu_số): đổi giá kiểu phân số (vd 1.02 = 1 và 2/16) sang thập phân.
+        // DOLLARFR là nghịch đảo: đổi thập phân về kiểu phân số.
+        r["DOLLARDE"] = [need](const Args &a) {
+            need(a,2,"DOLLARDE");
+            double d = toNumber(a[0]); int frac = toInt(a[1]);
+            if (frac < 0) throw FormulaError(QStringLiteral("DOLLARDE: mẫu số < 0"), ERR_NUM);
+            if (frac == 0) throw FormulaError(QStringLiteral("DOLLARDE: mẫu số 0"), ERR_DIV0);
+            double ip = std::trunc(d), fp = d - ip;
+            int dg = int(std::floor(std::log10(frac))) + 1;
+            return Value::number(ip + fp * std::pow(10, dg) / frac);
+        };
+        r["DOLLARFR"] = [need](const Args &a) {
+            need(a,2,"DOLLARFR");
+            double d = toNumber(a[0]); int frac = toInt(a[1]);
+            if (frac < 0) throw FormulaError(QStringLiteral("DOLLARFR: mẫu số < 0"), ERR_NUM);
+            if (frac == 0) throw FormulaError(QStringLiteral("DOLLARFR: mẫu số 0"), ERR_DIV0);
+            double ip = std::trunc(d), fp = d - ip;
+            int dg = int(std::floor(std::log10(frac))) + 1;
+            return Value::number(ip + fp * frac / std::pow(10, dg));
+        };
         // NUMBERVALUE(text, [dấu_thập_phân="."], [dấu_nhóm=","]): đổi chuỗi thành số theo dấu phân cách tùy chọn.
         r["NUMBERVALUE"] = [](const Args &a) {
             if (a.size() < 1 || a.size() > 3) argErr("NUMBERVALUE");

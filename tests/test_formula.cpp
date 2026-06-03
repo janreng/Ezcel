@@ -242,6 +242,12 @@ int main() {
     checkNum("=DDB(10000,1000,5,2)", 2400);
     checkNum("=DDB(10000,1000,5,5)", 296);    // bi chan o muc salvage
     checkNum("=DDB(10000,1000,5,3,1.5)", 1470); // factor 1.5
+    // DOLLARDE / DOLLARFR (Spec 12) — gia kieu phan so
+    checkNum("=DOLLARDE(1.02,16)", 1.125); // 1 + 2/16
+    checkNum("=DOLLARDE(1.1,8)", 1.125);   // 1 + 1/8
+    checkNum("=DOLLARFR(1.125,16)", 1.02);
+    checkNum("=DOLLARFR(1.125,8)", 1.1);
+    checkNum("=DOLLARDE(DOLLARFR(1.5,32),32)", 1.5); // khu hoi
     checkStr("=A1/0", "#DIV/0!");
     checkStr("=IFERROR(A1/0,\"err\")", "err");
     checkStr("=AND(A1>5,A2>5)", "true");
