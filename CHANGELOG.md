@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v0.53.0 — Đặt tên vùng (Named Range)
+
+- **Đặt tên cho vùng ô**: chọn vùng → gõ một cái tên (vd `DoanhThu`) vào ô địa chỉ rồi Enter để lưu tên. Sau này gõ lại tên đó vào ô địa chỉ là **nhảy tới và chọn đúng vùng** ngay.
+
 ## v0.52.0 — Ghi chú ô
 
 - **Thêm ghi chú cho ô** (menu **Sửa → Ghi chú ô**, hoặc Shift+F2): ô có ghi chú hiện **dấu tam giác đỏ** ở góc và nội dung ghi chú khi rê chuột vào. Có nút xóa ghi chú.

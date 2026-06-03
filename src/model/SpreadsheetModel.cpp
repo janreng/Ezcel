@@ -329,6 +329,17 @@ void SpreadsheetModel::clearCondRules() {
 void SpreadsheetModel::addValidationRule(const validation::Rule &rule) { m_validationRules.push_back(rule); }
 void SpreadsheetModel::clearValidationRules() { m_validationRules.clear(); }
 
+void SpreadsheetModel::defineName(const QString &name, const MergeRange &range) {
+    if (!name.isEmpty()) m_names.insert(name, range);
+}
+
+bool SpreadsheetModel::lookupName(const QString &name, MergeRange &out) const {
+    auto it = m_names.constFind(name);
+    if (it == m_names.constEnd()) return false;
+    out = it.value();
+    return true;
+}
+
 void SpreadsheetModel::setNote(int row, int col, const QString &text) {
     const qint64 k = key(row, col);
     if (text.isEmpty()) m_notes.remove(k);
@@ -845,6 +856,7 @@ void SpreadsheetModel::loadGrid(const QVector<QVector<QString>> &rows) {
     m_condRules.clear();
     m_validationRules.clear();
     m_notes.clear();
+    m_names.clear();
     m_undo.clear();
     m_redo.clear();
     rebuildDeps();

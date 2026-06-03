@@ -8,6 +8,7 @@
 #include <QFont>
 #include <QMap>
 #include <QPair>
+#include <QStringList>
 #include <optional>
 #include "model/CondFormat.h"
 #include "model/Validation.h"
@@ -68,6 +69,11 @@ public:
     // Ghi chú ô (note): đặt (text rỗng -> xóa), lấy. Hiện tooltip + dấu tam giác.
     void setNote(int row, int col, const QString &text);
     QString note(int row, int col) const { return m_notes.value(key(row, col)); }
+
+    // Vùng đặt tên (named range): đặt tên cho 1 vùng; tra theo tên.
+    void defineName(const QString &name, const MergeRange &range);
+    bool lookupName(const QString &name, MergeRange &out) const;
+    QStringList definedNames() const { return m_names.keys(); }
     // Toàn bộ định dạng theo (row,col) — để lưu ra file.
     QMap<QPair<int, int>, Format> cellFormats() const;
     // Nạp định dạng từ file (thay toàn bộ, KHÔNG undo — dùng khi mở file).
@@ -140,6 +146,7 @@ private:
     QVector<cond::Rule> m_condRules;             // định dạng có điều kiện
     QVector<validation::Rule> m_validationRules; // kiểm tra dữ liệu nhập
     QHash<qint64, QString> m_notes;              // ghi chú theo ô
+    QHash<QString, MergeRange> m_names;          // vùng đặt tên
     mutable QHash<QString, QFont> m_fontCache;   // QFont chia sẻ theo style
     mutable QHash<QString, bool> m_fontCacheNull;// style không có font
 

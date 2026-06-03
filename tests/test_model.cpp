@@ -355,6 +355,18 @@ int main(int argc, char **argv) {
         ok(mm.note(0, 0).isEmpty(), "setNote rong -> xoa");
     }
 
+    // --- vung dat ten (named range) ---
+    {
+        SpreadsheetModel mm;
+        mm.resizeGrid(10, 5);
+        mm.defineName("DoanhThu", MergeRange{1, 0, 5, 2});
+        MergeRange out;
+        ok(mm.lookupName("DoanhThu", out), "lookupName tim thay");
+        ok(out.top == 1 && out.left == 0 && out.bottom == 5 && out.right == 2, "lookupName tra dung vung");
+        ok(!mm.lookupName("KhongCo", out), "ten khong co -> false");
+        ok(mm.definedNames().contains("DoanhThu"), "definedNames liet ke");
+    }
+
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);
     return g_fail == 0 ? 0 : 1;
 }

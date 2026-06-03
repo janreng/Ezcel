@@ -215,9 +215,35 @@ static QPoint parseCellRef(const QString &ref)
 void MainWindow::onNameBoxCommitted()
 {
     const QString text = m_nameBox->text().trimmed();
+    if (text.isEmpty()) { m_view->setFocus(); return; }
+
+    // 1) Nếu là vùng đã đặt tên -> chọn vùng đó.
+    MergeRange nr;
+    if (m_model->lookupName(text, nr)) {
+        QModelIndex a0 = m_model->index(nr.top, nr.left);
+        QModelIndex b0 = m_model->index(qMin(nr.bottom, m_model->rowCount() - 1),
+                                        qMin(nr.right, m_model->columnCount() - 1));
+        m_view->setCurrentIndex(a0);
+        m_view->selectionModel()->select(QItemSelection(a0, b0), QItemSelectionModel::ClearAndSelect);
+        m_view->scrollTo(a0);
+        m_view->setFocus();
+        return;
+    }
+
     QString first = text.section(':', 0, 0), last = text.section(':', 1, 1);
     QPoint a = parseCellRef(first);
-    if (a.x() < 0) { m_view->setFocus(); return; }
+    // 2) Không phải địa chỉ ô + bắt đầu bằng chữ -> ĐẶT TÊN cho vùng đang chọn.
+    if (a.x() < 0) {
+        if (text[0].isLetter()) {
+            int t, l, b, r;
+            if (selectionBox(t, l, b, r)) {
+                m_model->defineName(text, MergeRange{t, l, b, r});
+                statusBar()->showMessage(QStringLiteral("Đã đặt tên \"%1\" cho vùng chọn").arg(text), 3000);
+            }
+        }
+        m_view->setFocus();
+        return;
+    }
     int rows = m_model->rowCount(), cols = m_model->columnCount();
     if (a.y() >= rows || a.x() >= cols) { m_view->setFocus(); return; }
 
