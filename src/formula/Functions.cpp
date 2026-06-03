@@ -250,6 +250,30 @@ QHash<QString, Fn> &fnMap() {
             for (int i = 0; i < int(coef.size()); ++i) s += coef[i] * std::pow(x, n + i*m);
             return Value::number(s);
         };
+        // CONVERT(số, đơn_vị_từ, đơn_vị_đến): đổi đơn vị đo (khối lượng/độ dài/thời gian/nhiệt độ).
+        r["CONVERT"] = [need](const Args &a) {
+            need(a,3,"CONVERT");
+            double x = toNumber(a[0]);
+            QString from = toText(a[1]), to = toText(a[2]);
+            auto isTemp = [](const QString &u) { return u=="C" || u=="F" || u=="K"; };
+            if (isTemp(from) || isTemp(to)) {
+                if (!(isTemp(from) && isTemp(to))) throw FormulaError(QStringLiteral("CONVERT: đơn vị không khớp"), ERR_NA);
+                double c = from=="C" ? x : from=="F" ? (x-32)*5.0/9.0 : x-273.15; // về độ C
+                double r = to=="C" ? c : to=="F" ? c*9.0/5.0+32 : c+273.15;
+                return Value::number(r);
+            }
+            struct U { int cat; double f; };
+            static const QHash<QString, U> units = {
+                {"g",{0,1}}, {"kg",{0,1000}}, {"mg",{0,0.001}}, {"lbm",{0,453.59237}}, {"ozm",{0,28.349523125}},
+                {"m",{1,1}}, {"km",{1,1000}}, {"cm",{1,0.01}}, {"mm",{1,0.001}},
+                {"mi",{1,1609.344}}, {"yd",{1,0.9144}}, {"ft",{1,0.3048}}, {"in",{1,0.0254}},
+                {"sec",{2,1}}, {"s",{2,1}}, {"min",{2,60}}, {"hr",{2,3600}}, {"day",{2,86400}},
+            };
+            auto fi = units.find(from), ti = units.find(to);
+            if (fi == units.end() || ti == units.end() || fi->cat != ti->cat)
+                throw FormulaError(QStringLiteral("CONVERT: đơn vị không hỗ trợ/không khớp"), ERR_NA);
+            return Value::number(x * fi->f / ti->f);
+        };
         // TEXTBEFORE/TEXTAFTER(text, delim, [instance=1], [match_mode=0]): lấy phần trước/sau dấu phân cách.
         // instance âm -> đếm từ cuối; match_mode 1 -> không phân biệt hoa thường.
         auto matchPositions = [](const QString &s, const QString &d, Qt::CaseSensitivity cs) {

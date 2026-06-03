@@ -178,6 +178,16 @@ int main() {
     checkNum("=PERCENTRANK(A1:A3,15)", 0.25); // noi suy
     checkNum("=SERIESSUM(2,0,1,A1:A3)", 170); // 10*1+20*2+30*4
     checkNum("=SERIESSUM(1,0,1,A1:A3)", 60);  // 10+20+30
+    // CONVERT (Spec 12) — doi don vi
+    checkNum("=CONVERT(1,\"kg\",\"g\")", 1000);
+    checkNum("=CONVERT(1,\"lbm\",\"ozm\")", 16);
+    checkNum("=CONVERT(1,\"ft\",\"in\")", 12);
+    checkNum("=CONVERT(1,\"hr\",\"sec\")", 3600);
+    checkNum("=CONVERT(1,\"mi\",\"km\")", 1.609344);
+    checkNum("=CONVERT(0,\"C\",\"F\")", 32);
+    checkNum("=CONVERT(100,\"C\",\"F\")", 212);
+    checkNum("=CONVERT(300,\"K\",\"C\")", 26.85);
+    checkStr("=CONVERT(1,\"kg\",\"m\")", "#N/A"); // khac nhom
     checkStr("=A1/0", "#DIV/0!");
     checkStr("=IFERROR(A1/0,\"err\")", "err");
     checkStr("=AND(A1>5,A2>5)", "true");

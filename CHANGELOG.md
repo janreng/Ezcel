@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v0.80.0 — Hàm đổi đơn vị CONVERT (Spec 12)
+
+- **Thêm hàm `CONVERT`** — đổi đơn vị đo lường: khối lượng (g, kg, mg, lbm, ozm), độ dài (m, km, cm, mm, mi, yd, ft, in), thời gian (giây, phút, giờ, ngày) và nhiệt độ (C, F, K).
+
 ## v0.79.0 — Hàm PERCENTRANK & SERIESSUM (Spec 12)
 
 - **Thêm hàm `PERCENTRANK`** — xác định thứ hạng của một giá trị theo tỉ lệ phần trăm trong tập dữ liệu.
