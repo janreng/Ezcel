@@ -340,6 +340,65 @@ QHash<QString, Fn> &fnMap() {
         r["GEOMEAN"]= [](const Args &a) { auto n = numbers(a); if (n.empty()) throw FormulaError(QStringLiteral("GEOMEAN cần số")); double p = 1; for (double x : n) { if (x<=0) throw FormulaError(QStringLiteral("GEOMEAN cần số dương"), ERR_NUM); p *= x; } return Value::number(std::pow(p, 1.0/n.size())); };
         r["HARMEAN"]= [](const Args &a) { auto n = numbers(a); if (n.empty()) throw FormulaError(QStringLiteral("HARMEAN cần số")); double s = 0; for (double x : n) { if (x==0) throw FormulaError(QStringLiteral("HARMEAN cần khác 0"), ERR_NUM); s += 1.0/x; } return Value::number(n.size()/s); };
 
+        // --- đa điều kiện (COUNTIFS/SUMIFS/AVERAGEIFS/MAXIFS/MINIFS) ---
+        // pairs bắt đầu từ chỉ số `base` (cặp range,criteria). Trả các index hàng thỏa.
+        auto matchRows = [](const Args &a, int base, const char *fn) {
+            std::vector<std::vector<Value>> ranges;
+            std::vector<std::function<bool(const Value &)>> preds;
+            for (size_t i = base; i + 1 < a.size(); i += 2) {
+                ranges.push_back(flatten({a[i]}));
+                preds.push_back(compileCriteria(a[i+1]));
+            }
+            size_t n = ranges.empty() ? 0 : ranges[0].size();
+            for (auto &rg : ranges) if (rg.size() != n) throw FormulaError(QStringLiteral("%1: vùng khác kích thước").arg(QLatin1String(fn)));
+            std::vector<int> hit;
+            for (size_t i = 0; i < n; ++i) {
+                bool all = true;
+                for (size_t k = 0; k < preds.size(); ++k) if (!preds[k](ranges[k][i])) { all = false; break; }
+                if (all) hit.push_back(int(i));
+            }
+            return hit;
+        };
+        r["COUNTIFS"] = [matchRows](const Args &a) { if (a.size()<2||a.size()%2!=0) argErr("COUNTIFS"); return Value::number(matchRows(a, 0, "COUNTIFS").size()); };
+        r["SUMIFS"] = [matchRows](const Args &a) { if (a.size()<3||a.size()%2==0) argErr("SUMIFS"); auto sv = flatten({a[0]}); auto hit = matchRows(a, 1, "SUMIFS"); double s = 0; for (int i : hit) if (i < int(sv.size())) { try { s += toNumber(sv[i]); } catch (...) {} } return Value::number(s); };
+        r["AVERAGEIFS"] = [matchRows](const Args &a) { if (a.size()<3||a.size()%2==0) argErr("AVERAGEIFS"); auto sv = flatten({a[0]}); auto hit = matchRows(a, 1, "AVERAGEIFS"); double s = 0; int c = 0; for (int i : hit) if (i < int(sv.size())) { try { s += toNumber(sv[i]); ++c; } catch (...) {} } if (!c) throw FormulaError(QStringLiteral("AVERAGEIFS không có số"), ERR_DIV0); return Value::number(s/c); };
+        r["MAXIFS"] = [matchRows](const Args &a) { if (a.size()<3||a.size()%2==0) argErr("MAXIFS"); auto sv = flatten({a[0]}); auto hit = matchRows(a, 1, "MAXIFS"); double best = 0; bool any = false; for (int i : hit) if (i < int(sv.size())) { try { double v = toNumber(sv[i]); if (!any || v > best) { best = v; any = true; } } catch (...) {} } return Value::number(any ? best : 0); };
+        r["MINIFS"] = [matchRows](const Args &a) { if (a.size()<3||a.size()%2==0) argErr("MINIFS"); auto sv = flatten({a[0]}); auto hit = matchRows(a, 1, "MINIFS"); double best = 0; bool any = false; for (int i : hit) if (i < int(sv.size())) { try { double v = toNumber(sv[i]); if (!any || v < best) { best = v; any = true; } } catch (...) {} } return Value::number(any ? best : 0); };
+        r["SUMPRODUCT"] = [](const Args &a) { if (a.empty()) return Value::number(0); std::vector<std::vector<Value>> arr; for (auto &x : a) arr.push_back(critValues(x)); size_t n = arr[0].size(); for (auto &x : arr) n = std::min(n, x.size()); double tot = 0; for (size_t i=0;i<n;++i) { double p = 1; for (auto &x : arr) p *= toNumber(x[i]); tot += p; } return Value::number(tot); };
+
+        // --- math mở rộng ---
+        auto gcd2 = [](long long a, long long b) { a = std::llabs(a); b = std::llabs(b); while (b) { long long t = a % b; a = b; b = t; } return a; };
+        r["GCD"] = [gcd2](const Args &a) { long long g = 0; for (double x : numbers(a)) g = gcd2(g, (long long)x); return Value::number(double(g)); };
+        r["LCM"] = [gcd2](const Args &a) { long long l = 1; for (double x : numbers(a)) { long long v = (long long)x; if (v==0) return Value::number(0); l = l / gcd2(l, v) * v; } return Value::number(double(l)); };
+        r["FACT"] = [need](const Args &a) { need(a,1,"FACT"); int n = toInt(a[0]); if (n<0) throw FormulaError(QStringLiteral("FACT cần >= 0"), ERR_NUM); double f = 1; for (int i=2;i<=n;++i) f *= i; return Value::number(f); };
+        r["COMBIN"] = [need](const Args &a) { need(a,2,"COMBIN"); int n = toInt(a[0]), k = toInt(a[1]); if (k<0||n<0||k>n) throw FormulaError(QStringLiteral("COMBIN đối số sai"), ERR_NUM); double c = 1; for (int i=0;i<k;++i) c = c*(n-i)/(i+1); return Value::number(std::round(c)); };
+        r["PERMUT"] = [need](const Args &a) { need(a,2,"PERMUT"); int n = toInt(a[0]), k = toInt(a[1]); if (k<0||n<0||k>n) throw FormulaError(QStringLiteral("PERMUT đối số sai"), ERR_NUM); double p = 1; for (int i=0;i<k;++i) p *= (n-i); return Value::number(p); };
+        r["MROUND"] = [need](const Args &a) { need(a,2,"MROUND"); double n = toNumber(a[0]), m = toNumber(a[1]); if (m==0) return Value::number(0); return Value::number(std::round(n/m)*m); };
+        r["QUOTIENT"] = [need](const Args &a) { need(a,2,"QUOTIENT"); double d = toNumber(a[1]); if (d==0) throw FormulaError(QStringLiteral("QUOTIENT chia 0"), ERR_DIV0); return Value::number(std::trunc(toNumber(a[0])/d)); };
+        r["EVEN"] = [need](const Args &a) { need(a,1,"EVEN"); double n = toNumber(a[0]); double c = std::ceil(std::abs(n)/2.0)*2; return Value::number(n<0 ? -c : c); };
+        r["ODD"]  = [need](const Args &a) { need(a,1,"ODD"); double n = toNumber(a[0]); double m = std::abs(n); double c = std::floor((m-1)/2.0)*2+1; if (c<m) c += 2; return Value::number(n<0 ? -c : c); };
+        r["ATAN2"] = [need](const Args &a) { need(a,2,"ATAN2"); return Value::number(std::atan2(toNumber(a[1]), toNumber(a[0]))); };
+        r["DEGREES"] = [need](const Args &a) { need(a,1,"DEGREES"); return Value::number(toNumber(a[0]) * 180.0 / M_PI); };
+        r["RADIANS"] = [need](const Args &a) { need(a,1,"RADIANS"); return Value::number(toNumber(a[0]) * M_PI / 180.0); };
+        r["ASIN"] = [need](const Args &a) { need(a,1,"ASIN"); double x = toNumber(a[0]); if (x<-1||x>1) throw FormulaError(QStringLiteral("ASIN miền [-1,1]"), ERR_NUM); return Value::number(std::asin(x)); };
+        r["ACOS"] = [need](const Args &a) { need(a,1,"ACOS"); double x = toNumber(a[0]); if (x<-1||x>1) throw FormulaError(QStringLiteral("ACOS miền [-1,1]"), ERR_NUM); return Value::number(std::acos(x)); };
+        r["ATAN"] = [need](const Args &a) { need(a,1,"ATAN"); return Value::number(std::atan(toNumber(a[0]))); };
+        r["SINH"] = [need](const Args &a) { need(a,1,"SINH"); return Value::number(std::sinh(toNumber(a[0]))); };
+        r["COSH"] = [need](const Args &a) { need(a,1,"COSH"); return Value::number(std::cosh(toNumber(a[0]))); };
+        r["TANH"] = [need](const Args &a) { need(a,1,"TANH"); return Value::number(std::tanh(toNumber(a[0]))); };
+
+        // --- text/info mở rộng ---
+        r["CHAR"]    = [need](const Args &a) { need(a,1,"CHAR"); int c = toInt(a[0]); if (c<1||c>255) throw FormulaError(QStringLiteral("CHAR mã 1..255"), ERR_VALUE); return Value::str(QString(QChar(c))); };
+        r["UNICHAR"] = [need](const Args &a) { need(a,1,"UNICHAR"); int c = toInt(a[0]); if (c<1) throw FormulaError(QStringLiteral("UNICHAR mã > 0"), ERR_VALUE); return Value::str(QString(QChar(c))); };
+        r["CODE"]    = [need](const Args &a) { need(a,1,"CODE"); QString s = toText(a[0]); if (s.isEmpty()) throw FormulaError(QStringLiteral("CODE chuỗi rỗng"), ERR_VALUE); return Value::number(s.at(0).unicode()); };
+        r["UNICODE"] = r["CODE"];
+        r["CLEAN"]   = [need](const Args &a) { need(a,1,"CLEAN"); QString s = toText(a[0]), o; for (QChar c : s) if (c.unicode() >= 32) o += c; return Value::str(o); };
+        r["REPLACE"] = [need](const Args &a) { need(a,4,"REPLACE"); QString s = toText(a[0]); int start = toInt(a[1]), num = toInt(a[2]); QString nw = toText(a[3]); if (start<1) throw FormulaError(QStringLiteral("REPLACE vị trí < 1")); s.replace(start-1, std::max(0,num), nw); return Value::str(s); };
+        r["ISEVEN"]  = [need](const Args &a) { need(a,1,"ISEVEN"); return Value::boolv(((long long)std::trunc(toNumber(a[0]))) % 2 == 0); };
+        r["ISODD"]   = [need](const Args &a) { need(a,1,"ISODD"); return Value::boolv(((long long)std::trunc(toNumber(a[0]))) % 2 != 0); };
+        r["ISNONTEXT"] = [need](const Args &a) { need(a,1,"ISNONTEXT"); return Value::boolv(a[0].type != Type::Text); };
+        r["NA"] = [](const Args &) -> Value { throw FormulaError(QStringLiteral("NA"), ERR_NA); };
+
         return r;
     }();
     return m;

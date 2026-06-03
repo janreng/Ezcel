@@ -100,6 +100,27 @@ int main() {
     checkNum("=SMALL(A1:A3,2)", 20);
     checkNum("=RANK(20,A1:A3)", 2);
 
+    // --- da dieu kien + math/text mo rong ---
+    checkNum("=COUNTIFS(A1:A3,\">15\")", 2);
+    checkNum("=SUMIFS(A1:A3,A1:A3,\">15\")", 50);
+    checkNum("=MAXIFS(A1:A3,A1:A3,\">15\")", 30);
+    checkNum("=MINIFS(A1:A3,A1:A3,\">15\")", 20);
+    checkNum("=SUMPRODUCT(A1:A3,D1:D3)", 140);
+    checkNum("=GCD(12,18)", 6);
+    checkNum("=LCM(4,6)", 12);
+    checkNum("=FACT(5)", 120);
+    checkNum("=COMBIN(5,2)", 10);
+    checkNum("=MROUND(10,3)", 9);
+    checkNum("=QUOTIENT(17,5)", 3);
+    checkNum("=EVEN(3)", 4);
+    checkNum("=ODD(2)", 3);
+    checkNum("=DEGREES(PI())", 180);
+    checkNum("=CODE(\"A\")", 65);
+    checkNum("=ISEVEN(4)", 1);
+    checkStr("=CHAR(65)", "A");
+    checkStr("=REPLACE(\"abcdef\",2,3,\"XY\")", "aXYef");
+    checkStr("=ISODD(4)", "false");
+
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);
     return g_fail == 0 ? 0 : 1;
 }
