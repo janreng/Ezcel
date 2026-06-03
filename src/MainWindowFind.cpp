@@ -2,6 +2,7 @@
 #include "MainWindow.h"
 #include "model/SpreadsheetModel.h"
 #include "model/TextSearch.h"
+#include "model/CondFormat.h"
 
 #include <QTableView>
 #include <QDialog>
@@ -11,6 +12,9 @@
 #include <QLabel>
 #include <QGridLayout>
 #include <QStatusBar>
+#include <QComboBox>
+#include <QColorDialog>
+#include <QDialogButtonBox>
 
 void MainWindow::showFindReplace()
 {
@@ -97,4 +101,60 @@ void MainWindow::replaceAllFromDialog()
     const bool mc = m_matchCase && m_matchCase->isChecked();
     int n = m_model->replaceAll(find, m_replaceField->text(), mc);
     statusBar()->showMessage(QStringLiteral("Đã thay %1 ô").arg(n), 4000);
+}
+
+void MainWindow::showCondFormat()
+{
+    int t, l, b, r;
+    if (!selectionBox(t, l, b, r)) return;
+
+    QDialog dlg(this);
+    dlg.setWindowTitle(QStringLiteral("Định dạng có điều kiện"));
+    auto *g = new QGridLayout(&dlg);
+
+    g->addWidget(new QLabel(QStringLiteral("Điều kiện:"), &dlg), 0, 0);
+    auto *opBox = new QComboBox(&dlg);
+    opBox->addItem(QStringLiteral("Lớn hơn"), int(cond::Op::GreaterThan));
+    opBox->addItem(QStringLiteral("Nhỏ hơn"), int(cond::Op::LessThan));
+    opBox->addItem(QStringLiteral("Bằng"), int(cond::Op::Equal));
+    opBox->addItem(QStringLiteral("Khác"), int(cond::Op::NotEqual));
+    opBox->addItem(QStringLiteral("Nằm giữa"), int(cond::Op::Between));
+    opBox->addItem(QStringLiteral("Chứa chữ"), int(cond::Op::Contains));
+    g->addWidget(opBox, 0, 1, 1, 2);
+
+    g->addWidget(new QLabel(QStringLiteral("Giá trị:"), &dlg), 1, 0);
+    auto *v1 = new QLineEdit(&dlg);
+    auto *v2 = new QLineEdit(&dlg);
+    v2->setPlaceholderText(QStringLiteral("đến (chỉ cho Nằm giữa)"));
+    g->addWidget(v1, 1, 1);
+    g->addWidget(v2, 1, 2);
+
+    QString chosenBg = QStringLiteral("#FFC7CE"); // mặc định đỏ nhạt
+    auto *colorBtn = new QPushButton(QStringLiteral("Chọn màu nền…"), &dlg);
+    auto setBtnColor = [&](const QString &c) {
+        colorBtn->setStyleSheet(QStringLiteral("background:%1;").arg(c));
+    };
+    setBtnColor(chosenBg);
+    QObject::connect(colorBtn, &QPushButton::clicked, &dlg, [&] {
+        QColor c = QColorDialog::getColor(QColor(chosenBg), &dlg, QStringLiteral("Màu nền"));
+        if (c.isValid()) { chosenBg = c.name(); setBtnColor(chosenBg); }
+    });
+    g->addWidget(colorBtn, 2, 1, 1, 2);
+
+    auto *bb = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dlg);
+    QObject::connect(bb, &QDialogButtonBox::accepted, &dlg, &QDialog::accept);
+    QObject::connect(bb, &QDialogButtonBox::rejected, &dlg, &QDialog::reject);
+    g->addWidget(bb, 3, 0, 1, 3);
+
+    if (dlg.exec() != QDialog::Accepted) return;
+
+    cond::Rule rule;
+    rule.top = t; rule.left = l; rule.bottom = b; rule.right = r;
+    rule.op = cond::Op(opBox->currentData().toInt());
+    rule.v1 = v1->text().toDouble();
+    rule.v2 = v2->text().toDouble();
+    rule.text = v1->text();
+    rule.bg = chosenBg;
+    m_model->addCondRule(rule);
+    statusBar()->showMessage(QStringLiteral("Đã thêm định dạng có điều kiện"), 3000);
 }

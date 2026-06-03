@@ -9,6 +9,7 @@
 #include <QMap>
 #include <QPair>
 #include <optional>
+#include "model/CondFormat.h"
 
 // Vùng ô gộp [top,left]..[bottom,right] (port tuple (t,l,b,r) của Python).
 struct MergeRange {
@@ -85,6 +86,11 @@ public:
     void autofillVertical(int col, int srcTop, int srcBottom, int dstBottom);
     void autofillHorizontal(int row, int srcLeft, int srcRight, int dstRight);
 
+    // Định dạng có điều kiện: thêm quy tắc cho vùng đang chọn; xóa hết.
+    void addCondRule(const cond::Rule &rule);
+    void clearCondRules();
+    int condRuleCount() const { return m_condRules.size(); }
+
     // Gộp ô (merge). Giữ nội dung ô góc trên-trái, xóa phần còn lại. Đều undoable.
     const QVector<MergeRange> &merges() const { return m_merges; }
     std::optional<MergeRange> mergeAt(int row, int col) const;
@@ -120,6 +126,7 @@ private:
     mutable QSet<qint64> m_evaluating;           // ô đang tính (vòng lặp)
     QHash<qint64, Format> m_fmt;                 // định dạng theo ô
     QVector<MergeRange> m_merges;                // vùng ô gộp
+    QVector<cond::Rule> m_condRules;             // định dạng có điều kiện
     mutable QHash<QString, QFont> m_fontCache;   // QFont chia sẻ theo style
     mutable QHash<QString, bool> m_fontCacheNull;// style không có font
 
@@ -136,6 +143,8 @@ private:
     static int keyCol(qint64 k) { return int(k & 0xffffffff); }
 
     QString displayValue(int row, int col) const;
+    // Màu theo định dạng điều kiện cho ô (fg=true: màu chữ; false: màu nền). Rỗng nếu không khớp.
+    QString condColorFor(int row, int col, bool fg) const;
     int alignmentFlags(int row, int col) const;
     QVariant fontFor(int row, int col) const;
     bool looksNumeric(int row, int col) const;

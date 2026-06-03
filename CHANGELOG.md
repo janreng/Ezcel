@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v0.32.0 — Định dạng có điều kiện
+
+- **Tô màu ô theo điều kiện** (menu **Dữ liệu → Định dạng có điều kiện**): chọn vùng, đặt điều kiện (lớn hơn / nhỏ hơn / bằng / khác / nằm giữa / chứa chữ) và màu nền — những ô thỏa điều kiện sẽ tự tô màu. Có nút xóa toàn bộ quy tắc.
+
 ## v0.31.0 — Thu phóng (Zoom)
 
 - **Phóng to / thu nhỏ bảng tính**: giữ **Ctrl + lăn chuột**, hoặc menu **Xem → Phóng to / Thu nhỏ / Thu phóng 100%** (Ctrl+`=`, Ctrl+`-`, Ctrl+`0`). Phóng từ 50% đến 400%.

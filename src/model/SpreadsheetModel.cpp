@@ -149,11 +149,15 @@ QVariant SpreadsheetModel::data(const QModelIndex &index, int role) const {
     case Qt::FontRole:
         return fontFor(row, col);
     case Qt::BackgroundRole: {
+        QString cbg = condColorFor(row, col, /*fg*/ false); // định dạng điều kiện đè màu nền
+        if (!cbg.isEmpty()) return QColor(cbg);
         const Format &f = m_fmt[key(row, col)];
         auto it = f.constFind(QStringLiteral("bg"));
         return it != f.constEnd() ? QColor(it->toString()) : QVariant();
     }
     case Qt::ForegroundRole: {
+        QString cfg = condColorFor(row, col, /*fg*/ true);
+        if (!cfg.isEmpty()) return QColor(cfg);
         const Format &f = m_fmt[key(row, col)];
         auto it = f.constFind(QStringLiteral("color"));
         return it != f.constEnd() ? QColor(it->toString()) : QVariant();
@@ -279,6 +283,36 @@ void SpreadsheetModel::setFormat(int top, int left, int bottom, int right, const
     pushUndo(std::move(e));
     m_fontCache.clear();
     emit dataChanged(index(top, left), index(bottom, right));
+}
+
+QString SpreadsheetModel::condColorFor(int row, int col, bool fg) const {
+    if (m_condRules.isEmpty()) return QString();
+    QString result; // quy tắc khớp sau cùng thắng (đè quy tắc trước)
+    QVariant v;
+    bool evaluated = false;
+    for (const cond::Rule &rule : m_condRules) {
+        if (!rule.contains(row, col)) continue;
+        if (!evaluated) { v = evalCell(row, col); evaluated = true; }
+        if (cond::match(v, rule.op, rule.v1, rule.v2, rule.text)) {
+            const QString &c = fg ? rule.color : rule.bg;
+            if (!c.isEmpty()) result = c;
+        }
+    }
+    return result;
+}
+
+void SpreadsheetModel::addCondRule(const cond::Rule &rule) {
+    m_condRules.push_back(rule);
+    emit dataChanged(index(rule.top, rule.left), index(rule.bottom, rule.right),
+                     {Qt::BackgroundRole, Qt::ForegroundRole});
+}
+
+void SpreadsheetModel::clearCondRules() {
+    if (m_condRules.isEmpty()) return;
+    m_condRules.clear();
+    if (rowCount() && columnCount())
+        emit dataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1),
+                         {Qt::BackgroundRole, Qt::ForegroundRole});
 }
 
 QMap<QPair<int, int>, SpreadsheetModel::Format> SpreadsheetModel::cellFormats() const {
@@ -787,6 +821,7 @@ void SpreadsheetModel::loadGrid(const QVector<QVector<QString>> &rows) {
     m_evaluating.clear();
     m_fmt.clear();
     m_merges.clear();
+    m_condRules.clear();
     m_undo.clear();
     m_redo.clear();
     rebuildDeps();

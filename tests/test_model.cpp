@@ -1,6 +1,7 @@
 // Test headless cho SpreadsheetModel (offscreen). CHI in ASCII.
 #include "model/SpreadsheetModel.h"
 #include "model/TextSearch.h"
+#include "model/CondFormat.h"
 #include <QGuiApplication>
 #include <QFont>
 #include <QColor>
@@ -247,6 +248,32 @@ int main(int argc, char **argv) {
         ok(disp(mm, 0, 0) == "3" && disp(mm, 0, 1) == "ba", "undo sortRange ve nguyen");
         mm.sortRange(0, 0, 2, 1, 0, false);  // giam dan
         ok(disp(mm, 0, 0) == "3" && disp(mm, 2, 0) == "1", "sortRange giam: 3..1");
+    }
+
+    // --- dinh dang co dieu kien ---
+    {
+        using cond::Op;
+        ok(cond::match(QVariant(10.0), Op::GreaterThan, 5, 0, ""), "10 > 5");
+        ok(!cond::match(QVariant(3.0), Op::GreaterThan, 5, 0, ""), "3 !> 5");
+        ok(cond::match(QVariant(5.0), Op::Equal, 5, 0, ""), "5 == 5");
+        ok(cond::match(QVariant(7.0), Op::Between, 5, 10, ""), "7 in [5,10]");
+        ok(!cond::match(QVariant(12.0), Op::Between, 5, 10, ""), "12 not in [5,10]");
+        ok(cond::match(QVariant(QString("Hello")), Op::Contains, 0, 0, "ell"), "contains ell");
+        ok(!cond::match(QVariant(QString("abc")), Op::GreaterThan, 5, 0, ""), "chuoi !> 5");
+
+        // tich hop model: BackgroundRole doi mau khi khop
+        SpreadsheetModel mm;
+        mm.resizeGrid(4, 3);
+        put(mm, 0, 0, "100"); put(mm, 1, 0, "20");
+        cond::Rule rule; rule.top = 0; rule.left = 0; rule.bottom = 3; rule.right = 0;
+        rule.op = Op::GreaterThan; rule.v1 = 50; rule.bg = "#ffcccc";
+        mm.addCondRule(rule);
+        QVariant bg0 = mm.data(mm.index(0, 0), Qt::BackgroundRole); // 100 > 50 -> to mau
+        QVariant bg1 = mm.data(mm.index(1, 0), Qt::BackgroundRole); // 20 -> khong
+        ok(bg0.canConvert<QColor>() && bg0.value<QColor>().red() == 255, "cond to mau o > 50");
+        ok(!bg1.isValid(), "cond khong to o <= 50");
+        mm.clearCondRules();
+        ok(!mm.data(mm.index(0, 0), Qt::BackgroundRole).isValid(), "clear cond -> het mau");
     }
 
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);

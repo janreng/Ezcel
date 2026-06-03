@@ -246,6 +246,9 @@ void MainWindow::buildMenus()
         int kc = m_view->currentIndex().isValid() ? m_view->currentIndex().column() : l;
         m_model->sortRange(t, l, b, r, qBound(l, kc, r), false);
     });
+    data->addSeparator();
+    data->addAction(QStringLiteral("Định dạng có điều kiện..."), this, &MainWindow::showCondFormat);
+    data->addAction(QStringLiteral("Xóa định dạng có điều kiện"), this, [this] { m_model->clearCondRules(); });
 
     QMenu *view = menuBar()->addMenu(QStringLiteral("&Xem"));
     view->addAction(QStringLiteral("Phóng to"), QKeySequence::ZoomIn, this, [this] { m_zoom += 10; applyZoom(); });
