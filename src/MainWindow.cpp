@@ -75,6 +75,7 @@ MainWindow::MainWindow(QWidget *parent)
     tabLay->setSpacing(2);
     m_sheetTabs = new QTabBar(tabRow);
     m_sheetTabs->setExpanding(false);
+    m_sheetTabs->setTabsClosable(true);
     m_sheetTabs->addTab(QStringLiteral("Trang 1"));
     auto *addSheetBtn = new QToolButton(tabRow);
     addSheetBtn->setText(QStringLiteral("+"));
@@ -89,6 +90,17 @@ MainWindow::MainWindow(QWidget *parent)
         QString n = QInputDialog::getText(this, QStringLiteral("Đổi tên trang"),
             QStringLiteral("Tên trang:"), QLineEdit::Normal, m_sheetTabs->tabText(i), &ok);
         if (ok && !n.isEmpty()) m_sheetTabs->setTabText(i, n);
+    });
+    connect(m_sheetTabs, &QTabBar::tabCloseRequested, this, [this](int i) {
+        if (m_sheets.size() <= 1) return; // luôn giữ ít nhất 1 trang
+        m_sheetTabs->blockSignals(true);
+        m_sheets[i]->deleteLater();
+        m_sheets.remove(i);
+        m_sheetTabs->removeTab(i);
+        int cur = qBound(0, m_sheetTabs->currentIndex(), m_sheets.size() - 1);
+        m_sheetTabs->setCurrentIndex(cur);
+        m_sheetTabs->blockSignals(false);
+        switchToSheet(cur);
     });
 
     auto *central = new QWidget(this);

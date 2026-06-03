@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v0.43.0 — Xóa trang tính
+
+- **Đóng/xóa trang tính**: mỗi tab có nút ✕ để xóa trang không cần nữa (luôn giữ lại ít nhất một trang).
+
 ## v0.42.0 — Lưu nhiều trang vào một file
 
 - **Mở và lưu nhiều trang tính trong cùng một file `.xlsx`**: khi lưu, tất cả các trang đều được ghi vào file; khi mở file nhiều trang, các tab sẽ hiện đầy đủ theo đúng tên trang.
