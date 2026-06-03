@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v0.69.0 — Hàm thống kê AVERAGEA, MAXA, MINA (Spec 12)
+
+- **Thêm `AVERAGEA`, `MAXA`, `MINA`** — giống AVERAGE/MAX/MIN nhưng tính cả ô chứa chữ (coi là 0) và giá trị logic (ĐÚNG = 1, SAI = 0), hữu ích khi vùng dữ liệu lẫn cả số, chữ và logic.
+
 ## v0.68.0 — Hàm phần năm YEARFRAC (Spec 12)
 
 - **Thêm hàm `YEARFRAC`** — tính phần năm giữa hai ngày theo 5 quy ước đếm ngày (US 30/360, thực/thực, thực/360, thực/365, Âu 30/360), tiện cho tính lãi và kỳ hạn tài chính.

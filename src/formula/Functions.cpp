@@ -137,6 +137,20 @@ QHash<QString, Fn> &fnMap() {
         r["COUNT"]   = [](const Args &a) { return Value::number(double(numbers(a).size())); };
         r["COUNTA"]  = [](const Args &a) { int c = 0; for (auto &v : flatten(a)) if (!(v.type == Type::Empty || (v.type == Type::Text && v.text.isEmpty()))) ++c; return Value::number(c); };
         r["COUNTBLANK"] = [](const Args &a) { int c = 0; for (auto &v : flatten(a)) if (v.type == Type::Empty || (v.type == Type::Text && v.text.isEmpty())) ++c; return Value::number(c); };
+        // Biến thể "A": số (kể cả chuỗi số) giữ giá trị, TRUE=1/FALSE=0, text không-số = 0; ô rỗng bỏ qua.
+        auto valuesA = [](const Args &a) {
+            std::vector<double> out;
+            for (const Value &v : flatten(a)) {
+                if (v.type == Type::Empty) continue;
+                if (v.type == Type::Text && v.text.isEmpty()) continue; // coi như rỗng
+                try { out.push_back(toNumber(v)); }      // số / chuỗi-số / bool
+                catch (const FormulaError &) { out.push_back(0.0); } // text không-số -> 0
+            }
+            return out;
+        };
+        r["AVERAGEA"] = [valuesA](const Args &a) { auto n = valuesA(a); if (n.empty()) throw FormulaError(QStringLiteral("AVERAGEA chia 0"), ERR_DIV0); return Value::number(sumv(n)/n.size()); };
+        r["MAXA"] = [valuesA](const Args &a) { auto n = valuesA(a); if (n.empty()) return Value::number(0); return Value::number(*std::max_element(n.begin(), n.end())); };
+        r["MINA"] = [valuesA](const Args &a) { auto n = valuesA(a); if (n.empty()) return Value::number(0); return Value::number(*std::min_element(n.begin(), n.end())); };
         r["ABS"]   = [need](const Args &a) { need(a,1,"ABS"); return Value::number(std::abs(toNumber(a[0]))); };
         r["SIGN"]  = [need](const Args &a) { need(a,1,"SIGN"); double n = toNumber(a[0]); return Value::number((n>0)-(n<0)); };
         r["INT"]   = [need](const Args &a) { need(a,1,"INT"); return Value::number(std::floor(toNumber(a[0]))); };

@@ -110,6 +110,14 @@ int main() {
     checkNum("=YEARFRAC(DATE(2024,1,1),DATE(2024,7,1),2)", 182.0/360.0);    // thuc/360
     checkNum("=YEARFRAC(DATE(2024,1,1),DATE(2024,7,1),1)", 182.0/366.0);    // thuc/thuc nam nhuan
     checkNum("=YEARFRAC(DATE(2024,1,31),DATE(2024,2,28),0)", 28.0/360.0);   // 30/360 don ngay 31
+    // AVERAGEA / MAXA / MINA (Spec 12): text="hello" -> 0 (A1:B1 = {10, "hello"})
+    checkNum("=AVERAGEA(A1:B1)", 5);   // (10 + 0)/2
+    checkNum("=MAXA(A1:B1)", 10);
+    checkNum("=MINA(A1:B1)", 0);       // text ke 0 -> min 0
+    checkNum("=AVERAGEA(2,TRUE,FALSE)", 1); // (2+1+0)/3
+    checkNum("=MAXA(2,TRUE)", 2);
+    checkNum("=MINA(-1,FALSE)", -1);
+    checkNum("=AVERAGE(A1:B1)", 10);   // AVERAGE bo qua text -> 10/1
     checkStr("=A1/0", "#DIV/0!");
     checkStr("=IFERROR(A1/0,\"err\")", "err");
     checkStr("=AND(A1>5,A2>5)", "true");
