@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v0.62.0 — Hàm ngày làm việc WORKDAY & NETWORKDAYS (Spec 12)
+
+- **Thêm hàm `WORKDAY`** — tính ngày sau (hoặc trước) một số ngày làm việc, tự bỏ qua Thứ Bảy, Chủ Nhật và danh sách ngày nghỉ tùy chọn.
+- **Thêm hàm `NETWORKDAYS`** — đếm số ngày làm việc giữa hai mốc ngày (gồm cả hai đầu), trừ ngày nghỉ; đảo thứ tự cho kết quả âm.
+
 ## v0.61.0 — Hàm ngày tháng EDATE & EOMONTH (Spec 12)
 
 - **Thêm hàm `EDATE`** — cộng/trừ số tháng vào một ngày, tự dồn về ngày cuối tháng khi cần (ví dụ 31/01 cộng 1 tháng ra 29/02).

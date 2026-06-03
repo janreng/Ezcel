@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <numeric>
 #include <functional>
+#include <set>
 
 // Batch 1 các hàm dựng sẵn (port _FUNCTIONS của formula.py). Các nhóm còn lại
 // (tra cứu nâng cao, ngày/giờ, thống kê, lượng giác đầy đủ) bổ sung ở vòng sau.
@@ -330,6 +331,35 @@ QHash<QString, Fn> &fnMap() {
         r["EDATE"] = [need](const Args &a) { need(a,2,"EDATE"); QDate d = serialToDate(toNumber(a[0])).addMonths(toInt(a[1])); return Value::number(dateToSerial(d)); };
         // EOMONTH(start, months): ngày cuối cùng của tháng sau khi cộng months.
         r["EOMONTH"] = [need](const Args &a) { need(a,2,"EOMONTH"); QDate d = serialToDate(toNumber(a[0])).addMonths(toInt(a[1])); QDate eom(d.year(), d.month(), d.daysInMonth()); return Value::number(dateToSerial(eom)); };
+        // Gom ngày nghỉ (đối số tùy chọn, có thể là vùng) -> tập serial (đã làm tròn).
+        auto holidaySet = [](const Args &a, int from) {
+            std::set<qint64> hs;
+            for (int i = from; i < int(a.size()); ++i)
+                for (const Value &v : critValues(a[i]))
+                    if (v.type == Type::Number) hs.insert(qint64(std::floor(v.num)));
+            return hs;
+        };
+        auto isWorkday = [](const QDate &d, const std::set<qint64> &hs) {
+            int dow = d.dayOfWeek(); // 6=T7, 7=CN
+            return dow != 6 && dow != 7 && !hs.count(qint64(dateToSerial(d)));
+        };
+        // WORKDAY(start, days, [holidays]): ngày sau `days` ngày làm việc (bỏ T7/CN + nghỉ).
+        r["WORKDAY"] = [need,holidaySet,isWorkday](const Args &a) {
+            if (a.size() < 2) argErr("WORKDAY");
+            QDate d = serialToDate(toNumber(a[0])); int days = toInt(a[1]);
+            auto hs = holidaySet(a, 2); int step = days >= 0 ? 1 : -1; int left = std::abs(days);
+            while (left > 0) { d = d.addDays(step); if (isWorkday(d, hs)) --left; }
+            return Value::number(dateToSerial(d));
+        };
+        // NETWORKDAYS(start, end, [holidays]): đếm ngày làm việc trong khoảng (gồm 2 đầu).
+        r["NETWORKDAYS"] = [need,holidaySet,isWorkday](const Args &a) {
+            if (a.size() < 2) argErr("NETWORKDAYS");
+            QDate s = serialToDate(toNumber(a[0])), e = serialToDate(toNumber(a[1]));
+            int sign = 1; if (s > e) { std::swap(s, e); sign = -1; }
+            auto hs = holidaySet(a, 2); int cnt = 0;
+            for (QDate d = s; d <= e; d = d.addDays(1)) if (isWorkday(d, hs)) ++cnt;
+            return Value::number(double(sign * cnt));
+        };
         // TIME(giờ,phút,giây) -> phần lẻ của ngày. T(v) -> chuỗi nếu là text. N(v) -> số.
         r["TIME"] = [need](const Args &a) { need(a,3,"TIME"); double s = toNumber(a[0])*3600 + toNumber(a[1])*60 + toNumber(a[2]); return Value::number(std::fmod(s/86400.0 + 1.0, 1.0)); };
         r["T"]    = [need](const Args &a) { need(a,1,"T"); return a[0].type == Type::Text ? a[0] : Value::str(QString()); };

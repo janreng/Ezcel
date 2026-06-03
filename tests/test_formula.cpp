@@ -99,6 +99,15 @@ int main() {
     checkNum("=MONTH(EDATE(DATE(2024,1,31),1))", 2);
     checkNum("=YEAR(EDATE(DATE(2023,12,15),1))", 2024); // qua nam
     checkNum("=MONTH(EDATE(DATE(2023,12,15),1))", 1);
+    // WORKDAY/NETWORKDAYS (Spec 12): bo T7/CN. 2024-01-05 la Thu Sau.
+    checkNum("=DAY(WORKDAY(DATE(2024,1,5),1))", 8);     // T6 +1 ngay lam viec -> T2 8/1
+    checkNum("=DAY(WORKDAY(DATE(2024,1,5),5))", 12);    // +5 ngay lam viec -> T6 12/1
+    checkNum("=DAY(WORKDAY(DATE(2024,1,8),-1))", 5);    // T2 lui 1 -> T6 5/1
+    checkNum("=NETWORKDAYS(DATE(2024,1,1),DATE(2024,1,7))", 5);  // T2->CN: 5 ngay lam viec
+    checkNum("=NETWORKDAYS(DATE(2024,1,1),DATE(2024,1,5))", 5);  // T2->T6: 5
+    checkNum("=NETWORKDAYS(DATE(2024,1,7),DATE(2024,1,1))", -5); // dao chieu -> am
+    checkNum("=NETWORKDAYS(DATE(2024,1,1),DATE(2024,1,7),DATE(2024,1,3))", 4); // tru 1 ngay nghi
+    checkNum("=DAY(WORKDAY(DATE(2024,1,5),1,DATE(2024,1,8)))", 9); // 8/1 nghi -> nhay 9/1
 
     // --- thong ke ---
     checkNum("=MEDIAN(A1:A3)", 20);
