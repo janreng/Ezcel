@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v0.39.0 — Tính tổng nhanh (AutoSum)
+
+- **Tính tổng tự động** (menu **Dữ liệu → AutoSum**, hoặc Alt+`=`): tự nhận dãy số ngay phía trên (hoặc bên trái) ô đang chọn và chèn công thức `=SUM(...)` cho bạn.
+
 ## v0.38.0 — Thống kê vùng chọn
 
 - **Xem nhanh tổng / trung bình / số ô**: khi bôi đen nhiều ô, góc phải thanh trạng thái hiện ngay **Đếm**, **Tổng** và **Trung bình** của vùng chọn — không cần gõ công thức.

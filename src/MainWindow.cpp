@@ -11,6 +11,7 @@
 #include "update/Updater.h"
 #include "ui/Theme.h"
 #include "model/Stats.h"
+#include "model/AutoSum.h"
 
 #include <QTableView>
 #include <QHeaderView>
@@ -255,6 +256,31 @@ void MainWindow::buildMenus()
         int t, l, b, r; if (!selectionBox(t, l, b, r)) return;
         int kc = m_view->currentIndex().isValid() ? m_view->currentIndex().column() : l;
         m_model->sortRange(t, l, b, r, qBound(l, kc, r), false);
+    });
+    data->addAction(QStringLiteral("AutoSum (∑)"), QKeySequence(QStringLiteral("Alt+=")), this, [this] {
+        QModelIndex idx = m_view->currentIndex();
+        if (!idx.isValid()) return;
+        const int r = idx.row(), c = idx.column();
+        auto disp = [this](int rr, int cc) {
+            return m_model->data(m_model->index(rr, cc), Qt::DisplayRole).toString();
+        };
+        QString formula;
+        QVector<QString> above;
+        for (int rr = 0; rr < r; ++rr) above.push_back(disp(rr, c));
+        int run = autosum::trailingNumericRun(above);
+        if (run > 0) {
+            const QString col = SpreadsheetModel::columnLabel(c);
+            formula = QStringLiteral("=SUM(%1%2:%1%3)").arg(col).arg(r - run + 1).arg(r);
+        } else {
+            QVector<QString> left;
+            for (int cc = 0; cc < c; ++cc) left.push_back(disp(r, cc));
+            run = autosum::trailingNumericRun(left);
+            if (run > 0)
+                formula = QStringLiteral("=SUM(%1%3:%2%3)")
+                              .arg(SpreadsheetModel::columnLabel(c - run))
+                              .arg(SpreadsheetModel::columnLabel(c - 1)).arg(r + 1);
+        }
+        if (!formula.isEmpty()) m_model->setData(idx, formula, Qt::EditRole);
     });
     data->addSeparator();
     data->addAction(i18n::tr("data_cond"), this, &MainWindow::showCondFormat);

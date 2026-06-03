@@ -5,6 +5,7 @@
 #include "model/Filter.h"
 #include "model/PasteOps.h"
 #include "model/Stats.h"
+#include "model/AutoSum.h"
 #include <QGuiApplication>
 #include <QFont>
 #include <QColor>
@@ -307,6 +308,15 @@ int main(int argc, char **argv) {
         ok(r.avg == 20.0, "trung binh 20");
         stats::Result e = stats::compute({"x", "y"});
         ok(e.count == 2 && e.numCount == 0 && e.avg == 0, "khong co so -> avg 0");
+    }
+
+    // --- AutoSum: dem run so cuoi danh sach ---
+    {
+        ok(autosum::trailingNumericRun({"a", "1", "2", "3"}) == 3, "run 3 so cuoi");
+        ok(autosum::trailingNumericRun({"1", "2", "x", "5"}) == 1, "dut o 'x' -> run 1");
+        ok(autosum::trailingNumericRun({"a", "b"}) == 0, "khong co so -> 0");
+        ok(autosum::trailingNumericRun({}) == 0, "rong -> 0");
+        ok(autosum::trailingNumericRun({"10", "20"}) == 2, "ca hai so -> 2");
     }
 
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);
