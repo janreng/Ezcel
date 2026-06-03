@@ -38,6 +38,8 @@
 #include <QPoint>
 #include <QWheelEvent>
 #include <QEvent>
+#include <QDate>
+#include <QTime>
 
 // Bộ lọc file dùng chung cho mở/lưu.
 static const char *kFileFilter =
@@ -281,6 +283,16 @@ void MainWindow::buildMenus()
                               .arg(SpreadsheetModel::columnLabel(c - 1)).arg(r + 1);
         }
         if (!formula.isEmpty()) m_model->setData(idx, formula, Qt::EditRole);
+    });
+    data->addAction(QStringLiteral("Chèn ngày hôm nay"), QKeySequence(QStringLiteral("Ctrl+;")), this, [this] {
+        QModelIndex idx = m_view->currentIndex();
+        if (idx.isValid())
+            m_model->setData(idx, QDate::currentDate().toString(QStringLiteral("dd/MM/yyyy")), Qt::EditRole);
+    });
+    data->addAction(QStringLiteral("Chèn giờ hiện tại"), QKeySequence(QStringLiteral("Ctrl+Shift+;")), this, [this] {
+        QModelIndex idx = m_view->currentIndex();
+        if (idx.isValid())
+            m_model->setData(idx, QTime::currentTime().toString(QStringLiteral("HH:mm:ss")), Qt::EditRole);
     });
     data->addSeparator();
     data->addAction(i18n::tr("data_cond"), this, &MainWindow::showCondFormat);

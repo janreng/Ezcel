@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v0.40.0 — Chèn ngày / giờ
+
+- **Chèn nhanh ngày và giờ** (menu **Dữ liệu**): Ctrl+`;` chèn ngày hôm nay, Ctrl+Shift+`;` chèn giờ hiện tại vào ô đang chọn.
+
 ## v0.39.0 — Tính tổng nhanh (AutoSum)
 
 - **Tính tổng tự động** (menu **Dữ liệu → AutoSum**, hoặc Alt+`=`): tự nhận dãy số ngay phía trên (hoặc bên trái) ô đang chọn và chèn công thức `=SUM(...)` cho bạn.
