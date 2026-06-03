@@ -88,3 +88,12 @@ add_test(NAME model COMMAND test_model)
 add_test(NAME io COMMAND test_io)
 add_test(NAME view COMMAND test_view)
 add_test(NAME version COMMAND test_version)
+
+# --- Sort (sắp xếp vùng dữ liệu) — module logic thuần (Qt Core) -> static lib + test.
+add_library(ezcel_sort STATIC src/model/Sort.cpp src/model/Sort.h)
+target_include_directories(ezcel_sort PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_link_libraries(ezcel_sort PUBLIC Qt6::Core)
+
+add_executable(test_sort tests/test_sort.cpp)
+target_link_libraries(test_sort PRIVATE ezcel_sort Qt6::Core)
+add_test(NAME sort COMMAND test_sort)
