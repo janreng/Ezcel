@@ -47,6 +47,7 @@ private slots:
     void filterByValues();    // lọc theo giá trị chọn trong cột (Spec 15)
     void removeDuplicates();  // xóa hàng trùng (Spec 27)
     void textToColumns();     // tách cột theo dấu phân cách (Spec 27)
+    void subtotalRange();     // tổng phụ theo nhóm (Spec 27.6)
     void toggleMergeSelection();
     void toggleShowFormulas(bool on);
     void showShortcuts();     // hộp thoại bảng phím tắt (Spec 23)

@@ -1,5 +1,11 @@
 # Lịch sử thay đổi
 
+## v1.24.0 — Tổng phụ theo nhóm (Spec 27)
+
+- **Thêm "Tổng phụ theo nhóm..."** trong menu Dữ liệu: tự chèn dòng tổng sau mỗi nhóm dữ liệu liên tiếp và một dòng tổng cộng ở cuối.
+- Chọn **hàm tổng hợp**: Tổng, Đếm, Trung bình, Lớn nhất, Nhỏ nhất; chọn cột cần tính.
+- Nhóm theo cột của ô đang chọn (dữ liệu nên được sắp xếp theo cột đó trước).
+
 ## v1.23.0 — Dán đặc biệt: phép tính & bỏ qua ô trống (Spec 13)
 
 - **Hộp thoại "Dán đặc biệt" mở rộng**: chọn phép tính khi dán — Cộng, Trừ, Nhân, Chia — để gộp giá trị vùng dán vào giá trị đang có ở vùng đích.

@@ -649,6 +649,7 @@ void MainWindow::buildMenus()
     data->addAction(QStringLiteral("Lọc theo giá trị..."), this, &MainWindow::filterByValues);
     data->addAction(QStringLiteral("Xóa hàng trùng"), this, &MainWindow::removeDuplicates);
     data->addAction(QStringLiteral("Tách cột theo dấu phân cách..."), this, &MainWindow::textToColumns);
+    data->addAction(QStringLiteral("Tổng phụ theo nhóm..."), this, &MainWindow::subtotalRange);
     data->addAction(i18n::tr("data_clear_filter"), this, [this] {
         for (int r = 0; r < m_model->rowCount(); ++r) m_view->setRowHidden(r, false);
     });
@@ -1254,6 +1255,59 @@ void MainWindow::textToColumns()
         ++filled;
     }
     statusBar()->showMessage(QStringLiteral("Đã tách %1 hàng theo '%2'").arg(filled).arg(delim), 3000);
+}
+
+// Tổng phụ (Subtotal, Spec 27.6): chèn dòng tổng sau mỗi nhóm + dòng tổng cộng.
+// Dữ liệu cần đã sắp xếp theo cột nhóm. Cột nhóm = cột ô hiện hành.
+void MainWindow::subtotalRange()
+{
+    const int rows = m_model->rowCount(), cols = m_model->columnCount();
+    int lastRow = -1;
+    for (int r = 0; r < rows; ++r) {
+        bool empty = true;
+        for (int c = 0; c < cols; ++c)
+            if (!m_model->data(m_model->index(r, c), Qt::EditRole).toString().trimmed().isEmpty()) { empty = false; break; }
+        if (empty) break;
+        lastRow = r;
+    }
+    if (lastRow < 1) { statusBar()->showMessage(QStringLiteral("Không đủ dữ liệu để tính tổng phụ"), 2500); return; }
+
+    QModelIndex cur = m_view->currentIndex();
+    int groupCol = cur.isValid() ? cur.column() : 0;
+
+    bool ok = false;
+    const QStringList fnNames{QStringLiteral("Tổng (Sum)"), QStringLiteral("Đếm (Count)"),
+        QStringLiteral("Trung bình (Average)"), QStringLiteral("Lớn nhất (Max)"), QStringLiteral("Nhỏ nhất (Min)")};
+    QString fnChoice = QInputDialog::getItem(this, QStringLiteral("Tổng phụ"),
+        QStringLiteral("Hàm tổng hợp:"), fnNames, 0, false, &ok);
+    if (!ok) return;
+    datatools::Agg fn = datatools::Agg::Sum;
+    int fi = fnNames.indexOf(fnChoice);
+    fn = static_cast<datatools::Agg>(qMax(0, fi));
+
+    int aggCol = QInputDialog::getInt(this, QStringLiteral("Tổng phụ"),
+        QStringLiteral("Cột cần tổng hợp (số thứ tự, A=1):"),
+        qMin(groupCol + 2, cols), 1, cols, 1, &ok) - 1;
+    if (!ok) return;
+
+    // Lấy khối DỮ LIỆU (bỏ dòng tiêu đề hàng 0).
+    QVector<QVector<QString>> data;
+    for (int r = 1; r <= lastRow; ++r) {
+        QVector<QString> row;
+        for (int c = 0; c < cols; ++c) row.push_back(m_model->data(m_model->index(r, c), Qt::EditRole).toString());
+        data.push_back(row);
+    }
+    auto result = datatools::subtotal(data, groupCol, {aggCol}, fn,
+                                      QStringLiteral("Tổng"), QStringLiteral("Tổng cộng"));
+    if (result.isEmpty()) return;
+
+    // Chèn thêm dòng cho phần dôi ra rồi ghi đè kết quả bắt đầu từ hàng 1.
+    int extra = result.size() - data.size();
+    if (extra > 0) m_model->insertRows(lastRow + 1, extra);
+    for (int r = 0; r < result.size(); ++r)
+        for (int c = 0; c < cols && c < result[r].size(); ++c)
+            m_model->setData(m_model->index(1 + r, c), result[r][c], Qt::EditRole);
+    statusBar()->showMessage(QStringLiteral("Đã chèn tổng phụ theo nhóm"), 3000);
 }
 
 void MainWindow::toggleShowFormulas(bool on)

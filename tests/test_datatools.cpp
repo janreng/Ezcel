@@ -35,6 +35,33 @@ int main(int argc, char **argv) {
     auto d2 = datatools::duplicateRowIndices(rows, {0, 1}, true);
     ok(d2.size() == 1 && d2.contains(4), "khoa (0,1): chi Binh/8 trung");
 
+    // --- subtotal (Spec 27.6) ---
+    // Da sort theo cot 0 (vung). Cot 1 = doanh so.
+    QVector<QVector<QString>> sdata = {
+        {"Bac", "10"}, {"Bac", "20"},
+        {"Nam", "5"},  {"Nam", "5"}, {"Nam", "30"},
+    };
+    auto st = datatools::subtotal(sdata, 0, {1}, datatools::Agg::Sum,
+                                  QString::fromUtf8("Tong"), QString::fromUtf8("Tong cong"));
+    // 5 dong goc + 2 dong tong phu + 1 dong tong cong = 8
+    ok(st.size() == 8, "subtotal: 5 goc + 2 phu + 1 cong = 8 dong");
+    ok(st[2][0] == QString::fromUtf8("Bac Tong") && st[2][1] == "30", "tong phu Bac = 30");
+    ok(st[6][0] == QString::fromUtf8("Nam Tong") && st[6][1] == "40", "tong phu Nam = 40");
+    ok(st[7][0] == QString::fromUtf8("Tong cong") && st[7][1] == "70", "tong cong = 70");
+
+    // Count + Average + Max + Min tren mot nhom
+    QVector<QVector<QString>> one = {{"X", "2"}, {"X", "4"}, {"X", "9"}};
+    auto sc = datatools::subtotal(one, 0, {1}, datatools::Agg::Count, "T", "G");
+    ok(sc[3][1] == "3", "Count = 3");
+    auto sa = datatools::subtotal(one, 0, {1}, datatools::Agg::Average, "T", "G");
+    ok(sa[3][1] == "5", "Average = 5");
+    auto smx = datatools::subtotal(one, 0, {1}, datatools::Agg::Max, "T", "G");
+    ok(smx[3][1] == "9", "Max = 9");
+    auto smn = datatools::subtotal(one, 0, {1}, datatools::Agg::Min, "T", "G");
+    ok(smn[3][1] == "2", "Min = 2");
+
+    ok(datatools::subtotal({}, 0, {1}, datatools::Agg::Sum, "T", "G").isEmpty(), "rong -> rong");
+
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);
     return g_fail == 0 ? 0 : 1;
 }
