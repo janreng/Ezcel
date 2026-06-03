@@ -17,6 +17,7 @@
 #include "ui/Zoom.h"
 #include "ui/SheetNav.h"
 #include "ui/CellMode.h"
+#include "ui/WorkbookStats.h"
 
 #include <QTableView>
 #include <QHeaderView>
@@ -560,6 +561,7 @@ void MainWindow::buildMenus()
     });
     QAction *shAct = help->addAction(i18n::tr("help_shortcuts"), this, [this] { showShortcuts(); });
     shAct->setShortcut(QKeySequence(Qt::Key_F1));
+    help->addAction(i18n::tr("help_stats"), this, [this] { showWorkbookStats(); });
     help->addAction(i18n::tr("help_about"), this, [this] {
 #ifdef EZCEL_VERSION
         const QString ver = QStringLiteral(EZCEL_VERSION);
@@ -613,6 +615,50 @@ void MainWindow::showShortcuts()
     lay->addWidget(box);
 
     dlg.exec();
+}
+
+// Hộp thoại thống kê bảng tính (Spec 57.1): đếm ô/dữ liệu/công thức/từ cho trang hiện tại + cả workbook.
+void MainWindow::showWorkbookStats()
+{
+    auto gather = [](SpreadsheetModel *m) {
+        std::vector<QString> texts;
+        const int rows = m->rowCount(), cols = m->columnCount();
+        texts.reserve(size_t(rows) * cols);
+        for (int r = 0; r < rows; ++r)
+            for (int c = 0; c < cols; ++c)
+                texts.push_back(m->data(m->index(r, c), Qt::EditRole).toString());
+        return wbstats::analyze(texts);
+    };
+
+    wbstats::Result cur = gather(m_model);
+    wbstats::Result wb;
+    for (SpreadsheetModel *s : m_sheets) wbstats::add(wb, gather(s));
+
+    int idx = m_sheetTabs ? m_sheetTabs->currentIndex() : 0;
+    QString sheetName = (m_sheetTabs && idx >= 0) ? m_sheetTabs->tabText(idx) : QStringLiteral("Trang 1");
+
+    QString html = QStringLiteral(
+        "<b>Trang hiện tại: %1</b><table cellpadding='3'>"
+        "<tr><td>Số ô có dữ liệu:</td><td align='right'>%2</td></tr>"
+        "<tr><td>Số công thức:</td><td align='right'>%3</td></tr>"
+        "<tr><td>Số ô là số:</td><td align='right'>%4</td></tr>"
+        "<tr><td>Số từ:</td><td align='right'>%5</td></tr></table>"
+        "<hr><b>Toàn bộ bảng tính (%6 trang)</b><table cellpadding='3'>"
+        "<tr><td>Số ô có dữ liệu:</td><td align='right'>%7</td></tr>"
+        "<tr><td>Số công thức:</td><td align='right'>%8</td></tr>"
+        "<tr><td>Số ô là số:</td><td align='right'>%9</td></tr>"
+        "<tr><td>Số từ:</td><td align='right'>%10</td></tr></table>")
+        .arg(sheetName)
+        .arg(cur.cellsWithData).arg(cur.formulas).arg(cur.numbers).arg(cur.words)
+        .arg(m_sheets.size())
+        .arg(wb.cellsWithData).arg(wb.formulas).arg(wb.numbers).arg(wb.words);
+
+    QMessageBox box(this);
+    box.setWindowTitle(i18n::tr("help_stats"));
+    box.setTextFormat(Qt::RichText);
+    box.setText(html);
+    box.setStandardButtons(QMessageBox::Ok);
+    box.exec();
 }
 
 void MainWindow::buildToolbar()

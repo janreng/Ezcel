@@ -45,6 +45,7 @@ private slots:
     void toggleMergeSelection();
     void toggleShowFormulas(bool on);
     void showShortcuts();     // hộp thoại bảng phím tắt (Spec 23)
+    void showWorkbookStats(); // hộp thoại thống kê bảng tính (Spec 57)
     void showFindReplace();   // định nghĩa ở MainWindowFind.cpp
     void showCondFormat();    // định dạng có điều kiện (MainWindowFind.cpp)
     void showDataValidation();// kiểm tra dữ liệu (MainWindowFind.cpp)

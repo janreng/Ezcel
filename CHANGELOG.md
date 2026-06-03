@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v1.16.0 — Thống kê bảng tính (Spec 57)
+
+- **Thêm hộp thoại "Thống kê bảng tính"** trong menu Trợ giúp: hiển thị số ô có dữ liệu, số công thức, số ô là số và số từ — cho cả trang hiện tại và toàn bộ bảng tính (tất cả các trang). Tiện kiểm tra nhanh độ phức tạp của tệp.
+
 ## v1.15.0 — Bộ hàm lớn: phân phối xác suất, đổi đơn vị & thống kê (Spec 12)
 
 - **Thêm nhóm hàm phân phối xác suất**: `BINOMDIST` (nhị thức), `POISSON`, `EXPONDIST` (mũ), `WEIBULL`, `NEGBINOMDIST` (nhị thức âm) và `HYPGEOMDIST` (siêu bội), hỗ trợ cả dạng mật độ và tích lũy.
