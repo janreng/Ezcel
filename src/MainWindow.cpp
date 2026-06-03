@@ -315,6 +315,7 @@ void MainWindow::buildToolbar()
 {
     QToolBar *tb = addToolBar(QStringLiteral("Chính"));
     tb->setMovable(false);
+    tb->setStyleSheet(theme::toolbarStyle()); // dải kiểu ribbon
     tb->addAction(QStringLiteral("Mới"), this, &MainWindow::newFile);
     tb->addAction(QStringLiteral("Mở"), this, &MainWindow::openFile);
     tb->addAction(QStringLiteral("Lưu"), this, [this] { saveFile(); });

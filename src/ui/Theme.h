@@ -55,4 +55,16 @@ inline QString tableStyle() {
         .arg(Gridline, CellBg, TextPrimary, SelectionFill, RibbonBg, HeaderSelected, ExcelGreen);
 }
 
+// Stylesheet cho thanh công cụ (dải ribbon nền xám nhạt, nút bo nhẹ, hover xám,
+// dấu ngăn nhóm). Áp cho từng QToolBar.
+inline QString toolbarStyle() {
+    return QStringLiteral(
+        "QToolBar { background: %1; border: none; border-bottom: 1px solid %2; spacing: 2px; padding: 3px; }"
+        "QToolBar::separator { width: 1px; background: %3; margin: 3px 5px; }"
+        "QToolButton { padding: 4px 8px; border: 1px solid transparent; border-radius: 3px; color: %4; }"
+        "QToolButton:hover { background: %5; border: 1px solid %2; }"
+        "QToolButton:pressed, QToolButton:checked { background: %6; border: 1px solid %2; }")
+        .arg(RibbonBg, Gridline, Divider, TextPrimary, HoverBg, HeaderSelected);
+}
+
 } // namespace theme

@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v0.37.0 — Thanh công cụ kiểu dải lệnh
+
+- **Thanh công cụ gọn và chuyên nghiệp hơn**: nền xám nhạt, nút bo góc và sáng lên khi rê chuột, có vạch ngăn nhóm — nhìn giống dải lệnh (ribbon) quen thuộc.
+
 ## v0.36.0 — Dịch trọn thanh menu
 
 - **Toàn bộ thanh menu đã song ngữ**: ngoài các menu trước đó, nay cả menu **Sửa, Cấu trúc, Dữ liệu** cũng đổi theo ngôn ngữ đã chọn (Tiếng Việt / English).

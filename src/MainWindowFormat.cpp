@@ -3,6 +3,7 @@
 // Viền ô cần delegate vẽ nên để ở đợt view/delegate sau.
 #include "MainWindow.h"
 #include "model/SpreadsheetModel.h"
+#include "ui/Theme.h"
 
 #include <QTableView>
 #include <QToolBar>
@@ -48,6 +49,7 @@ void MainWindow::buildFormatToolbar()
 {
     QToolBar *tb = addToolBar(QStringLiteral("Định dạng"));
     tb->setMovable(false);
+    tb->setStyleSheet(theme::toolbarStyle()); // dải kiểu ribbon
 
     // Font + cỡ chữ.
     auto *fontBox = new QFontComboBox(tb);

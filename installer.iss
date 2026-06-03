@@ -4,7 +4,7 @@
 
 #define MyAppName "Ezcel"
 #ifndef MyAppVersion
-  #define MyAppVersion "0.36.0"
+  #define MyAppVersion "0.37.0"
 #endif
 #define MyAppPublisher "EZG"
 #define MyAppExeName "Ezcel.exe"
