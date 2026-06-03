@@ -248,6 +248,11 @@ int main() {
     checkNum("=DOLLARFR(1.125,16)", 1.02);
     checkNum("=DOLLARFR(1.125,8)", 1.1);
     checkNum("=DOLLARDE(DOLLARFR(1.5,32),32)", 1.5); // khu hoi
+    // EFFECT / NOMINAL (Spec 12) — lai hieu dung / danh nghia
+    checkNum("=EFFECT(0.1,4)", 0.10381289062499954);
+    checkNum("=EFFECT(0.12,12)", 0.12682503013196977);
+    checkNum("=NOMINAL(EFFECT(0.1,4),4)", 0.1); // khu hoi
+    checkNum("=NOMINAL(EFFECT(0.08,2),2)", 0.08);
     checkStr("=A1/0", "#DIV/0!");
     checkStr("=IFERROR(A1/0,\"err\")", "err");
     checkStr("=AND(A1>5,A2>5)", "true");

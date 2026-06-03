@@ -558,6 +558,19 @@ QHash<QString, Fn> &fnMap() {
             int dg = int(std::floor(std::log10(frac))) + 1;
             return Value::number(ip + fp * frac / std::pow(10, dg));
         };
+        // EFFECT(lãi_danh_nghĩa, số_kỳ/năm): lãi suất hiệu dụng năm. NOMINAL là nghịch đảo.
+        r["EFFECT"] = [need](const Args &a) {
+            need(a,2,"EFFECT");
+            double nom = toNumber(a[0]); int npery = toInt(a[1]);
+            if (nom <= 0 || npery < 1) throw FormulaError(QStringLiteral("EFFECT: đối số sai"), ERR_NUM);
+            return Value::number(std::pow(1 + nom / npery, npery) - 1);
+        };
+        r["NOMINAL"] = [need](const Args &a) {
+            need(a,2,"NOMINAL");
+            double eff = toNumber(a[0]); int npery = toInt(a[1]);
+            if (eff <= 0 || npery < 1) throw FormulaError(QStringLiteral("NOMINAL: đối số sai"), ERR_NUM);
+            return Value::number(npery * (std::pow(1 + eff, 1.0 / npery) - 1));
+        };
         // NUMBERVALUE(text, [dấu_thập_phân="."], [dấu_nhóm=","]): đổi chuỗi thành số theo dấu phân cách tùy chọn.
         r["NUMBERVALUE"] = [](const Args &a) {
             if (a.size() < 1 || a.size() > 3) argErr("NUMBERVALUE");

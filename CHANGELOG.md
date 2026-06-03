@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v0.91.0 — Hàm lãi suất EFFECT & NOMINAL (Spec 12)
+
+- **Thêm hàm `EFFECT`** — tính lãi suất hiệu dụng năm từ lãi suất danh nghĩa và số kỳ ghép lãi mỗi năm.
+- **Thêm hàm `NOMINAL`** — tính ngược lãi suất danh nghĩa từ lãi suất hiệu dụng.
+
 ## v0.90.0 — Hàm giá kiểu phân số DOLLARDE & DOLLARFR (Spec 12)
 
 - **Thêm hàm `DOLLARDE`** — đổi giá ghi theo kiểu phân số (ví dụ 1.02 nghĩa là 1 và 2/16) thành số thập phân.
