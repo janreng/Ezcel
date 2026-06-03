@@ -139,6 +139,11 @@ int main() {
     checkNum("=QUARTILE(A1:A3,2)", 20);
     checkNum("=QUARTILE(A1:A3,3)", 25);
     checkNum("=QUARTILE(A1:A3,4)", 30);
+    // DEVSQ / AVEDEV (Spec 12): A1:A3 = {10,20,30}, trung binh 20
+    checkNum("=DEVSQ(A1:A3)", 200);        // 100 + 0 + 100
+    checkNum("=AVEDEV(A1:A3)", 20.0/3.0);  // (10+0+10)/3
+    checkNum("=DEVSQ(2,4,6)", 8);          // mean 4 -> 4+0+4
+    checkNum("=AVEDEV(2,4,6)", 4.0/3.0);
     checkStr("=A1/0", "#DIV/0!");
     checkStr("=IFERROR(A1/0,\"err\")", "err");
     checkStr("=AND(A1>5,A2>5)", "true");

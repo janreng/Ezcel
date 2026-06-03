@@ -176,6 +176,21 @@ QHash<QString, Fn> &fnMap() {
             if (q < 0 || q > 4) throw FormulaError(QStringLiteral("QUARTILE: phần tư 0..4"), ERR_NUM);
             return Value::number(percentileInc(v, q * 0.25));
         };
+        // DEVSQ: tổng bình phương độ lệch so với trung bình. AVEDEV: độ lệch tuyệt đối trung bình.
+        r["DEVSQ"] = [](const Args &a) {
+            auto v = numbers(a);
+            if (v.empty()) throw FormulaError(QStringLiteral("DEVSQ: vùng rỗng"), ERR_NUM);
+            double m = sumv(v) / v.size(), s = 0;
+            for (double x : v) s += (x - m) * (x - m);
+            return Value::number(s);
+        };
+        r["AVEDEV"] = [](const Args &a) {
+            auto v = numbers(a);
+            if (v.empty()) throw FormulaError(QStringLiteral("AVEDEV: vùng rỗng"), ERR_NUM);
+            double m = sumv(v) / v.size(), s = 0;
+            for (double x : v) s += std::abs(x - m);
+            return Value::number(s / v.size());
+        };
         // TEXTBEFORE/TEXTAFTER(text, delim, [instance=1], [match_mode=0]): lấy phần trước/sau dấu phân cách.
         // instance âm -> đếm từ cuối; match_mode 1 -> không phân biệt hoa thường.
         auto matchPositions = [](const QString &s, const QString &d, Qt::CaseSensitivity cs) {

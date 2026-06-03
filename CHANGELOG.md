@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v0.72.0 — Hàm độ lệch DEVSQ & AVEDEV (Spec 12)
+
+- **Thêm hàm `DEVSQ`** — tổng bình phương độ lệch của các giá trị so với trung bình.
+- **Thêm hàm `AVEDEV`** — độ lệch tuyệt đối trung bình của các giá trị so với trung bình.
+
 ## v0.71.0 — Hàm phân vị PERCENTILE & QUARTILE (Spec 12)
 
 - **Thêm hàm `PERCENTILE`** — tính phân vị thứ k (0–1) của một vùng số theo phương pháp nội suy tuyến tính.
