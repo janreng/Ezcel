@@ -68,6 +68,14 @@ int main() {
     checkNum("=ACOSH(COSH(1))", 1);
     checkNum("=ATANH(TANH(0.5))", 0.5);
     checkNum("=ASINH(SINH(2))", 2);
+    // Bitwise (Spec 12)
+    checkNum("=BITAND(12,10)", 8);   // 1100 & 1010 = 1000
+    checkNum("=BITOR(12,10)", 14);   // 1100 | 1010 = 1110
+    checkNum("=BITXOR(12,10)", 6);   // 1100 ^ 1010 = 0110
+    checkNum("=BITLSHIFT(1,4)", 16);
+    checkNum("=BITRSHIFT(16,4)", 1);
+    checkNum("=BITLSHIFT(16,-4)", 1); // shift am -> dich phai
+    checkNum("=BITAND(255,15)", 15);
     checkNum("=LEN(B1)", 5);
     checkNum("=COUNTIF(A1:A3,\">15\")", 2);
     checkNum("=SUMIF(A1:A3,\">15\")", 50);

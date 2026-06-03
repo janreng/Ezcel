@@ -465,6 +465,19 @@ QHash<QString, Fn> &fnMap() {
         r["ASINH"] = [need](const Args &a) { need(a,1,"ASINH"); return Value::number(std::asinh(toNumber(a[0]))); };
         r["ACOSH"] = [need](const Args &a) { need(a,1,"ACOSH"); double x = toNumber(a[0]); if (x<1) throw FormulaError(QStringLiteral("ACOSH miền x>=1"), ERR_NUM); return Value::number(std::acosh(x)); };
         r["ATANH"] = [need](const Args &a) { need(a,1,"ATANH"); double x = toNumber(a[0]); if (x<=-1||x>=1) throw FormulaError(QStringLiteral("ATANH miền (-1,1)"), ERR_NUM); return Value::number(std::atanh(x)); };
+        // Bitwise (kỹ thuật): số nguyên không âm < 2^48. BITAND/BITOR/BITXOR.
+        auto bitArg = [](const Value &v, const char *fn) -> qint64 {
+            double d = toNumber(v);
+            if (d < 0 || d != std::floor(d) || d >= 281474976710656.0) // 2^48
+                throw FormulaError(QString::fromUtf8(fn) + QStringLiteral(": cần số nguyên không âm < 2^48"), ERR_NUM);
+            return qint64(d);
+        };
+        r["BITAND"] = [need,bitArg](const Args &a) { need(a,2,"BITAND"); return Value::number(double(bitArg(a[0],"BITAND") & bitArg(a[1],"BITAND"))); };
+        r["BITOR"]  = [need,bitArg](const Args &a) { need(a,2,"BITOR");  return Value::number(double(bitArg(a[0],"BITOR")  | bitArg(a[1],"BITOR"))); };
+        r["BITXOR"] = [need,bitArg](const Args &a) { need(a,2,"BITXOR"); return Value::number(double(bitArg(a[0],"BITXOR") ^ bitArg(a[1],"BITXOR"))); };
+        // BITLSHIFT/BITRSHIFT: dịch trái/phải `shift` bit (shift âm -> dịch ngược). |shift| <= 53.
+        r["BITLSHIFT"] = [need,bitArg](const Args &a) { need(a,2,"BITLSHIFT"); qint64 n = bitArg(a[0],"BITLSHIFT"); int s = toInt(a[1]); if (s<-53||s>53) throw FormulaError(QStringLiteral("BITLSHIFT: |shift| <= 53"), ERR_NUM); return Value::number(s>=0 ? double(n << s) : double(n >> (-s))); };
+        r["BITRSHIFT"] = [need,bitArg](const Args &a) { need(a,2,"BITRSHIFT"); qint64 n = bitArg(a[0],"BITRSHIFT"); int s = toInt(a[1]); if (s<-53||s>53) throw FormulaError(QStringLiteral("BITRSHIFT: |shift| <= 53"), ERR_NUM); return Value::number(s>=0 ? double(n >> s) : double(n << (-s))); };
 
         // --- text/info mở rộng ---
         r["CHAR"]    = [need](const Args &a) { need(a,1,"CHAR"); int c = toInt(a[0]); if (c<1||c>255) throw FormulaError(QStringLiteral("CHAR mã 1..255"), ERR_VALUE); return Value::str(QString(QChar(c))); };

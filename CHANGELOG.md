@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v0.65.0 — Hàm thao tác bit (Spec 12)
+
+- **Thêm nhóm hàm thao tác bit** `BITAND`, `BITOR`, `BITXOR` (và/hoặc/hoặc-loại-trừ theo bit) cùng `BITLSHIFT`, `BITRSHIFT` (dịch bit trái/phải) — tiện cho tính toán kỹ thuật và xử lý cờ nhị phân.
+
 ## v0.64.0 — Hàm lượng giác mở rộng (Spec 12)
 
 - **Thêm hàm lượng giác nghịch đảo** `SEC`, `CSC`, `COT` và phiên bản hyperbolic `SECH`, `CSCH`, `COTH`.
