@@ -95,6 +95,14 @@ int main() {
     checkNum("=ARABIC(\"MCMXCIV\")", 1994);
     checkNum("=ARABIC(\"MMXXIV\")", 2024);
     checkNum("=ARABIC(ROMAN(3888))", 3888); // khu hoi
+    // DELTA / GESTEP (Spec 12, ky thuat)
+    checkNum("=DELTA(5,5)", 1);
+    checkNum("=DELTA(5,4)", 0);
+    checkNum("=DELTA(0)", 1);    // b mac dinh 0
+    checkNum("=GESTEP(5,4)", 1);
+    checkNum("=GESTEP(4,5)", 0);
+    checkNum("=GESTEP(5,5)", 1); // bang nhau -> 1
+    checkNum("=GESTEP(-1)", 0);  // step mac dinh 0
     checkStr("=A1/0", "#DIV/0!");
     checkStr("=IFERROR(A1/0,\"err\")", "err");
     checkStr("=AND(A1>5,A2>5)", "true");

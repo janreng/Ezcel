@@ -504,6 +504,11 @@ QHash<QString, Fn> &fnMap() {
             return Value::number(double(sign * total));
         };
 
+        // DELTA(a,[b]): 1 nếu a==b (delta Kronecker), ngược lại 0. b mặc định 0.
+        r["DELTA"] = [](const Args &a) { if (a.size()<1||a.size()>2) argErr("DELTA"); double x = toNumber(a[0]); double y = a.size()==2 ? toNumber(a[1]) : 0.0; return Value::number(x==y ? 1 : 0); };
+        // GESTEP(num,[step]): 1 nếu num >= step, ngược lại 0. step mặc định 0.
+        r["GESTEP"] = [](const Args &a) { if (a.size()<1||a.size()>2) argErr("GESTEP"); double x = toNumber(a[0]); double s = a.size()==2 ? toNumber(a[1]) : 0.0; return Value::number(x>=s ? 1 : 0); };
+
         // --- text/info mở rộng ---
         r["CHAR"]    = [need](const Args &a) { need(a,1,"CHAR"); int c = toInt(a[0]); if (c<1||c>255) throw FormulaError(QStringLiteral("CHAR mã 1..255"), ERR_VALUE); return Value::str(QString(QChar(c))); };
         r["UNICHAR"] = [need](const Args &a) { need(a,1,"UNICHAR"); int c = toInt(a[0]); if (c<1) throw FormulaError(QStringLiteral("UNICHAR mã > 0"), ERR_VALUE); return Value::str(QString(QChar(c))); };

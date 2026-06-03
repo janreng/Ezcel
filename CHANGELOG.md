@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v0.67.0 — Hàm so sánh kỹ thuật DELTA & GESTEP (Spec 12)
+
+- **Thêm hàm `DELTA`** — trả về 1 nếu hai số bằng nhau, ngược lại 0 (delta Kronecker).
+- **Thêm hàm `GESTEP`** — trả về 1 nếu số lớn hơn hoặc bằng ngưỡng, ngược lại 0.
+
 ## v0.66.0 — Hàm chữ số La Mã ROMAN & ARABIC (Spec 12)
 
 - **Thêm hàm `ROMAN`** — đổi số (0–3999) sang chữ số La Mã, ví dụ `1994` ra `MCMXCIV`.
