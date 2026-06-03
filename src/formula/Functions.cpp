@@ -171,6 +171,8 @@ QHash<QString, Fn> &fnMap() {
         };
         r["VARPA"]   = [varpaCore](const Args &a) { return Value::number(varpaCore(a, "VARPA")); };
         r["STDEVPA"] = [varpaCore](const Args &a) { return Value::number(std::sqrt(varpaCore(a, "STDEVPA"))); };
+        // ENCODEURL(text): mã hóa chuỗi theo kiểu URL (phần trăm), ví dụ dấu cách -> %20.
+        r["ENCODEURL"] = [need](const Args &a) { need(a,1,"ENCODEURL"); return Value::str(QString::fromLatin1(toText(a[0]).toUtf8().toPercentEncoding())); };
         // PERCENTILE/QUARTILE: phân vị theo nội suy tuyến tính (phương pháp INC, gồm cả hai đầu).
         auto percentileInc = [](std::vector<double> v, double k) {
             std::sort(v.begin(), v.end());

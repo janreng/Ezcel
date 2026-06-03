@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v1.12.0 — Hàm mã hóa URL ENCODEURL (Spec 12)
+
+- **Thêm hàm `ENCODEURL`** — mã hóa một chuỗi theo kiểu URL (dấu cách thành `%20`, ký tự đặc biệt thành mã phần trăm), tiện khi ghép địa chỉ web.
+
 ## v1.11.0 — Hàm VARPA & STDEVPA (Spec 12)
 
 - **Thêm hàm `VARPA` và `STDEVPA`** — tính phương sai và độ lệch chuẩn của toàn bộ tổng thể, có tính cả ô chứa chữ và giá trị logic.

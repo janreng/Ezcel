@@ -263,6 +263,10 @@ int main() {
     // VARPA / STDEVPA (Spec 12) — tong the (chia n)
     checkNum("=VARPA(A1:A3)", 200.0/3.0);    // {10,20,30}
     checkNum("=STDEVPA(A1:A3)", 8.16496580927726);
+    // ENCODEURL (Spec 12) — ma hoa URL
+    checkStr("=ENCODEURL(\"a b\")", "a%20b");
+    checkStr("=ENCODEURL(\"a&b\")", "a%26b");
+    checkStr("=ENCODEURL(\"hello\")", "hello");
     // IPMT / PPMT (Spec 12): vay 8000, lai 10%/nam, 36 ky
     checkNum("=IPMT(0.1/12,1,36,8000)", -66.6666666666667); // ky 1: -pv*rate
     checkNum("=IPMT(0.1/12,2,36,8000)", -65.0710764092997);
