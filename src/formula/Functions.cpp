@@ -524,6 +524,20 @@ QHash<QString, Fn> &fnMap() {
             if (life <= 0 || per < 1 || per > life) throw FormulaError(QStringLiteral("SYD: đối số sai"), ERR_NUM);
             return Value::number((cost - salv) * (life - per + 1) * 2.0 / (life * (life + 1)));
         };
+        // DDB(cost, salvage, life, period, [factor=2]): khấu hao số dư giảm dần kép cho kỳ `period`.
+        r["DDB"] = [](const Args &a) {
+            if (a.size() < 4 || a.size() > 5) argErr("DDB");
+            double cost = toNumber(a[0]), salv = toNumber(a[1]), life = toNumber(a[2]), period = toNumber(a[3]);
+            double factor = a.size() >= 5 ? toNumber(a[4]) : 2.0;
+            if (life <= 0 || period < 1 || period > life) throw FormulaError(QStringLiteral("DDB: đối số sai"), ERR_NUM);
+            double rate = factor / life, book = cost, dep = 0;
+            for (int p = 1; p <= int(period + 0.5); ++p) {
+                dep = std::min(book * rate, book - salv);
+                if (dep < 0) dep = 0;
+                book -= dep;
+            }
+            return Value::number(dep);
+        };
         // NUMBERVALUE(text, [dấu_thập_phân="."], [dấu_nhóm=","]): đổi chuỗi thành số theo dấu phân cách tùy chọn.
         r["NUMBERVALUE"] = [](const Args &a) {
             if (a.size() < 1 || a.size() > 3) argErr("NUMBERVALUE");

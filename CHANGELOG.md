@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v0.89.0 — Hàm khấu hao nhanh DDB (Spec 12)
+
+- **Thêm hàm `DDB`** — tính khấu hao theo phương pháp số dư giảm dần kép cho từng kỳ, có hệ số tăng tốc tùy chọn và tự dừng khi chạm giá trị thanh lý.
+
 ## v0.88.0 — Hàm khấu hao SLN & SYD (Spec 12)
 
 - **Thêm hàm `SLN`** — tính khấu hao đều mỗi kỳ của tài sản (phương pháp đường thẳng).

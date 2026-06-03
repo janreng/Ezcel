@@ -237,6 +237,11 @@ int main() {
     checkNum("=SYD(10000,1000,5,1)", 3000);   // nam dau lon nhat
     checkNum("=SYD(10000,1000,5,5)", 600);    // nam cuoi nho nhat
     checkNum("=SYD(10000,1000,5,3)", 1800);   // nam giua
+    // DDB (Spec 12) — so du giam dan kep, factor mac dinh 2
+    checkNum("=DDB(10000,1000,5,1)", 4000);   // 10000*0.4
+    checkNum("=DDB(10000,1000,5,2)", 2400);
+    checkNum("=DDB(10000,1000,5,5)", 296);    // bi chan o muc salvage
+    checkNum("=DDB(10000,1000,5,3,1.5)", 1470); // factor 1.5
     checkStr("=A1/0", "#DIV/0!");
     checkStr("=IFERROR(A1/0,\"err\")", "err");
     checkStr("=AND(A1>5,A2>5)", "true");
