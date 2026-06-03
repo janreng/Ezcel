@@ -989,6 +989,21 @@ QHash<QString, Fn> &fnMap() {
             if (c.first == 0 && c.second == 0) throw FormulaError(QStringLiteral("IMARGUMENT: số phức 0"), ERR_DIV0);
             return Value::number(std::atan2(c.second, c.first));
         };
+        // IMPRODUCT (nhân các số phức) và IMDIV (chia số phức).
+        r["IMPRODUCT"] = [parseComplex, formatComplex](const Args &a) {
+            if (a.empty()) argErr("IMPRODUCT");
+            double re = 1, im = 0;
+            for (const Value &v : a) { auto c = parseComplex(toText(v)); double nr = re*c.first - im*c.second, ni = re*c.second + im*c.first; re = nr; im = ni; }
+            return Value::str(formatComplex(re, im));
+        };
+        r["IMDIV"] = [need, parseComplex, formatComplex](const Args &a) {
+            need(a,2,"IMDIV");
+            auto c1 = parseComplex(toText(a[0])), c2 = parseComplex(toText(a[1]));
+            double denom = c2.first*c2.first + c2.second*c2.second;
+            if (denom == 0) throw FormulaError(QStringLiteral("IMDIV: chia cho số phức 0"), ERR_DIV0);
+            return Value::str(formatComplex((c1.first*c2.first + c1.second*c2.second)/denom,
+                                            (c1.second*c2.first - c1.first*c2.second)/denom));
+        };
 
         // --- thống kê ---
         r["MEDIAN"] = [](const Args &a) { auto n = numbers(a); if (n.empty()) throw FormulaError(QStringLiteral("MEDIAN cần ít nhất một số")); std::sort(n.begin(), n.end()); size_t m = n.size(); return Value::number(m%2 ? n[m/2] : (n[m/2-1]+n[m/2])/2.0); };

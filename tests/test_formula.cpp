@@ -407,6 +407,10 @@ int main() {
     checkStr("=IMCONJUGATE(\"3+4i\")", "3-4i");
     checkNum("=IMARGUMENT(\"1+i\")", 0.7853981633974483);  // pi/4
     checkNum("=IMARGUMENT(\"3+4i\")", 0.9272952180016122);
+    // IMPRODUCT / IMDIV (Spec 12)
+    checkStr("=IMPRODUCT(\"3+4i\",\"1+2i\")", "-5+10i"); // (3-8)+(6+4)i
+    checkStr("=IMDIV(\"3+4i\",\"1+2i\")", "2.2-0.4i");   // (11-2i)/5
+    checkStr("=IMDIV(\"1\",\"i\")", "-i");               // 1/i = -i
 
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);
     return g_fail == 0 ? 0 : 1;

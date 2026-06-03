@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v1.2.0 — Nhân & chia số phức (Spec 12)
+
+- **Thêm hàm `IMPRODUCT`** — nhân nhiều số phức với nhau.
+- **Thêm hàm `IMDIV`** — chia hai số phức.
+
 ## v1.1.0 — Phép toán số phức (Spec 12)
 
 - **Thêm hàm `IMSUM` và `IMSUB`** — cộng và trừ các số phức.
