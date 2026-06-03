@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v0.25.0 — Bảng màu giống Excel
+
+- **Giao diện lưới sát Excel hơn**: đường kẻ ô màu xám nhạt, vùng chọn tô xanh nhạt với chữ xanh Excel, tiêu đề cột/dòng nền xám và sáng lên màu xanh khi đang chọn — nhìn quen mắt như Excel.
+
 ## v0.24.0 — Biểu tượng ứng dụng
 
 - **Ezcel đã có icon riêng**: hiển thị trên thanh tiêu đề cửa sổ, thanh tác vụ và bộ cài đặt (giống biểu tượng quen thuộc của bản trước).

@@ -4,6 +4,7 @@
 #include "io/Xlsx.h"
 #include "view/MergeSpans.h"
 #include "update/Updater.h"
+#include "ui/Theme.h"
 
 #include <QTableView>
 #include <QHeaderView>
@@ -38,8 +39,12 @@ MainWindow::MainWindow(QWidget *parent)
 
     m_view = new QTableView(this);
     m_view->setModel(m_model);
-    m_view->horizontalHeader()->setDefaultSectionSize(90);
-    m_view->verticalHeader()->setDefaultSectionSize(22);
+    m_view->horizontalHeader()->setDefaultSectionSize(theme::ColWidth);
+    m_view->verticalHeader()->setDefaultSectionSize(theme::RowHeight);
+    m_view->setStyleSheet(theme::tableStyle()); // bảng màu kiểu Excel
+    m_view->setShowGrid(true);
+    m_view->horizontalHeader()->setHighlightSections(true); // header sáng khi chọn (giống Excel)
+    m_view->verticalHeader()->setHighlightSections(true);
 
     buildFormulaBar();
 
