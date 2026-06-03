@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v1.5.0 — Sin & cos số phức (Spec 12)
+
+- **Thêm hàm `IMSIN`** — tính sin của một số phức.
+- **Thêm hàm `IMCOS`** — tính cos của một số phức.
+
 ## v1.4.0 — Căn & lũy thừa số phức (Spec 12)
 
 - **Thêm hàm `IMSQRT`** — tính căn bậc hai của một số phức.

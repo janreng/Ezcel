@@ -423,6 +423,12 @@ int main() {
     checkNum("=IMREAL(IMPOWER(\"2+i\",2))", 3);    // (2+i)^2 = 3+4i
     checkNum("=IMAGINARY(IMPOWER(\"2+i\",2))", 4);
     checkNum("=IMAGINARY(IMPOWER(\"1+i\",2))", 2); // (1+i)^2 = 2i
+    // IMSIN / IMCOS (Spec 12)
+    checkNum("=IMREAL(IMSIN(\"0\"))", 0);   // sin(0)=0
+    checkNum("=IMREAL(IMCOS(\"0\"))", 1);   // cos(0)=1
+    checkNum("=IMAGINARY(IMSIN(\"i\"))", 1.1752011936438014); // sin(i)=i*sinh(1)
+    checkNum("=IMREAL(IMCOS(\"i\"))", 1.5430806348152437);    // cos(i)=cosh(1)
+    checkNum("=IMAGINARY(IMCOS(\"i\"))", 0);
 
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);
     return g_fail == 0 ? 0 : 1;

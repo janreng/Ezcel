@@ -1031,6 +1031,17 @@ QHash<QString, Fn> &fnMap() {
             double r = std::hypot(c.first, c.second), th = std::atan2(c.second, c.first), rn = std::pow(r, n);
             return Value::str(formatComplex(rn * std::cos(n*th), rn * std::sin(n*th)));
         };
+        // IMSIN/IMCOS: sin/cos của số phức (a+bi).
+        r["IMSIN"] = [need, parseComplex, formatComplex](const Args &a) {
+            need(a,1,"IMSIN");
+            auto c = parseComplex(toText(a[0]));
+            return Value::str(formatComplex(std::sin(c.first)*std::cosh(c.second), std::cos(c.first)*std::sinh(c.second)));
+        };
+        r["IMCOS"] = [need, parseComplex, formatComplex](const Args &a) {
+            need(a,1,"IMCOS");
+            auto c = parseComplex(toText(a[0]));
+            return Value::str(formatComplex(std::cos(c.first)*std::cosh(c.second), -std::sin(c.first)*std::sinh(c.second)));
+        };
 
         // --- thống kê ---
         r["MEDIAN"] = [](const Args &a) { auto n = numbers(a); if (n.empty()) throw FormulaError(QStringLiteral("MEDIAN cần ít nhất một số")); std::sort(n.begin(), n.end()); size_t m = n.size(); return Value::number(m%2 ? n[m/2] : (n[m/2-1]+n[m/2])/2.0); };
