@@ -42,6 +42,13 @@ public:
     bool showFormulas() const { return m_showFormulas; }
     void setShowFormulas(bool on);
 
+    // Thao tác vùng (đều undoable theo ô).
+    void clearRange(int top, int left, int bottom, int right);
+    void pasteBlock(int top, int left, const QVector<QVector<QString>> &block,
+                    int srcAnchorRow = -1, int srcAnchorCol = -1);
+    void autofillVertical(int col, int srcTop, int srcBottom, int dstBottom);
+    void autofillHorizontal(int row, int srcLeft, int srcRight, int dstRight);
+
     // Undo/redo.
     bool undo();
     bool redo();
@@ -86,4 +93,5 @@ private:
     void recalculateAll();                 // bulk: xóa toàn bộ cache, vẽ lại
     void pushUndo(UndoEntry entry);
     void applyEntry(const UndoEntry &e, bool useOld); // revert(useOld) hoặc reapply
+    void applyCellChanges(QVector<CellChange> changes); // batch: undo + set + deps + recalc
 };

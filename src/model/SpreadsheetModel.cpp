@@ -4,8 +4,11 @@
 #include <QColor>
 #include <QDate>
 #include <QDateTime>
+#include <QStringList>
+#include <QRegularExpression>
 #include <cmath>
 #include <climits>
+#include <optional>
 
 // ---------------------------------------------------------------- helpers
 namespace {
@@ -43,6 +46,41 @@ QVariant coerceLiteral(const QString &raw) {
     double d = raw.toDouble(&ok);
     if (ok) return d;
     return raw;
+}
+
+// Số -> chuỗi gọn (nguyên không có '.0').
+QString numToText(double v) {
+    if (std::floor(v) == v && std::abs(v) < 1e15) return QString::number((long long)v);
+    return QString::number(v, 'g', 15);
+}
+
+// Chuỗi không phải công thức -> số, hoặc nullopt.
+std::optional<double> parseNum(const QString &t) {
+    if (t.startsWith('=')) return std::nullopt;
+    bool ok = false; double d = t.toDouble(&ok);
+    return ok ? std::optional<double>(d) : std::nullopt;
+}
+
+// Nếu các ô là số tạo cấp số cộng: trả (đầu, bước). 1 ô -> bước 0. Port _as_series.
+std::optional<std::pair<double,double>> asSeries(const QStringList &src) {
+    QList<double> nums;
+    for (const QString &c : src) { auto n = parseNum(c); if (!n) return std::nullopt; nums << *n; }
+    if (nums.isEmpty()) return std::nullopt;
+    if (nums.size() == 1) return std::make_pair(nums[0], 0.0);
+    double step = nums[1] - nums[0];
+    for (int i = 1; i < nums.size(); ++i)
+        if (std::abs((nums[i] - nums[i-1]) - step) > 1e-9) return std::nullopt;
+    return std::make_pair(nums[0], step);
+}
+
+// 'Item1' + pos -> 'Item{1+pos}'. nullopt nếu không có phần chữ ở đầu. Port _increment_trailing_number.
+std::optional<QString> incrementTrailing(const QString &text, int pos) {
+    static const QRegularExpression re(QStringLiteral("^(.*?)(\\d+)$"));
+    auto m = re.match(text);
+    if (!m.hasMatch() || m.captured(1).isEmpty()) return std::nullopt;
+    long long n = m.captured(2).toLongLong() + pos;
+    if (n < 0) n = 0;
+    return m.captured(1) + QString::number(n);
 }
 
 // Mã định dạng ngày -> format QDate.
@@ -348,6 +386,100 @@ bool SpreadsheetModel::redo() {
     applyEntry(e, /*useOld*/ false);
     m_undo.push_back(std::move(e));
     return true;
+}
+
+// ---------------------------------------------------------------- thao tác vùng
+void SpreadsheetModel::applyCellChanges(QVector<CellChange> changes) {
+    // Bỏ thay đổi không thực sự đổi.
+    QVector<CellChange> real;
+    for (auto &c : changes) if (c.oldVal != c.newVal) real.push_back(c);
+    if (real.isEmpty()) return;
+    UndoEntry e; e.cells = real;
+    for (const auto &c : real) { m_data[c.row][c.col] = c.newVal; updateDeps(c.row, c.col); }
+    pushUndo(std::move(e));
+    recalculateAll();
+}
+
+void SpreadsheetModel::clearRange(int top, int left, int bottom, int right) {
+    QVector<CellChange> changes;
+    for (int r = top; r <= bottom; ++r)
+        for (int c = left; c <= right; ++c)
+            if (r < m_data.size() && c < m_data[r].size() && !m_data[r][c].isEmpty())
+                changes.push_back({r, c, m_data[r][c], QString()});
+    applyCellChanges(std::move(changes));
+}
+
+void SpreadsheetModel::pasteBlock(int top, int left, const QVector<QVector<QString>> &block,
+                                  int srcAnchorRow, int srcAnchorCol) {
+    QVector<CellChange> changes;
+    bool offset = (srcAnchorRow >= 0 && srcAnchorCol >= 0);
+    for (int i = 0; i < block.size(); ++i) {
+        for (int j = 0; j < block[i].size(); ++j) {
+            int r = top + i, c = left + j;
+            if (r >= m_data.size() || c >= m_data[r].size()) continue; // chưa hỗ trợ tự nới lưới
+            QString val = block[i][j];
+            if (offset && formula::isFormula(val))
+                val = formula::offsetFormula(val, top - srcAnchorRow, left - srcAnchorCol);
+            changes.push_back({r, c, m_data[r][c], val});
+        }
+    }
+    applyCellChanges(std::move(changes));
+}
+
+void SpreadsheetModel::autofillVertical(int col, int srcTop, int srcBottom, int dstBottom) {
+    int srcLen = srcBottom - srcTop + 1;
+    if (srcLen <= 0 || dstBottom <= srcBottom || col < 0 || col >= columnCount()) return;
+    QStringList src;
+    for (int r = srcTop; r <= srcBottom; ++r) src << m_data[r][col];
+    auto series = asSeries(src);
+    QVector<CellChange> changes;
+    for (int r = srcBottom + 1; r <= dstBottom && r < rowCount(); ++r) {
+        QString val;
+        if (series) {
+            val = numToText(series->first + series->second * (r - srcTop));
+        } else {
+            int idx = (r - srcTop) % srcLen;
+            QString base = src[idx];
+            if (srcLen == 1) {
+                auto inc = incrementTrailing(base, r - srcBottom);
+                if (inc) val = *inc;
+                else if (formula::isFormula(base)) val = formula::offsetFormula(base, r - srcTop, 0);
+                else val = base;
+            } else {
+                val = formula::isFormula(base) ? formula::offsetFormula(base, r - (srcTop + idx), 0) : base;
+            }
+        }
+        changes.push_back({r, col, m_data[r][col], val});
+    }
+    applyCellChanges(std::move(changes));
+}
+
+void SpreadsheetModel::autofillHorizontal(int row, int srcLeft, int srcRight, int dstRight) {
+    int srcLen = srcRight - srcLeft + 1;
+    if (srcLen <= 0 || dstRight <= srcRight || row < 0 || row >= rowCount()) return;
+    QStringList src;
+    for (int c = srcLeft; c <= srcRight; ++c) src << m_data[row][c];
+    auto series = asSeries(src);
+    QVector<CellChange> changes;
+    for (int c = srcRight + 1; c <= dstRight && c < columnCount(); ++c) {
+        QString val;
+        if (series) {
+            val = numToText(series->first + series->second * (c - srcLeft));
+        } else {
+            int idx = (c - srcLeft) % srcLen;
+            QString base = src[idx];
+            if (srcLen == 1) {
+                auto inc = incrementTrailing(base, c - srcRight);
+                if (inc) val = *inc;
+                else if (formula::isFormula(base)) val = formula::offsetFormula(base, 0, c - srcLeft);
+                else val = base;
+            } else {
+                val = formula::isFormula(base) ? formula::offsetFormula(base, 0, c - (srcLeft + idx)) : base;
+            }
+        }
+        changes.push_back({row, c, m_data[row][c], val});
+    }
+    applyCellChanges(std::move(changes));
 }
 
 // ---------------------------------------------------------------- header / flags / kích thước
