@@ -1060,6 +1060,17 @@ QHash<QString, Fn> &fnMap() {
         };
         r["IMLOG10"] = [need, imLogBase](const Args &a) { need(a,1,"IMLOG10"); return imLogBase(toText(a[0]), std::log(10.0)); };
         r["IMLOG2"]  = [need, imLogBase](const Args &a) { need(a,1,"IMLOG2"); return imLogBase(toText(a[0]), std::log(2.0)); };
+        // IMSINH/IMCOSH: sinh/cosh của số phức (a+bi).
+        r["IMSINH"] = [need, parseComplex, formatComplex](const Args &a) {
+            need(a,1,"IMSINH");
+            auto c = parseComplex(toText(a[0]));
+            return Value::str(formatComplex(std::sinh(c.first)*std::cos(c.second), std::cosh(c.first)*std::sin(c.second)));
+        };
+        r["IMCOSH"] = [need, parseComplex, formatComplex](const Args &a) {
+            need(a,1,"IMCOSH");
+            auto c = parseComplex(toText(a[0]));
+            return Value::str(formatComplex(std::cosh(c.first)*std::cos(c.second), std::sinh(c.first)*std::sin(c.second)));
+        };
 
         // --- thống kê ---
         r["MEDIAN"] = [](const Args &a) { auto n = numbers(a); if (n.empty()) throw FormulaError(QStringLiteral("MEDIAN cần ít nhất một số")); std::sort(n.begin(), n.end()); size_t m = n.size(); return Value::number(m%2 ? n[m/2] : (n[m/2-1]+n[m/2])/2.0); };

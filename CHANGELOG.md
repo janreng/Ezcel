@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v1.7.0 — Sinh & cosh số phức (Spec 12)
+
+- **Thêm hàm `IMSINH`** — tính sin hyperbolic của một số phức.
+- **Thêm hàm `IMCOSH`** — tính cos hyperbolic của một số phức.
+
 ## v1.6.0 — Tang & logarit cơ số số phức (Spec 12)
 
 - **Thêm hàm `IMTAN`** — tính tang của một số phức.

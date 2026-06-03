@@ -435,6 +435,11 @@ int main() {
     checkNum("=IMREAL(IMLOG10(\"100\"))", 2); // log10(100)=2
     checkNum("=IMREAL(IMLOG2(\"8\"))", 3);    // log2(8)=3
     checkNum("=IMREAL(IMLOG10(\"1\"))", 0);
+    // IMSINH / IMCOSH (Spec 12)
+    checkNum("=IMREAL(IMSINH(\"0\"))", 0);   // sinh(0)=0
+    checkNum("=IMREAL(IMCOSH(\"0\"))", 1);   // cosh(0)=1
+    checkNum("=IMAGINARY(IMSINH(\"i\"))", 0.8414709848078965); // sinh(i)=i*sin(1)
+    checkNum("=IMREAL(IMCOSH(\"i\"))", 0.5403023058681398);    // cosh(i)=cos(1)
 
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);
     return g_fail == 0 ? 0 : 1;
