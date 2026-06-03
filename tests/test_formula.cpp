@@ -18,6 +18,8 @@ static QVariant resolver(int row, int col) {
         // Dong tien F1:F6 (cot 5) cho test tai chinh NPV/IRR
         {"0,5", "-1000"}, {"1,5", "500"}, {"2,5", "500"}, {"3,5", "500"},
         {"4,5", "-100"}, {"5,5", "110"},
+        // G1:G3 (cot 6) = 2*A + 1 cho test hoi quy: x=A1:A3{10,20,30}, y=G1:G3{21,41,61}
+        {"0,6", "21"}, {"1,6", "41"}, {"2,6", "61"},
     };
     auto it = cells.constFind(QString("%1,%2").arg(row).arg(col));
     return it == cells.constEnd() ? QVariant(QString()) : QVariant(it.value());
@@ -230,6 +232,9 @@ int main() {
     checkNum("=CUMIPMT(0.1/12,36,8000,1,12,0)", -691.71020732028);
     checkNum("=CUMPRINC(0.1/12,36,8000,1,12,0)", -2405.93976328813);
     checkNum("=CUMIPMT(0.1/12,36,8000,1,36,0)+CUMPRINC(0.1/12,36,8000,1,36,0)", -9292.94991182524); // = 36*PMT
+    // SLOPE / INTERCEPT (Spec 12): y=G1:G3{21,41,61} = 2*x+1, x=A1:A3{10,20,30}
+    checkNum("=SLOPE(G1:G3,A1:A3)", 2);
+    checkNum("=INTERCEPT(G1:G3,A1:A3)", 1);
     // IPMT / PPMT (Spec 12): vay 8000, lai 10%/nam, 36 ky
     checkNum("=IPMT(0.1/12,1,36,8000)", -66.6666666666667); // ky 1: -pv*rate
     checkNum("=IPMT(0.1/12,2,36,8000)", -65.0710764092997);

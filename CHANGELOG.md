@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v0.94.0 — Hàm hồi quy SLOPE & INTERCEPT (Spec 12)
+
+- **Thêm hàm `SLOPE`** — tính hệ số góc của đường hồi quy tuyến tính qua hai vùng dữ liệu.
+- **Thêm hàm `INTERCEPT`** — tính điểm giao của đường hồi quy với trục tung, dùng để dự báo theo xu hướng.
+
 ## v0.93.0 — Hàm tổng lãi & gốc CUMIPMT & CUMPRINC (Spec 12)
 
 - **Thêm hàm `CUMIPMT`** — tính tổng tiền lãi đã trả giữa hai kỳ bất kỳ của khoản vay.

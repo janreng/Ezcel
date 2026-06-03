@@ -613,6 +613,24 @@ QHash<QString, Fn> &fnMap() {
             }
             return Value::number(sum);
         };
+        // SLOPE/INTERCEPT(known_y, known_x): hệ số góc và giao điểm của đường hồi quy tuyến tính.
+        auto regression = [](const Args &a, const char *fn, bool wantSlope) {
+            auto y = numbers(std::vector<Value>{a[0]});
+            auto x = numbers(std::vector<Value>{a[1]});
+            if (x.size() != y.size() || x.empty())
+                throw FormulaError(QString::fromUtf8(fn) + QStringLiteral(": hai vùng phải cùng kích thước"), ERR_NA);
+            int n = int(x.size());
+            double mx = 0, my = 0;
+            for (int i = 0; i < n; ++i) { mx += x[i]; my += y[i]; }
+            mx /= n; my /= n;
+            double sxy = 0, sxx = 0;
+            for (int i = 0; i < n; ++i) { sxy += (x[i]-mx)*(y[i]-my); sxx += (x[i]-mx)*(x[i]-mx); }
+            if (sxx == 0) throw FormulaError(QString::fromUtf8(fn) + QStringLiteral(": phương sai x bằng 0"), ERR_DIV0);
+            double slope = sxy / sxx;
+            return wantSlope ? slope : my - slope * mx;
+        };
+        r["SLOPE"] = [regression](const Args &a) { if (a.size()!=2) argErr("SLOPE"); return Value::number(regression(a, "SLOPE", true)); };
+        r["INTERCEPT"] = [regression](const Args &a) { if (a.size()!=2) argErr("INTERCEPT"); return Value::number(regression(a, "INTERCEPT", false)); };
         // NUMBERVALUE(text, [dấu_thập_phân="."], [dấu_nhóm=","]): đổi chuỗi thành số theo dấu phân cách tùy chọn.
         r["NUMBERVALUE"] = [](const Args &a) {
             if (a.size() < 1 || a.size() > 3) argErr("NUMBERVALUE");
