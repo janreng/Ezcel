@@ -1,5 +1,6 @@
 // Test headless cho CSV I/O (csvio). Chi in ASCII.
 #include "io/Csv.h"
+#include "io/Xlsx.h"
 #include <QCoreApplication>
 #include <QTemporaryDir>
 #include <QFile>
@@ -98,6 +99,39 @@ int main(int argc, char **argv) {
         Grid r = csvio::loadCsv("Z:/khong/ton/tai.csv", &okLoad);
         ok(!okLoad, "load file thieu -> ok=false");
         ok(r.size() == 1 && r[0].size() == 1, "load loi -> luoi 1x1");
+    }
+
+    // --- XLSX round-trip qua QXlsx (gia tri + cong thuc + so + o gop) ---
+    {
+        QTemporaryDir dir;
+        QString path = dir.path() + "/rt.xlsx";
+        Grid src = g({{"Ten", "SL", "Tong"},
+                      {"Ca phe", "2", "=B2*10"},
+                      {"Tra", "3", "=B3*10"}});
+        QVector<xlsxio::Merge> merges = {{0, 0, 0, 2}}; // gop A1:C1
+
+        ok(xlsxio::saveXlsx(path, "BangGia", src, merges), "saveXlsx tra true");
+        ok(QFile::exists(path), "file xlsx ton tai");
+
+        xlsxio::Sheet sh;
+        ok(xlsxio::loadXlsx(path, sh), "loadXlsx tra true");
+        ok(sh.name == "BangGia", "giu ten sheet");
+
+        // Gia tri: chuoi + so giu nguyen text; cong thuc giu nguyen "=...".
+        ok(sh.rows.size() >= 3 && sh.rows[0][0] == "Ten", "xlsx A1=Ten");
+        ok(sh.rows[1][0] == "Ca phe", "xlsx A2=Ca phe");
+        ok(sh.rows[1][1] == "2", "xlsx B2=2 (so)");
+        ok(sh.rows[1][2] == "=B2*10", "xlsx C2 giu cong thuc");
+
+        // O gop round-trip.
+        ok(sh.merges.size() == 1, "xlsx 1 vung gop");
+        ok(sh.merges[0] == (xlsxio::Merge{0, 0, 0, 2}), "xlsx vung gop A1:C1");
+    }
+
+    // --- XLSX load file khong ton tai ---
+    {
+        xlsxio::Sheet sh;
+        ok(!xlsxio::loadXlsx("Z:/khong/co.xlsx", sh), "load xlsx thieu -> false");
     }
 
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);

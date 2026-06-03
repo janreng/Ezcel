@@ -1,6 +1,7 @@
 #include "MainWindow.h"
 #include "model/SpreadsheetModel.h"
 #include "io/Csv.h"
+#include "io/Xlsx.h"
 
 #include <QTableView>
 #include <QHeaderView>
@@ -26,13 +27,19 @@ MainWindow::~MainWindow() = default;
 void MainWindow::openPath(const QString &path)
 {
     const QString suffix = QFileInfo(path).suffix().toLower();
-    // XLSX/XLSM sẽ thêm sau (cần thư viện OOXML). Hiện hỗ trợ CSV/TXT/TSV.
+    const QString title = QStringLiteral("Ezcel — %1").arg(QFileInfo(path).fileName());
     if (suffix == "csv" || suffix == "txt" || suffix == "tsv") {
         bool ok = false;
         csvio::Grid rows = csvio::loadCsv(path, &ok);
-        if (ok) {
-            m_model->loadGrid(rows);
-            setWindowTitle(QStringLiteral("Ezcel — %1").arg(QFileInfo(path).fileName()));
+        if (ok) { m_model->loadGrid(rows); setWindowTitle(title); }
+    } else if (suffix == "xlsx" || suffix == "xlsm") {
+        xlsxio::Sheet sh;
+        if (xlsxio::loadXlsx(path, sh)) {
+            m_model->loadGrid(sh.rows);
+            QVector<MergeRange> mr;
+            for (const auto &m : sh.merges) mr.push_back({m.top, m.left, m.bottom, m.right});
+            for (const auto &m : mr) m_model->mergeCells(m.top, m.left, m.bottom, m.right);
+            setWindowTitle(title);
         }
     }
 }

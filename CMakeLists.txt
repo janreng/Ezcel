@@ -14,6 +14,18 @@ endif()
 
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Svg)
 
+# --- QXlsx (đọc/ghi XLSX) — tải qua FetchContent, ghim tag v1.5.0.
+# Tải về build/_deps (đã gitignore), không nhúng nguồn vào repo.
+include(FetchContent)
+FetchContent_Declare(
+    QXlsx
+    GIT_REPOSITORY https://github.com/QtExcel/QXlsx.git
+    GIT_TAG        v1.5.0
+    GIT_SHALLOW    TRUE
+    SOURCE_SUBDIR  QXlsx
+)
+FetchContent_MakeAvailable(QXlsx)
+
 # --- Engine công thức (không phụ thuộc GUI) -> static lib dùng chung.
 add_library(ezcel_formula STATIC
     src/formula/Formula.cpp
@@ -28,10 +40,10 @@ add_library(ezcel_model STATIC src/model/SpreadsheetModel.cpp src/model/Spreadsh
 target_include_directories(ezcel_model PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(ezcel_model PUBLIC ezcel_formula Qt6::Core Qt6::Gui)
 
-# --- I/O file (CSV; XLSX sau) — không phụ thuộc GUI -> static lib.
-add_library(ezcel_io STATIC src/io/Csv.cpp src/io/Csv.h)
+# --- I/O file (CSV + XLSX qua QXlsx) -> static lib.
+add_library(ezcel_io STATIC src/io/Csv.cpp src/io/Csv.h src/io/Xlsx.cpp src/io/Xlsx.h)
 target_include_directories(ezcel_io PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
-target_link_libraries(ezcel_io PUBLIC Qt6::Core)
+target_link_libraries(ezcel_io PUBLIC Qt6::Core Qt6::Gui QXlsx::QXlsx)
 
 # --- App GUI ---
 qt_add_executable(Ezcel WIN32 src/main.cpp src/MainWindow.cpp src/MainWindow.h)
