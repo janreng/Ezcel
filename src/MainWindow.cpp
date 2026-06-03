@@ -6,6 +6,7 @@
 #include "view/CellBorderDelegate.h"
 #include "view/Visibility.h"
 #include "view/HeaderMenu.h"
+#include "view/Outline.h"
 #include "model/Filter.h"
 #include "model/PasteOps.h"
 #include "model/GotoSpecial.h"
@@ -650,6 +651,14 @@ void MainWindow::buildMenus()
     data->addAction(QStringLiteral("Xóa hàng trùng"), this, &MainWindow::removeDuplicates);
     data->addAction(QStringLiteral("Tách cột theo dấu phân cách..."), this, &MainWindow::textToColumns);
     data->addAction(QStringLiteral("Tổng phụ theo nhóm..."), this, &MainWindow::subtotalRange);
+    data->addSeparator();
+    {
+        QAction *aGroup = data->addAction(QStringLiteral("Gom nhóm hàng"), this, &MainWindow::groupRows);
+        aGroup->setShortcut(QKeySequence(Qt::ALT | Qt::SHIFT | Qt::Key_Right));
+        QAction *aUngroup = data->addAction(QStringLiteral("Bỏ nhóm hàng"), this, &MainWindow::ungroupRows);
+        aUngroup->setShortcut(QKeySequence(Qt::ALT | Qt::SHIFT | Qt::Key_Left));
+        data->addAction(QStringLiteral("Thu gọn/Mở rộng nhóm"), this, &MainWindow::toggleGroupRows);
+    }
     data->addAction(i18n::tr("data_clear_filter"), this, [this] {
         for (int r = 0; r < m_model->rowCount(); ++r) m_view->setRowHidden(r, false);
     });
@@ -1308,6 +1317,45 @@ void MainWindow::subtotalRange()
         for (int c = 0; c < cols && c < result[r].size(); ++c)
             m_model->setData(m_model->index(1 + r, c), result[r][c], Qt::EditRole);
     statusBar()->showMessage(QStringLiteral("Đã chèn tổng phụ theo nhóm"), 3000);
+}
+
+// --- Gom nhóm / phác thảo hàng (Spec 09.4) ---
+// Áp ẩn/hiện hàng theo các nhóm đang thu gọn: hiện hết rồi ẩn lại phần thu gọn.
+void MainWindow::applyRowOutline()
+{
+    const QSet<int> hidden = m_rowOutline.hiddenRows();
+    for (int r = 0; r < m_model->rowCount(); ++r)
+        m_view->setRowHidden(r, hidden.contains(r));
+}
+
+void MainWindow::groupRows()
+{
+    int t, l, b, r;
+    if (!selectionBox(t, l, b, r)) return;
+    m_rowOutline.add(t, b);
+    statusBar()->showMessage(QStringLiteral("Đã gom nhóm hàng %1–%2 (Alt+Shift+→ để thu gọn)").arg(t + 1).arg(b + 1), 3000);
+}
+
+void MainWindow::ungroupRows()
+{
+    QModelIndex cur = m_view->currentIndex();
+    int row = cur.isValid() ? cur.row() : 0;
+    if (m_rowOutline.remove(row)) {
+        applyRowOutline();
+        statusBar()->showMessage(QStringLiteral("Đã bỏ nhóm hàng"), 2500);
+    } else {
+        statusBar()->showMessage(QStringLiteral("Ô hiện tại không nằm trong nhóm nào"), 2500);
+    }
+}
+
+void MainWindow::toggleGroupRows()
+{
+    QModelIndex cur = m_view->currentIndex();
+    int row = cur.isValid() ? cur.row() : 0;
+    if (m_rowOutline.isEmpty()) { statusBar()->showMessage(QStringLiteral("Chưa có nhóm hàng nào"), 2500); return; }
+    bool collapsed = m_rowOutline.toggle(row);
+    applyRowOutline();
+    statusBar()->showMessage(collapsed ? QStringLiteral("Đã thu gọn nhóm") : QStringLiteral("Đã mở rộng nhóm"), 2500);
 }
 
 void MainWindow::toggleShowFormulas(bool on)

@@ -3,6 +3,7 @@
 #include <QString>
 
 #include <QVector>
+#include "view/Outline.h"
 
 class QTableView;
 class QLineEdit;
@@ -48,6 +49,9 @@ private slots:
     void removeDuplicates();  // xóa hàng trùng (Spec 27)
     void textToColumns();     // tách cột theo dấu phân cách (Spec 27)
     void subtotalRange();     // tổng phụ theo nhóm (Spec 27.6)
+    void groupRows();         // gom nhóm hàng đang chọn (Spec 09.4)
+    void ungroupRows();       // bỏ nhóm hàng tại ô hiện hành
+    void toggleGroupRows();   // thu gọn/mở rộng nhóm tại ô hiện hành
     void toggleMergeSelection();
     void toggleShowFormulas(bool on);
     void showShortcuts();     // hộp thoại bảng phím tắt (Spec 23)
@@ -111,4 +115,7 @@ private:
     QLineEdit *m_replaceField = nullptr;
     QCheckBox *m_matchCase = nullptr;
     bool findNext(); // nhảy tới ô khớp kế tiếp; trả false nếu không thấy
+
+    outline::Outline m_rowOutline;   // nhóm/phác thảo hàng (Spec 09.4)
+    void applyRowOutline();          // áp ẩn/hiện hàng theo nhóm đang thu gọn
 };

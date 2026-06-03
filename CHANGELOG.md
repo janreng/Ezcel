@@ -1,5 +1,11 @@
 # Lịch sử thay đổi
 
+## v1.25.0 — Gom nhóm & thu gọn hàng (Spec 09)
+
+- **Gom nhóm hàng** (Alt+Shift+→): chọn một dải hàng rồi gom thành nhóm để gấp gọn.
+- **Thu gọn/Mở rộng nhóm**: ẩn nhanh các hàng chi tiết trong nhóm rồi bung lại khi cần.
+- **Bỏ nhóm hàng** (Alt+Shift+←): gỡ nhóm tại ô đang chọn. Các nhóm có thể lồng nhau.
+
 ## v1.24.0 — Tổng phụ theo nhóm (Spec 27)
 
 - **Thêm "Tổng phụ theo nhóm..."** trong menu Dữ liệu: tự chèn dòng tổng sau mỗi nhóm dữ liệu liên tiếp và một dòng tổng cộng ở cuối.
