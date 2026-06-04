@@ -622,6 +622,23 @@ int main() {
         okEq(tips.value("KHONGCO").isEmpty(), "ham la -> khong co tooltip");
     }
 
+    // --- SEQUENCE (mảng động, Spec 12) — dùng evaluateValue giữ vùng ---
+    {
+        auto okEq = [&](bool c, const char *n) { if (c) ++g_pass; else { ++g_fail; std::printf("FAIL %s\n", n); } };
+        formula::Value v = formula::evaluateValue(QStringLiteral("=SEQUENCE(3)"), resolver);
+        okEq(v.isRange() && v.range.height() == 3 && v.range.width() == 1, "SEQUENCE(3) -> vung 3x1");
+        auto f = v.range.flat();
+        okEq(f.size() == 3 && f[0].num == 1 && f[1].num == 2 && f[2].num == 3, "SEQUENCE(3) = 1,2,3");
+        formula::Value v2 = formula::evaluateValue(QStringLiteral("=SEQUENCE(2,3)"), resolver);
+        okEq(v2.isRange() && v2.range.height() == 2 && v2.range.width() == 3, "SEQUENCE(2,3) -> 2x3");
+        formula::Value v3 = formula::evaluateValue(QStringLiteral("=SEQUENCE(3,1,10,5)"), resolver);
+        auto f3 = v3.range.flat();
+        okEq(f3.size() == 3 && f3[0].num == 10 && f3[1].num == 15 && f3[2].num == 20, "SEQUENCE start=10 step=5");
+        // 1 ô -> vô hướng (không phải vùng).
+        formula::Value v4 = formula::evaluateValue(QStringLiteral("=SEQUENCE(1)"), resolver);
+        okEq(!v4.isRange() && v4.num == 1, "SEQUENCE(1) -> vo huong 1");
+    }
+
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);
     return g_fail == 0 ? 0 : 1;
 }

@@ -1066,6 +1066,30 @@ QHash<QString, Fn> &fnMap() {
         r["ROWS"]    = [need](const Args &a) { need(a,1,"ROWS"); return Value::number(a[0].isRange() ? a[0].range.height() : 1); };
         r["COLUMNS"] = [need](const Args &a) { need(a,1,"COLUMNS"); return Value::number(a[0].isRange() ? a[0].range.width() : 1); };
 
+        // --- mảng động (spill) ---
+        // SEQUENCE(rows,[cols],[start],[step]) -> ma trận số đếm dần, đổ thành vùng.
+        r["SEQUENCE"] = [](const Args &a) {
+            if (a.empty() || a.size() > 4) argErr("SEQUENCE");
+            int nrows = toInt(a[0]);
+            int ncols = a.size() >= 2 ? toInt(a[1]) : 1;
+            double start = a.size() >= 3 ? toNumber(a[2]) : 1.0;
+            double step  = a.size() >= 4 ? toNumber(a[3]) : 1.0;
+            if (nrows < 1 || ncols < 1)
+                throw FormulaError(QStringLiteral("SEQUENCE: số hàng/cột phải >= 1"), ERR_VALUE);
+            if (qint64(nrows) * ncols > 1000000)
+                throw FormulaError(QStringLiteral("SEQUENCE: vùng quá lớn"), ERR_NUM);
+            auto grid = std::make_shared<std::vector<std::vector<Value>>>();
+            grid->reserve(nrows);
+            double v = start;
+            for (int rr = 0; rr < nrows; ++rr) {
+                std::vector<Value> rowv; rowv.reserve(ncols);
+                for (int cc = 0; cc < ncols; ++cc) { rowv.push_back(Value::number(v)); v += step; }
+                grid->push_back(std::move(rowv));
+            }
+            Range rg; rg.rows = grid;
+            return Value::rangev(rg);
+        };
+
         // --- ngày / giờ (serial Excel) ---
         r["TODAY"] = [](const Args &a) { if (!a.empty()) argErr("TODAY"); return Value::number(dateToSerial(QDate::currentDate())); };
         r["NOW"]   = [](const Args &a) { if (!a.empty()) argErr("NOW"); QDateTime n = QDateTime::currentDateTime(); double s = dateToSerial(n.date()); QTime t = n.time(); return Value::number(s + (t.hour()*3600 + t.minute()*60 + t.second())/86400.0); };

@@ -121,6 +121,16 @@ QVariant SpreadsheetModel::data(const QModelIndex &index, int role) const {
         auto it = m_notes.constFind(key(row, col));
         return it != m_notes.constEnd() ? it.value() : QVariant();
     }
+    case SpillEdgesRole: {
+        int t, l, b, rg; // bitmask cạnh biên vùng spill: 1=trên,2=trái,4=dưới,8=phải
+        if (!spillRangeAt(row, col, t, l, b, rg)) return 0;
+        int edges = 0;
+        if (row == t) edges |= 1;
+        if (col == l) edges |= 2;
+        if (row == b) edges |= 4;
+        if (col == rg) edges |= 8;
+        return edges;
+    }
     case Qt::TextAlignmentRole:
         return alignmentFlags(row, col);
     case Qt::FontRole:
@@ -159,10 +169,17 @@ QString SpreadsheetModel::displayValue(int row, int col) const {
 QVariant SpreadsheetModel::evalCell(int row, int col) const {
     if (m_data.isEmpty() || row < 0 || col < 0 || row >= m_data.size() || col >= m_data.first().size())
         return {};
+    const qint64 k = key(row, col);
+    // Ô TRÀN (do anchor khác sở hữu): trả giá trị đã đổ từ mảng spill.
+    auto vit = m_spillVals.constFind(k);
+    if (vit != m_spillVals.constEnd() && m_spillOwner.contains(k)) return vit.value();
+
     const QString &raw = m_data[row][col];
     if (!formula::isFormula(raw)) return coerceLiteral(raw);
 
-    const qint64 k = key(row, col);
+    // Anchor đã đăng ký spill (đổ được hoặc #SPILL!): trả giá trị đã ghi.
+    if (vit != m_spillVals.constEnd()) return vit.value();
+
     auto it = m_evalCache.constFind(k);
     if (it != m_evalCache.constEnd()) return it.value();
     if (m_evaluating.contains(k)) return QString::fromLatin1(formula::ERR_REF);
@@ -177,6 +194,76 @@ QVariant SpreadsheetModel::evalCell(int row, int col) const {
     m_evaluating.remove(k);
     m_evalCache.insert(k, result);
     return result;
+}
+
+QVariant SpreadsheetModel::registerSpill(int row, int col, const formula::Value &vv) const {
+    const int h = vv.range.height(), w = vv.range.width();
+    const qint64 anchor = key(row, col);
+    const int rows = m_data.size(), cols = m_data.isEmpty() ? 0 : m_data.first().size();
+    // Vùng vượt mép lưới -> #SPILL!.
+    if (row + h > rows || col + w > cols) {
+        m_spillVals.insert(anchor, QString::fromLatin1(formula::ERR_SPILL));
+        return m_spillVals.value(anchor);
+    }
+    // Kiểm tra chặn: ô tràn (trừ anchor) phải trống & chưa bị spill khác chiếm.
+    for (int r = 0; r < h; ++r)
+        for (int c = 0; c < w; ++c) {
+            if (r == 0 && c == 0) continue;
+            const int rr = row + r, cc = col + c;
+            if (!m_data[rr][cc].isEmpty()) {
+                m_spillVals.insert(anchor, QString::fromLatin1(formula::ERR_SPILL));
+                return m_spillVals.value(anchor);
+            }
+        }
+    // OK -> đổ mảng.
+    const auto &grid = *vv.range.rows;
+    m_spillSize.insert(anchor, QSize(w, h));
+    QVariant topLeft;
+    for (int r = 0; r < h; ++r)
+        for (int c = 0; c < w; ++c) {
+            const qint64 kk = key(row + r, col + c);
+            QVariant cellVal = (r < int(grid.size()) && c < int(grid[r].size()))
+                                   ? grid[r][c].toVariant() : QVariant(QString());
+            m_spillVals.insert(kk, cellVal);
+            if (r == 0 && c == 0) topLeft = cellVal;
+            else                  m_spillOwner.insert(kk, anchor);
+        }
+    return topLeft;
+}
+
+void SpreadsheetModel::rebuildSpills() const {
+    m_spillSize.clear();
+    m_spillVals.clear();
+    m_spillOwner.clear();
+    const int rows = m_data.size();
+    for (int r = 0; r < rows; ++r) {
+        const QVector<QString> &rowv = m_data[r];
+        for (int c = 0; c < rowv.size(); ++c) {
+            if (!formula::isFormula(rowv[c])) continue;
+            formula::Value vv;
+            try {
+                vv = formula::evaluateValue(rowv[c],
+                    [this](int rr, int cc) { return evalCell(rr, cc); }, m_sheetResolver);
+            } catch (const formula::FormulaError &) {
+                continue; // ô lỗi vô hướng -> evalCell hiển thị #... như cũ
+            }
+            if (vv.type == formula::Type::Range && (vv.range.height() > 1 || vv.range.width() > 1))
+                registerSpill(r, c, vv);
+        }
+    }
+}
+
+bool SpreadsheetModel::spillRangeAt(int row, int col, int &top, int &left, int &bottom, int &right) const {
+    const qint64 k = key(row, col);
+    qint64 anchor;
+    if (m_spillSize.contains(k)) anchor = k;
+    else if (m_spillOwner.contains(k)) anchor = m_spillOwner.value(k);
+    else return false;
+    auto sit = m_spillSize.constFind(anchor);
+    if (sit == m_spillSize.constEnd()) return false;
+    top = keyRow(anchor); left = keyCol(anchor);
+    bottom = top + sit->height() - 1; right = left + sit->width() - 1;
+    return true;
 }
 
 bool SpreadsheetModel::looksNumeric(int row, int col) const {
@@ -222,6 +309,11 @@ QVariant SpreadsheetModel::fontFor(int row, int col) const {
 bool SpreadsheetModel::setData(const QModelIndex &index, const QVariant &value, int role) {
     if (role != Qt::EditRole || !index.isValid()) return false;
     const int row = index.row(), col = index.column();
+    // Không cho ghi đè ô TRÀN (spill) — phải sửa ở ô gốc.
+    if (m_spillOwner.contains(key(row, col))) {
+        emit validationFailed(QStringLiteral("Không sửa được ô trong vùng tràn (spill); hãy sửa ô gốc."));
+        return false;
+    }
     QString nw = value.isNull() ? QString() : value.toString();
     QString old = m_data[row][col];
     if (old == nw) return true;
@@ -430,21 +522,19 @@ void SpreadsheetModel::recalculate(int row, int col) {
         if (it != m_dependents.constEnd())
             for (qint64 d : *it) if (!dirty.contains(d)) queue.push_back(d);
     }
-    int rMin = INT_MAX, rMax = INT_MIN, cMin = INT_MAX, cMax = INT_MIN;
-    for (qint64 cell : dirty) {
-        m_evalCache.remove(cell);
-        int r = keyRow(cell), c = keyCol(cell);
-        rMin = qMin(rMin, r); rMax = qMax(rMax, r);
-        cMin = qMin(cMin, c); cMax = qMax(cMax, c);
-    }
-    emit dataChanged(index(rMin, cMin), index(rMax, cMax), {Qt::DisplayRole});
+    for (qint64 cell : dirty) m_evalCache.remove(cell);
+    rebuildSpills(); // vùng spill có thể đổi (anchor sửa / ô chặn bỏ đi) -> dựng lại
+    // Spill có thể đổi ô ngoài bounding-box các ô dirty -> phát lại toàn lưới cho chắc.
+    if (rowCount() && columnCount())
+        emit dataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1));
     emit contentChanged();
 }
 
 void SpreadsheetModel::recalculateAll() {
     m_evalCache.clear();
+    rebuildSpills();
     if (rowCount() && columnCount())
-        emit dataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1), {Qt::DisplayRole});
+        emit dataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1));
     emit contentChanged();
 }
 
@@ -951,7 +1041,10 @@ QVariant SpreadsheetModel::headerData(int section, Qt::Orientation orientation, 
 
 Qt::ItemFlags SpreadsheetModel::flags(const QModelIndex &index) const {
     if (!index.isValid()) return Qt::NoItemFlags;
-    return Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsEditable;
+    Qt::ItemFlags f = Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsEditable;
+    // Ô TRÀN (spill) không sửa được — chỉ sửa ô gốc (anchor).
+    if (m_spillOwner.contains(key(index.row(), index.column()))) f &= ~Qt::ItemIsEditable;
+    return f;
 }
 
 void SpreadsheetModel::resizeGrid(int rows, int cols) {

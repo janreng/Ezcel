@@ -505,6 +505,22 @@ QVariant evaluate(const QString &formula, const Resolver &resolver,
     return v.toVariant();
 }
 
+Value evaluateValue(const QString &formula, const Resolver &resolver,
+                    const SheetResolver &sheetResolver) {
+    QString body = formula.startsWith(QLatin1Char('=')) ? formula.mid(1) : formula;
+    std::vector<Token> tokens = tokenize(body);
+    if (tokens.empty()) throw FormulaError(QStringLiteral("Công thức rỗng"));
+    Value v = Parser(std::move(tokens), resolver, sheetResolver).parse();
+    if (v.isRange()) {
+        auto f = v.range.flat();
+        if (f.size() == 1) v = f.front(); // vùng 1 ô -> vô hướng
+        else return v;                     // GIỮ vùng nhiều ô cho spill
+    }
+    if (v.type == Type::Number && !std::isfinite(v.num))
+        throw FormulaError(QStringLiteral("Kết quả không hữu hạn"), ERR_NUM);
+    return v;
+}
+
 // offset một tham chiếu ô theo (drow,dcol); giữ phần có '$'.
 static const QRegularExpression kOffsetCellRe(QStringLiteral("^(\\$?)([A-Za-z]+)(\\$?)(\\d+)$"));
 

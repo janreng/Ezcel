@@ -1,5 +1,11 @@
 # Lịch sử thay đổi
 
+## v1.74.0 — Mảng động: công thức tự tràn ra nhiều ô (Spec 12)
+
+- **Công thức trả về một dãy/khối số giờ tự "tràn" sang các ô bên cạnh** thay vì báo lỗi — gọi là mảng động (spill), giống bảng tính hiện đại.
+- Thêm hàm **`SEQUENCE(số_hàng, [số_cột], [bắt_đầu], [bước_nhảy])`** tạo dãy số đếm dần — ví dụ `=SEQUENCE(5)` đổ ra 1,2,3,4,5 theo chiều dọc.
+- Vùng tràn có **viền nét đứt xanh**; các ô trong vùng chỉ xem (sửa ở ô gốc). Nếu chỗ tràn bị vướng ô có sẵn dữ liệu thì báo `#SPILL!`; dọn chỗ vướng là tự tràn lại.
+
 ## v1.73.0 — Chèn / xóa ô có dịch chuyển (Spec 09)
 
 - **Chèn ô** (menu Cấu trúc → "Chèn ô..."): chọn vùng rồi đẩy ô sang phải hoặc xuống dưới để chừa chỗ trống — không phải chèn nguyên hàng/cột nữa.

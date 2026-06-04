@@ -17,6 +17,7 @@ inline constexpr const char *ERR_VALUE = "#VALUE!";
 inline constexpr const char *ERR_NUM   = "#NUM!";
 inline constexpr const char *ERR_NAME  = "#NAME?";
 inline constexpr const char *ERR_REF   = "#REF!";
+inline constexpr const char *ERR_SPILL = "#SPILL!";
 
 // Lỗi khi phân tích/tính công thức; etype mang mã lỗi kiểu Excel.
 class FormulaError : public std::exception {
@@ -47,6 +48,11 @@ bool isFormula(const QString &text);
 // Ném FormulaError nếu sai (caller hiển thị etype).
 QVariant evaluate(const QString &formula, const Resolver &resolver,
                   const SheetResolver &sheetResolver = {});
+
+// Như evaluate() nhưng GIỮ kết quả vùng (ma trận nhiều ô) thay vì gộp/ném lỗi — phục vụ
+// spill (mảng động). Vùng 1 ô vẫn rút về vô hướng. Ném FormulaError nếu sai.
+Value evaluateValue(const QString &formula, const Resolver &resolver,
+                    const SheetResolver &sheetResolver = {});
 
 // Dịch tham chiếu tương đối khi kéo-điền/paste; '$' giữ nguyên.
 QString offsetFormula(const QString &text, int drow, int dcol);

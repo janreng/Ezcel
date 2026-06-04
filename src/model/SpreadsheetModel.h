@@ -6,6 +6,7 @@
 #include <QSet>
 #include <QVariant>
 #include <QFont>
+#include <QSize>
 #include <QMap>
 #include <QPair>
 #include <QStringList>
@@ -38,6 +39,10 @@ class SpreadsheetModel : public QAbstractTableModel
 public:
     using Format = QHash<QString, QVariant>; // định dạng 1 ô (như dict Python)
 
+    // Role tùy biến: bitmask viền vùng tràn (spill) của ô — 1=trên,2=trái,4=dưới,8=phải.
+    // Delegate vẽ viền nét đứt theo các cạnh biên của vùng spill (Spec 12).
+    static constexpr int SpillEdgesRole = Qt::UserRole + 1;
+
     explicit SpreadsheetModel(QObject *parent = nullptr);
 
     // QAbstractTableModel
@@ -49,6 +54,8 @@ public:
     Qt::ItemFlags flags(const QModelIndex &index) const override;
 
     void resizeGrid(int rows, int cols);
+    // Biên vùng tràn (spill) chứa ô (row,col): true + [top,left,bottom,right]; false nếu ô không thuộc spill.
+    bool spillRangeAt(int row, int col, int &top, int &left, int &bottom, int &right) const;
     // Chèn/xóa hàng-cột (đều undoable, dời định dạng + ô gộp theo). Port insert/removeRows/Columns.
     void insertRows(int row, int count = 1);
     void removeRows(int row, int count = 1);
@@ -210,5 +217,14 @@ private:
     void restoreSnapshot(const Snapshot &s);   // khôi phục (reset model)
     void shiftFmtRows(int row, int count);     // dời khóa _fmt khi chèn/xóa hàng
     void shiftFmtCols(int col, int count);     // dời khóa _fmt khi chèn/xóa cột
+
+    // --- Mảng động / spill (Spec 12) ---
+    mutable QHash<qint64, QSize> m_spillSize;    // anchorKey -> kích thước vùng (rộng×cao, gồm anchor)
+    mutable QHash<qint64, QVariant> m_spillVals; // mọi ô trong vùng (+ anchor lỗi #SPILL) -> giá trị
+    mutable QHash<qint64, qint64> m_spillOwner;  // ô TRÀN (không gồm anchor) -> anchorKey
+    void rebuildSpills() const;                  // quét lại toàn bộ ô công thức, dựng vùng spill
+    // Đăng ký spill cho anchor (row,col) với mảng vv; trả giá trị hiển thị của anchor
+    // (top-left nếu đổ được, #SPILL! nếu vùng bị chặn/tràn mép). Cập nhật m_spill*.
+    QVariant registerSpill(int row, int col, const formula::Value &vv) const;
     void applyCellChanges(QVector<CellChange> changes); // batch: undo + set + deps + recalc
 };

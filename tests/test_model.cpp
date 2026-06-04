@@ -656,6 +656,44 @@ int main(int argc, char **argv) {
         ok(!mm.removeName("KhongCo"), "remove ten khong ton tai -> false");
     }
 
+    // --- Mảng động / spill (Spec 12) ---
+    {
+        SpreadsheetModel sm;
+        sm.resizeGrid(10, 5);
+        put(sm, 0, 0, "=SEQUENCE(3)");   // A1 -> tràn dọc A1:A3 = 1,2,3
+        ok(disp(sm, 0, 0) == "1", "spill anchor A1=1");
+        ok(disp(sm, 1, 0) == "2", "spill A2=2");
+        ok(disp(sm, 2, 0) == "3", "spill A3=3");
+        ok(disp(sm, 3, 0) == "", "duoi vung spill trong");
+        // Ô tràn read-only (không có cờ Editable).
+        ok(!(sm.flags(sm.index(1, 0)) & Qt::ItemIsEditable), "A2 read-only");
+        ok(sm.flags(sm.index(0, 0)) & Qt::ItemIsEditable, "anchor A1 sua duoc");
+        // Biên vùng spill.
+        int t, l, b, rr;
+        ok(sm.spillRangeAt(1, 0, t, l, b, rr) && t == 0 && l == 0 && b == 2 && rr == 0, "spillRangeAt A2 -> A1:A3");
+        ok(!sm.spillRangeAt(5, 0, t, l, b, rr), "o ngoai spill -> false");
+        // Bitmask cạnh: A1 có cạnh trên+trái+phải (1|2|8=11); A3 có trái+dưới+phải (2|4|8=14).
+        ok(sm.data(sm.index(0, 0), SpreadsheetModel::SpillEdgesRole).toInt() == (1|2|8), "edges A1");
+        ok(sm.data(sm.index(2, 0), SpreadsheetModel::SpillEdgesRole).toInt() == (2|4|8), "edges A3");
+        // Không ghi đè được ô tràn.
+        ok(!sm.setData(sm.index(1, 0), QStringLiteral("x"), Qt::EditRole), "khong ghi o tran");
+
+        // Chặn spill -> #SPILL!: đặt vật cản ở C2 rồi cho C1 spill xuống.
+        put(sm, 1, 2, "chan");           // C2 có dữ liệu
+        put(sm, 0, 2, "=SEQUENCE(3)");   // C1 muốn tràn C1:C3 -> bị chặn
+        ok(disp(sm, 0, 2) == "#SPILL!", "bi chan -> #SPILL!");
+        ok(disp(sm, 1, 2) == "chan", "o chan giu nguyen");
+        // Bỏ vật cản -> spill hồi phục.
+        put(sm, 1, 2, "");
+        ok(disp(sm, 0, 2) == "1" && disp(sm, 2, 2) == "3", "bo chan -> spill lai");
+        // 2 chiều: SEQUENCE(2,3) -> 2x3.
+        put(sm, 5, 0, "=SEQUENCE(2,3)");
+        ok(disp(sm, 5, 0) == "1" && disp(sm, 5, 2) == "3" && disp(sm, 6, 0) == "4" && disp(sm, 6, 2) == "6", "spill 2x3");
+        // Sửa anchor mất công thức -> vùng tràn biến mất.
+        put(sm, 0, 0, "99");
+        ok(disp(sm, 0, 0) == "99" && disp(sm, 1, 0) == "" && disp(sm, 2, 0) == "", "xoa anchor -> het spill");
+    }
+
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);
     return g_fail == 0 ? 0 : 1;
 }

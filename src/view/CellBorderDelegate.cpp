@@ -1,6 +1,7 @@
 #include "view/CellBorderDelegate.h"
 #include "view/FormulaHint.h"
 #include "ui/Theme.h"
+#include "model/SpreadsheetModel.h" // chỉ dùng hằng SpillEdgesRole
 
 #include <QAbstractItemView>
 #include <QPainter>
@@ -59,6 +60,22 @@ void CellBorderDelegate::paint(QPainter *painter, const QStyleOptionViewItem &op
         painter->setPen(Qt::NoPen);
         painter->setBrush(QColor("#C0392B"));
         painter->drawPolygon(tip, 3);
+        painter->restore();
+    }
+
+    // Viền nét đứt xanh quanh vùng tràn (spill) — chỉ vẽ ở các cạnh BIÊN của vùng.
+    const int spillEdges = index.data(SpreadsheetModel::SpillEdgesRole).toInt();
+    if (spillEdges) {
+        painter->save();
+        QPen dash(QColor(theme::SelectionBorder));
+        dash.setStyle(Qt::DashLine);
+        dash.setWidth(1);
+        painter->setPen(dash);
+        const QRect rc = option.rect.adjusted(0, 0, -1, -1);
+        if (spillEdges & 1) painter->drawLine(rc.topLeft(), rc.topRight());       // trên
+        if (spillEdges & 2) painter->drawLine(rc.topLeft(), rc.bottomLeft());     // trái
+        if (spillEdges & 4) painter->drawLine(rc.bottomLeft(), rc.bottomRight()); // dưới
+        if (spillEdges & 8) painter->drawLine(rc.topRight(), rc.bottomRight());   // phải
         painter->restore();
     }
 
