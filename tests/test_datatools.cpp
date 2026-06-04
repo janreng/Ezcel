@@ -69,6 +69,11 @@ int main(int argc, char **argv) {
         ok(rev.size() == 3 && rev[0][0] == "c" && rev[2][0] == "a", "reverseRows dao hang");
         ok(rev[0][1] == "3" && rev[1][0] == "b", "reverseRows giu nguyen cot");
         ok(datatools::reverseRows({}).isEmpty(), "reverse rong -> rong");
+        // reverseCols
+        auto rc = datatools::reverseCols(blk);
+        ok(rc[0][0] == "1" && rc[0][1] == "a", "reverseCols dao cot hang 0");
+        ok(rc[2][0] == "3" && rc[2][1] == "c", "reverseCols hang 2");
+        ok(datatools::reverseCols({}).isEmpty(), "reverseCols rong -> rong");
     }
 
     // --- fillBlanksDown ---

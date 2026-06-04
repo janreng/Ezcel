@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v1.54.0 — Đảo ngược thứ tự cột (Spec 15)
+
+- **Thêm "Đảo ngược thứ tự cột"** trong menu Dữ liệu: lật ngược thứ tự các cột trong vùng chọn (cột đầu thành cột cuối).
+- Bổ trợ cho "Đảo ngược thứ tự hàng" để sắp xếp lại bố cục bảng nhanh.
+
 ## v1.53.0 — Chọn ô trùng giá trị (Spec 15)
 
 - **Thêm "Chọn ô trùng giá trị"** trong menu Dữ liệu: tự đánh dấu tất cả các ô có giá trị xuất hiện nhiều hơn một lần trong cột đang chọn.

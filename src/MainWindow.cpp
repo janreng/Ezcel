@@ -712,6 +712,7 @@ void MainWindow::buildMenus()
     });
     data->addAction(QStringLiteral("Sắp xếp nhiều cấp..."), this, &MainWindow::sortMultiLevel);
     data->addAction(QStringLiteral("Đảo ngược thứ tự hàng"), this, &MainWindow::reverseRowsSelection);
+    data->addAction(QStringLiteral("Đảo ngược thứ tự cột"), this, &MainWindow::reverseColsSelection);
     data->addAction(QStringLiteral("Chọn ô trùng giá trị"), this, &MainWindow::selectDuplicates);
     data->addAction(QStringLiteral("Điền ô trống bằng giá trị trên"), this, &MainWindow::fillBlanksDownSelection);
     data->addAction(QStringLiteral("AutoSum (∑)"), QKeySequence(QStringLiteral("Alt+=")), this, [this] {
@@ -1307,6 +1308,24 @@ void MainWindow::reverseRowsSelection()
         for (int c = l; c <= r; ++c)
             m_model->setData(m_model->index(t + i, c), rev[i][c - l], Qt::EditRole);
     statusBar()->showMessage(QStringLiteral("Đã đảo ngược %1 hàng").arg(rev.size()), 2500);
+}
+
+// Đảo ngược thứ tự cột trong vùng chọn (Spec 15): cột đầu thành cuối.
+void MainWindow::reverseColsSelection()
+{
+    int t, l, b, r;
+    if (!selectionBox(t, l, b, r) || r <= l) { statusBar()->showMessage(QStringLiteral("Hãy chọn từ 2 cột trở lên"), 2500); return; }
+    QVector<QVector<QString>> block;
+    for (int row = t; row <= b; ++row) {
+        QVector<QString> line;
+        for (int c = l; c <= r; ++c) line.push_back(m_model->data(m_model->index(row, c), Qt::EditRole).toString());
+        block.push_back(line);
+    }
+    const auto rev = datatools::reverseCols(block);
+    for (int i = 0; i < rev.size(); ++i)
+        for (int c = l; c <= r; ++c)
+            m_model->setData(m_model->index(t + i, c), rev[i][c - l], Qt::EditRole);
+    statusBar()->showMessage(QStringLiteral("Đã đảo ngược %1 cột").arg(r - l + 1), 2500);
 }
 
 // Điền ô trống bằng giá trị phía trên cho vùng chọn (Spec 27 Clean Data).

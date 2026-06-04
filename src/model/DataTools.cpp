@@ -116,6 +116,18 @@ QVector<QVector<QString>> reverseRows(const QVector<QVector<QString>> &rows) {
     return out;
 }
 
+QVector<QVector<QString>> reverseCols(const QVector<QVector<QString>> &rows) {
+    QVector<QVector<QString>> out;
+    out.reserve(rows.size());
+    for (const auto &row : rows) {
+        QVector<QString> r;
+        r.reserve(row.size());
+        for (int c = row.size() - 1; c >= 0; --c) r.push_back(row[c]);
+        out.push_back(r);
+    }
+    return out;
+}
+
 QStringList joinColumns(const QVector<QVector<QString>> &rows, const QString &sep, bool skipEmpty) {
     QStringList out;
     out.reserve(rows.size());
