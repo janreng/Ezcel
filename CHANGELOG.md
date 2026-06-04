@@ -1,5 +1,11 @@
 # Lịch sử thay đổi
 
+## v1.39.0 — Chọn nhiều vùng & cả cột/hàng qua ô địa chỉ (Spec 02)
+
+- Gõ vào **ô địa chỉ** nay nhận nhiều vùng cách nhau bằng dấu phẩy: `A1:B3,D5,F1:F10` để chọn cùng lúc.
+- Hỗ trợ chọn **cả cột** (`A:A`, `A:C`) và **cả hàng** (`1:1`, `2:4`).
+- Tự chuẩn hóa vùng đảo ngược và giới hạn theo kích thước bảng.
+
 ## v1.38.0 — Tìm tất cả (Spec 32)
 
 - **Thêm nút "Tìm tất cả"** trong hộp thoại Tìm & Thay thế: chọn cùng lúc mọi ô có chứa từ khóa.

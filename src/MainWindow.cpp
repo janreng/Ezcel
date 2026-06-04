@@ -10,6 +10,7 @@
 #include "view/CopyVisible.h"
 #include "model/RefCycle.h"
 #include "model/NameValidate.h"
+#include "model/RangeParse.h"
 #include "model/Filter.h"
 #include "model/PasteOps.h"
 #include "model/GotoSpecial.h"
@@ -434,6 +435,21 @@ void MainWindow::onNameBoxCommitted()
         m_view->scrollTo(a0);
         m_view->setFocus();
         return;
+    }
+
+    // 1b) Đa vùng "A1:B3,D5,F1:F10" hoặc cả cột/hàng "A:A", "1:1" -> chọn (multi-range).
+    if (text.contains(QLatin1Char(',')) || text.contains(QLatin1Char(':'))) {
+        const auto ranges = rangeparse::parseMulti(text, m_model->rowCount(), m_model->columnCount());
+        if (!ranges.isEmpty()) {
+            QItemSelection sel;
+            for (const MergeRange &mr : ranges)
+                sel.select(m_model->index(mr.top, mr.left), m_model->index(mr.bottom, mr.right));
+            m_view->selectionModel()->select(sel, QItemSelectionModel::ClearAndSelect);
+            m_view->setCurrentIndex(m_model->index(ranges.first().top, ranges.first().left));
+            m_view->scrollTo(m_model->index(ranges.first().top, ranges.first().left));
+            m_view->setFocus();
+            return;
+        }
     }
 
     QString first = text.section(':', 0, 0), last = text.section(':', 1, 1);
