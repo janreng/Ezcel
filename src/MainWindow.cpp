@@ -1971,7 +1971,11 @@ void MainWindow::quickPivot()
 
     bool ok = false;
     int groupCol = QInputDialog::getInt(this, QStringLiteral("Bảng tổng hợp"),
-        QStringLiteral("Cột gom nhóm (số thứ tự, A=1):"), 1, 1, cols, 1, &ok) - 1;
+        QStringLiteral("Cột làm hàng (số thứ tự, A=1):"), 1, 1, cols, 1, &ok) - 1;
+    if (!ok) return;
+    // 0 = bảng 1 chiều; >0 = bảng chéo 2 chiều với cột tiêu đề tương ứng.
+    int colField = QInputDialog::getInt(this, QStringLiteral("Bảng tổng hợp"),
+        QStringLiteral("Cột làm tiêu đề cột (0 = bảng 1 chiều):"), 0, 0, cols, 1, &ok) - 1;
     if (!ok) return;
     int valueCol = QInputDialog::getInt(this, QStringLiteral("Bảng tổng hợp"),
         QStringLiteral("Cột giá trị cần tổng hợp (A=1):"), qMin(groupCol + 2, cols), 1, cols, 1, &ok) - 1;
@@ -1992,6 +1996,20 @@ void MainWindow::quickPivot()
         for (int c = 0; c < cols; ++c) row.push_back(m_model->data(m_model->index(r, c), Qt::EditRole).toString());
         data.push_back(row);
     }
+    // Bảng chéo 2 chiều nếu người dùng chọn cột tiêu đề (colField >= 0).
+    if (colField >= 0) {
+        const auto table = datatools::pivotCrosstab(data, groupCol, colField, valueCol, fn,
+            groupHdr.isEmpty() ? QStringLiteral("Nhóm") : groupHdr, QStringLiteral("Tổng"));
+        if (table.size() <= 2) { statusBar()->showMessage(QStringLiteral("Không đủ dữ liệu để tạo bảng chéo"), 2500); return; }
+        addSheet(QStringLiteral("Tổng hợp"));
+        for (int r = 0; r < table.size(); ++r)
+            for (int c = 0; c < table[r].size(); ++c)
+                m_model->setData(m_model->index(r, c), table[r][c], Qt::EditRole);
+        statusBar()->showMessage(QStringLiteral("Đã tạo bảng tổng hợp chéo %1×%2 ở trang mới")
+            .arg(table.size() - 2).arg(table.isEmpty() ? 0 : table[0].size() - 2), 3000);
+        return;
+    }
+
     const auto summary = datatools::pivotSummary(data, groupCol, valueCol, fn);
     if (summary.isEmpty()) { statusBar()->showMessage(QStringLiteral("Không có nhóm nào để tổng hợp"), 2500); return; }
 

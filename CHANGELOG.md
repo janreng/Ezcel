@@ -1,5 +1,11 @@
 # Lịch sử thay đổi
 
+## v1.72.0 — Bảng tổng hợp chéo 2 chiều (Spec 18)
+
+- **Bảng tổng hợp giờ làm được dạng chéo 2 chiều**: chọn một cột làm hàng và một cột làm tiêu đề cột, mỗi ô là kết quả tổng hợp giao nhau (như PivotTable).
+- Tự thêm **cột "Tổng" và hàng "Tổng"** ở mép để xem nhanh tổng theo từng hàng, từng cột và toàn bộ.
+- Vẫn giữ kiểu bảng 1 chiều như cũ: chỉ cần để ô "Cột làm tiêu đề cột" = 0.
+
 ## v1.71.0 — Sửa lỗi click ô khi đang gõ công thức báo #VALUE! (Spec 12)
 
 - **Sửa lỗi:** đang gõ công thức dở (ví dụ `=SUM(`) mà bấm sang ô khác thì ô đang sửa bị "chốt" công thức chưa hoàn chỉnh và báo `#VALUE!`.

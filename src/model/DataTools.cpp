@@ -165,6 +165,72 @@ QVector<QPair<QString, double>> pivotSummary(const QVector<QVector<QString>> &ro
     return out;
 }
 
+QVector<QVector<QString>> pivotCrosstab(const QVector<QVector<QString>> &rows,
+                                        int rowCol, int colCol, int valueCol, Agg fn,
+                                        const QString &cornerLabel, const QString &totalLabel) {
+    // Gom giá trị theo cặp (nhãn hàng, nhãn cột); giữ nhãn gốc đầu tiên cho mỗi khóa.
+    QHash<QString, QHash<QString, QVector<QString>>> cells; // rowKey -> colKey -> values
+    QHash<QString, QString> rowLabel, colLabel;             // key thường -> nhãn gốc
+    for (const auto &row : rows) {
+        if (rowCol < 0 || rowCol >= row.size() || colCol < 0 || colCol >= row.size()) continue;
+        const QString r = row[rowCol].trimmed();
+        const QString c = row[colCol].trimmed();
+        if (r.isEmpty() || c.isEmpty()) continue;
+        const QString rk = r.toLower(), ck = c.toLower();
+        if (!rowLabel.contains(rk)) rowLabel.insert(rk, r);
+        if (!colLabel.contains(ck)) colLabel.insert(ck, c);
+        const QString v = (valueCol >= 0 && valueCol < row.size()) ? row[valueCol] : QString();
+        cells[rk][ck].push_back(v);
+    }
+    // Danh sách nhãn hàng/cột sắp xếp tăng dần (không phân biệt hoa/thường).
+    auto sortedLabels = [](const QHash<QString, QString> &m) {
+        QVector<QString> keys;
+        for (auto it = m.constBegin(); it != m.constEnd(); ++it) keys.push_back(it.key());
+        std::sort(keys.begin(), keys.end(), [&](const QString &a, const QString &b) {
+            return m.value(a).compare(m.value(b), Qt::CaseInsensitive) < 0;
+        });
+        return keys;
+    };
+    const QVector<QString> rk = sortedLabels(rowLabel);
+    const QVector<QString> ck = sortedLabels(colLabel);
+
+    QVector<QVector<QString>> out;
+    // Hàng tiêu đề.
+    QVector<QString> header;
+    header.push_back(cornerLabel);
+    for (const QString &c : ck) header.push_back(colLabel.value(c));
+    header.push_back(totalLabel);
+    out.push_back(header);
+
+    // Thân bảng + tổng theo hàng.
+    for (const QString &r : rk) {
+        QVector<QString> line;
+        line.push_back(rowLabel.value(r));
+        QVector<QString> rowVals; // gom toàn bộ giá trị của hàng để tính tổng hàng
+        for (const QString &c : ck) {
+            const auto &vals = cells[r][c];
+            line.push_back(vals.isEmpty() ? QString() : aggregate(vals, fn));
+            rowVals += vals;
+        }
+        line.push_back(aggregate(rowVals, fn));
+        out.push_back(line);
+    }
+
+    // Hàng tổng theo cột + tổng toàn bộ.
+    QVector<QString> totalRow;
+    totalRow.push_back(totalLabel);
+    QVector<QString> allVals;
+    for (const QString &c : ck) {
+        QVector<QString> colVals;
+        for (const QString &r : rk) colVals += cells[r][c];
+        totalRow.push_back(aggregate(colVals, fn));
+        allVals += colVals;
+    }
+    totalRow.push_back(aggregate(allVals, fn));
+    out.push_back(totalRow);
+    return out;
+}
+
 QVector<int> duplicateValueIndices(const QVector<QString> &values) {
     QHash<QString, int> counts;
     for (const QString &v : values) {

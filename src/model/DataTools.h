@@ -55,4 +55,15 @@ QVector<int> duplicateValueIndices(const QVector<QString> &values);
 QVector<QPair<QString, double>> pivotSummary(const QVector<QVector<QString>> &rows,
                                              int groupCol, int valueCol, Agg fn);
 
+// Bảng tổng hợp 2 chiều (Pivot chéo, Spec 18): hàng = giá trị `rowCol`, cột = giá trị
+// `colCol`, ô = tổng hợp `valueCol` theo `fn`. Trả khối chuỗi đã dựng sẵn để ghi ra sheet:
+// - Hàng 0: [cornerLabel, <các nhãn cột sắp xếp>, totalLabel]
+// - Mỗi hàng tiếp: [nhãn hàng, <kết quả từng cột>, tổng theo hàng]
+// - Hàng cuối: [totalLabel, <tổng theo cột>, tổng toàn bộ]
+// Tổng theo hàng/cột/toàn bộ tính lại từ giá trị gốc (đúng cho cả Average). Ô không có
+// dữ liệu để trống. Bỏ qua hàng có ô nhãn hàng HOẶC nhãn cột rỗng.
+QVector<QVector<QString>> pivotCrosstab(const QVector<QVector<QString>> &rows,
+                                        int rowCol, int colCol, int valueCol, Agg fn,
+                                        const QString &cornerLabel, const QString &totalLabel);
+
 } // namespace datatools
