@@ -33,6 +33,7 @@
 #include "model/FlashFill.h"
 #include "model/AutoComplete.h"
 #include "model/DataTools.h"
+#include "model/Consolidate.h"
 
 #include <QTableView>
 #include <QHeaderView>
@@ -888,6 +889,7 @@ void MainWindow::buildMenus()
     data->addAction(QStringLiteral("Tách cột theo dấu phân cách..."), this, &MainWindow::textToColumns);
     data->addAction(QStringLiteral("Gộp cột thành một..."), this, &MainWindow::joinColumnsSelection);
     data->addAction(QStringLiteral("Tổng phụ theo nhóm..."), this, &MainWindow::subtotalRange);
+    data->addAction(QStringLiteral("Gộp dữ liệu nhiều vùng..."), this, &MainWindow::consolidateRanges);
     data->addAction(QStringLiteral("Bảng tổng hợp nhanh..."), this, &MainWindow::quickPivot);
     data->addSeparator();
     {
@@ -2128,6 +2130,52 @@ void MainWindow::subtotalRange()
         for (int c = 0; c < cols && c < result[r].size(); ++c)
             m_model->setData(m_model->index(1 + r, c), result[r][c], Qt::EditRole);
     statusBar()->showMessage(QStringLiteral("Đã chèn tổng phụ theo nhóm"), 3000);
+}
+
+// Gộp dữ liệu nhiều vùng theo nhãn (Consolidate, Spec 27). Mỗi vùng có nhãn cột ở hàng
+// đầu + nhãn hàng ở cột đầu; kết quả gộp theo nhãn ghi sang trang mới.
+void MainWindow::consolidateRanges()
+{
+    bool ok = false;
+    QString text = QInputDialog::getMultiLineText(this, QStringLiteral("Gộp dữ liệu"),
+        QStringLiteral("Các vùng cần gộp (nhãn cột ở hàng đầu, nhãn hàng ở cột đầu),\n"
+                       "ngăn nhau bằng dấu chấm phẩy ';'. Ví dụ:  A1:C4 ; E1:G4"),
+        QString(), &ok);
+    if (!ok || text.trimmed().isEmpty()) return;
+
+    const int rows = m_model->rowCount(), cols = m_model->columnCount();
+    QVector<QVector<QVector<QString>>> tables;
+    const QStringList tokens = text.split(QChar(';'), Qt::SkipEmptyParts);
+    for (const QString &tk : tokens) {
+        auto box = rangeparse::parseOne(tk.trimmed(), rows, cols);
+        if (!box) continue;
+        QVector<QVector<QString>> tbl;
+        for (int r = box->top; r <= box->bottom; ++r) {
+            QVector<QString> row;
+            for (int c = box->left; c <= box->right; ++c)
+                row.push_back(m_model->data(m_model->index(r, c), Qt::EditRole).toString());
+            tbl.push_back(row);
+        }
+        tables.push_back(tbl);
+    }
+    if (tables.isEmpty()) { statusBar()->showMessage(QStringLiteral("Không có vùng hợp lệ để gộp"), 2500); return; }
+
+    const QStringList fnNames{QStringLiteral("Tổng"), QStringLiteral("Đếm"),
+        QStringLiteral("Trung bình"), QStringLiteral("Lớn nhất"), QStringLiteral("Nhỏ nhất")};
+    QString fnPick = QInputDialog::getItem(this, QStringLiteral("Gộp dữ liệu"),
+        QStringLiteral("Hàm tổng hợp:"), fnNames, 0, false, &ok);
+    if (!ok) return;
+    const auto fn = static_cast<datatools::Agg>(qMax(0, fnNames.indexOf(fnPick)));
+
+    const auto out = consolidate::byLabels(tables, fn, QStringLiteral("Nhãn"));
+    if (out.size() <= 1) { statusBar()->showMessage(QStringLiteral("Không gộp được dữ liệu (thiếu nhãn?)"), 2500); return; }
+
+    addSheet(QStringLiteral("Gộp dữ liệu"));
+    for (int r = 0; r < out.size(); ++r)
+        for (int c = 0; c < out[r].size(); ++c)
+            m_model->setData(m_model->index(r, c), out[r][c], Qt::EditRole);
+    statusBar()->showMessage(QStringLiteral("Đã gộp %1 vùng → %2 nhãn hàng ở trang mới")
+        .arg(tables.size()).arg(out.size() - 1), 3000);
 }
 
 // --- Gom nhóm / phác thảo hàng (Spec 09.4) ---

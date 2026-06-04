@@ -1,5 +1,11 @@
 # Lịch sử thay đổi
 
+## v1.78.0 — Gộp dữ liệu nhiều vùng theo nhãn (Spec 27)
+
+- Thêm **Dữ liệu → "Gộp dữ liệu nhiều vùng..."**: nhập nhiều vùng (mỗi vùng có nhãn cột ở hàng đầu, nhãn hàng ở cột đầu), chọn hàm tổng hợp, kết quả gộp theo nhãn được tạo ở trang mới.
+- Nhãn hàng và nhãn cột được lấy hợp từ tất cả các vùng; ô giao nhau là kết quả tổng hợp (Tổng/Đếm/Trung bình/Lớn nhất/Nhỏ nhất) của mọi giá trị cùng nhãn.
+- Hữu ích khi cộng dồn các bảng cùng cấu trúc (ví dụ doanh thu nhiều tháng/khu vực) về một bảng tổng.
+
 ## v1.77.0 — Hàm FILTER: lọc dữ liệu bằng công thức (Spec 12)
 
 - Thêm hàm **`FILTER(vùng, điều_kiện, [nếu_rỗng])`** — giữ lại các dòng (hoặc cột) thỏa điều kiện rồi tự tràn kết quả ra ô.

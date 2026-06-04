@@ -68,6 +68,7 @@ private slots:
     void removeDuplicates();  // xóa hàng trùng (Spec 27)
     void textToColumns();     // tách cột theo dấu phân cách (Spec 27)
     void subtotalRange();     // tổng phụ theo nhóm (Spec 27.6)
+    void consolidateRanges(); // gộp dữ liệu nhiều vùng theo nhãn (Spec 27)
     void quickPivot();        // bảng tổng hợp nhanh (pivot, Spec 18)
     void insertCellsDialog(); // chèn ô có dịch chuyển phải/xuống (Spec 09)
     void deleteCellsDialog(); // xóa ô có dịch chuyển trái/lên (Spec 09)
