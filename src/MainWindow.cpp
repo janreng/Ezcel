@@ -100,6 +100,10 @@ MainWindow::MainWindow(QWidget *parent)
     m_view->horizontalHeader()->setHighlightSections(true); // header sáng khi chọn (giống Excel)
     m_view->verticalHeader()->setHighlightSections(true);
     m_view->setItemDelegate(new CellBorderDelegate(m_view, m_view)); // viền xanh ô đang chọn
+    // Gõ phím là vào chế độ sửa ngay (giống Excel); Enter sau đó tự nhảy xuống ô dưới.
+    m_view->setEditTriggers(QAbstractItemView::DoubleClicked | QAbstractItemView::EditKeyPressed
+                            | QAbstractItemView::AnyKeyPressed);
+    m_view->setTabKeyNavigation(true); // Tab sang phải, Enter xuống dưới
     m_view->viewport()->installEventFilter(this); // bắt Ctrl+wheel để zoom
     buildContextMenus(); // menu chuột phải: ô + đầu hàng/cột (Spec 06)
 
@@ -498,6 +502,13 @@ void MainWindow::onFormulaBarCommitted()
     QModelIndex idx = m_view->currentIndex();
     if (!idx.isValid()) return;
     m_model->setData(idx, m_formulaBar->text(), Qt::EditRole);
+    // Nhập xong Enter -> nhảy xuống ô ngay dưới (giống Excel).
+    const int nextRow = idx.row() + 1;
+    if (nextRow < m_model->rowCount()) {
+        QModelIndex below = m_model->index(nextRow, idx.column());
+        m_view->setCurrentIndex(below);
+        m_view->scrollTo(below);
+    }
     m_view->setFocus();
     setCellMode(int(cellmode::Mode::Ready)); // nhập xong -> sẵn sàng
 }

@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v1.58.0 — Gõ xong nhấn Enter tự nhảy xuống ô dưới (Spec 03)
+
+- **Sửa lỗi**: nhập nội dung rồi nhấn Enter nay tự chuyển xuống ô ngay bên dưới như mong đợi.
+- **Gõ phím là vào chế độ sửa ngay** trên ô đang chọn (không cần bấm đúp hay F2 trước); Tab chuyển sang phải, Enter xuống dưới.
+
 ## v1.57.0 — Hiện độ lệch chuẩn ở thanh trạng thái (Spec 11)
 
 - **Thanh trạng thái** nay hiển thị thêm **Độ lệch chuẩn** (mẫu) của vùng chọn khi có từ 2 ô số trở lên.
