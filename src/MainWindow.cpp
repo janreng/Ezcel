@@ -2139,21 +2139,40 @@ void MainWindow::consolidateRanges()
     bool ok = false;
     QString text = QInputDialog::getMultiLineText(this, QStringLiteral("Gộp dữ liệu"),
         QStringLiteral("Các vùng cần gộp (nhãn cột ở hàng đầu, nhãn hàng ở cột đầu),\n"
-                       "ngăn nhau bằng dấu chấm phẩy ';'. Ví dụ:  A1:C4 ; E1:G4"),
+                       "ngăn nhau bằng dấu chấm phẩy ';'. Có thể lấy từ trang khác bằng\n"
+                       "cú pháp Tên!Vùng. Ví dụ:  A1:C4 ; Tháng 2!A1:C4 ; Tháng 3!A1:C4"),
         QString(), &ok);
     if (!ok || text.trimmed().isEmpty()) return;
 
-    const int rows = m_model->rowCount(), cols = m_model->columnCount();
+    // Tra model trang tính theo tên tab (không phân biệt hoa/thường).
+    auto modelByName = [this](const QString &name) -> SpreadsheetModel * {
+        for (int j = 0; j < m_sheetTabs->count() && j < m_sheets.size(); ++j)
+            if (m_sheetTabs->tabText(j).compare(name, Qt::CaseInsensitive) == 0) return m_sheets[j];
+        return nullptr;
+    };
+
     QVector<QVector<QVector<QString>>> tables;
     const QStringList tokens = text.split(QChar(';'), Qt::SkipEmptyParts);
-    for (const QString &tk : tokens) {
-        auto box = rangeparse::parseOne(tk.trimmed(), rows, cols);
+    for (const QString &raw : tokens) {
+        QString tk = raw.trimmed();
+        SpreadsheetModel *src = m_model;
+        const int bang = tk.indexOf(QChar('!'));
+        if (bang >= 0) {                       // có tên trang -> Tên!Vùng
+            QString sheetName = tk.left(bang).trimmed();
+            if (sheetName.size() >= 2 && sheetName.startsWith(QChar('\'')) && sheetName.endsWith(QChar('\'')))
+                sheetName = sheetName.mid(1, sheetName.size() - 2); // bỏ nháy đơn 'Tên có dấu cách'
+            SpreadsheetModel *found = modelByName(sheetName);
+            if (!found) continue;              // trang không tồn tại -> bỏ
+            src = found;
+            tk = tk.mid(bang + 1).trimmed();
+        }
+        auto box = rangeparse::parseOne(tk, src->rowCount(), src->columnCount());
         if (!box) continue;
         QVector<QVector<QString>> tbl;
         for (int r = box->top; r <= box->bottom; ++r) {
             QVector<QString> row;
             for (int c = box->left; c <= box->right; ++c)
-                row.push_back(m_model->data(m_model->index(r, c), Qt::EditRole).toString());
+                row.push_back(src->data(src->index(r, c), Qt::EditRole).toString());
             tbl.push_back(row);
         }
         tables.push_back(tbl);

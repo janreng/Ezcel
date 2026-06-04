@@ -1,5 +1,11 @@
 # Lịch sử thay đổi
 
+## v1.79.0 — Gộp dữ liệu từ nhiều trang tính (Spec 27)
+
+- "Gộp dữ liệu nhiều vùng" giờ lấy được vùng **từ trang tính khác** bằng cú pháp `Tên!Vùng` — ví dụ `Tháng 2!A1:C4 ; Tháng 3!A1:C4`.
+- Tên trang có dấu cách đặt trong nháy đơn: `'Báo cáo Q1'!A1:C10`.
+- Rất tiện để cộng dồn các trang cùng cấu trúc (mỗi tháng/chi nhánh một trang) thành một bảng tổng.
+
 ## v1.78.0 — Gộp dữ liệu nhiều vùng theo nhãn (Spec 27)
 
 - Thêm **Dữ liệu → "Gộp dữ liệu nhiều vùng..."**: nhập nhiều vùng (mỗi vùng có nhãn cột ở hàng đầu, nhãn hàng ở cột đầu), chọn hàm tổng hợp, kết quả gộp theo nhãn được tạo ở trang mới.
