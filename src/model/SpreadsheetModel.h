@@ -70,6 +70,11 @@ public:
     void setNote(int row, int col, const QString &text);
     QString note(int row, int col) const { return m_notes.value(key(row, col)); }
 
+    // Truy vết phụ thuộc (Spec 32): precedents = các ô mà (row,col) tham chiếu tới;
+    // dependents = các ô tham chiếu tới (row,col). allLevels=true -> lan truyền BFS.
+    QVector<QPair<int, int>> precedents(int row, int col, bool allLevels) const;
+    QVector<QPair<int, int>> dependents(int row, int col, bool allLevels) const;
+
     // Vùng đặt tên (named range): đặt tên cho 1 vùng; tra theo tên.
     void defineName(const QString &name, const MergeRange &range);
     bool lookupName(const QString &name, MergeRange &out) const;

@@ -582,6 +582,33 @@ int main(int argc, char **argv) {
         ok(!cd.contains(qMakePair(0, 1)), "o moc hang khong tinh");
     }
 
+    // --- precedents / dependents (Spec 32) ---
+    {
+        SpreadsheetModel mm;
+        mm.resizeGrid(6, 3);
+        put(mm, 0, 0, "10");        // A1
+        put(mm, 1, 0, "20");        // A2
+        put(mm, 2, 0, "=A1+A2");    // A3 phu thuoc A1,A2
+        put(mm, 3, 0, "=A3*2");     // A4 phu thuoc A3
+        // precedents A3 truc tiep = A1,A2
+        auto p = mm.precedents(2, 0, false);
+        ok(p.size() == 2 && p.contains(qMakePair(0, 0)) && p.contains(qMakePair(1, 0)), "precedents A3 = A1,A2");
+        // precedents A4 all levels = A3, A1, A2
+        auto pa = mm.precedents(3, 0, true);
+        ok(pa.size() == 3 && pa.contains(qMakePair(2, 0)) && pa.contains(qMakePair(0, 0)), "precedents A4 all = A3,A1,A2");
+        // precedents A4 truc tiep = chi A3
+        auto pd = mm.precedents(3, 0, false);
+        ok(pd.size() == 1 && pd.contains(qMakePair(2, 0)), "precedents A4 direct = A3");
+        // dependents A1 truc tiep = A3
+        auto d1 = mm.dependents(0, 0, false);
+        ok(d1.size() == 1 && d1.contains(qMakePair(2, 0)), "dependents A1 = A3");
+        // dependents A1 all levels = A3, A4
+        auto d1a = mm.dependents(0, 0, true);
+        ok(d1a.size() == 2 && d1a.contains(qMakePair(2, 0)) && d1a.contains(qMakePair(3, 0)), "dependents A1 all = A3,A4");
+        // o khong lien quan -> rong
+        ok(mm.precedents(0, 2, true).isEmpty(), "o trong khong co precedents");
+    }
+
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);
     return g_fail == 0 ? 0 : 1;
 }

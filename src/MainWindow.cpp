@@ -605,6 +605,26 @@ void MainWindow::buildMenus()
         QApplication::clipboard()->setText(copyutil::toTsvSkipHidden(block, hidden));
         statusBar()->showMessage(QStringLiteral("Đã sao chép %1 hàng hiển thị").arg(b - t + 1 - hidden.size()), 3000);
     });
+    // Truy vết ô tham chiếu (precedents) / ô phụ thuộc (dependents) của ô hiện hành.
+    auto selectTrace = [this](bool precedents) {
+        QModelIndex cur = m_view->currentIndex();
+        if (!cur.isValid()) return;
+        const auto cells = precedents
+            ? m_model->precedents(cur.row(), cur.column(), /*allLevels*/ true)
+            : m_model->dependents(cur.row(), cur.column(), /*allLevels*/ true);
+        if (cells.isEmpty()) {
+            statusBar()->showMessage(precedents ? QStringLiteral("Ô này không tham chiếu ô nào")
+                                                : QStringLiteral("Không ô nào phụ thuộc ô này"), 3000);
+            return;
+        }
+        QItemSelection sel;
+        for (const auto &p : cells) { QModelIndex i = m_model->index(p.first, p.second); sel.select(i, i); }
+        m_view->selectionModel()->select(sel, QItemSelectionModel::ClearAndSelect);
+        statusBar()->showMessage(QStringLiteral("Đã chọn %1 ô %2").arg(cells.size())
+            .arg(precedents ? QStringLiteral("tham chiếu") : QStringLiteral("phụ thuộc")), 3000);
+    };
+    edit->addAction(QStringLiteral("Truy vết ô tham chiếu (precedents)"), this, [selectTrace] { selectTrace(true); });
+    edit->addAction(QStringLiteral("Truy vết ô phụ thuộc (dependents)"), this, [selectTrace] { selectTrace(false); });
 
     QMenu *st = menuBar()->addMenu(i18n::tr("menu_struct"));
     st->addAction(i18n::tr("st_ins_row"), this, [this] {

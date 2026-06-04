@@ -1,5 +1,11 @@
 # Lịch sử thay đổi
 
+## v1.34.0 — Truy vết ô tham chiếu & phụ thuộc (Spec 32)
+
+- **Truy vết ô tham chiếu (precedents)**: chọn nhanh tất cả ô mà công thức của ô đang chọn đang dùng tới (lan qua nhiều cấp).
+- **Truy vết ô phụ thuộc (dependents)**: chọn tất cả ô có công thức phụ thuộc vào ô đang chọn.
+- Giúp kiểm tra mạch tính toán: đổi một ô sẽ ảnh hưởng tới đâu, hoặc một kết quả đến từ những ô nào.
+
 ## v1.33.0 — Sao chép chỉ ô đang hiển thị (Spec 32)
 
 - **Sao chép chỉ ô hiện (Alt+;)**: khi dữ liệu đã lọc/ẩn hàng, chỉ chép các hàng đang hiển thị, bỏ qua hàng ẩn.

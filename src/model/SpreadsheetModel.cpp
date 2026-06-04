@@ -377,6 +377,36 @@ void SpreadsheetModel::updateDeps(int row, int col) {
     }
 }
 
+// Lan truyền BFS qua một bản đồ phụ thuộc (m_deps hoặc m_dependents) từ ô gốc.
+// directOnly=true -> chỉ lấy mức kế cận trực tiếp. Bỏ chính ô gốc khỏi kết quả.
+static QVector<QPair<int, int>> traceDeps(const QHash<qint64, QSet<qint64>> &graph,
+                                          qint64 start, bool allLevels) {
+    QVector<QPair<int, int>> out;
+    QSet<qint64> seen;
+    QList<qint64> queue;
+    auto it0 = graph.constFind(start);
+    if (it0 != graph.constEnd()) for (qint64 d : it0.value()) queue.push_back(d);
+    while (!queue.isEmpty()) {
+        qint64 cur = queue.takeFirst();
+        if (cur == start || seen.contains(cur)) continue;
+        seen.insert(cur);
+        out.push_back({int(cur >> 32), int(cur & 0xffffffff)}); // giải mã key(row,col)
+        if (allLevels) {
+            auto it = graph.constFind(cur);
+            if (it != graph.constEnd()) for (qint64 d : it.value()) if (!seen.contains(d)) queue.push_back(d);
+        }
+    }
+    return out;
+}
+
+QVector<QPair<int, int>> SpreadsheetModel::precedents(int row, int col, bool allLevels) const {
+    return traceDeps(m_deps, key(row, col), allLevels);
+}
+
+QVector<QPair<int, int>> SpreadsheetModel::dependents(int row, int col, bool allLevels) const {
+    return traceDeps(m_dependents, key(row, col), allLevels);
+}
+
 void SpreadsheetModel::recalculate(int row, int col) {
     // BFS ngược qua _dependents từ ô vừa đổi; xóa cache ô dirty + emit bounding-box.
     QSet<qint64> dirty;
