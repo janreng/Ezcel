@@ -147,6 +147,8 @@ QVariant SpreadsheetModel::data(const QModelIndex &index, int role) const {
             }
         return out.size() > 1 ? QVariant(out) : QVariant(); // cần ít nhất 1 giá trị
     }
+    case TableHeaderRole:
+        return isTableHeader(row, col); // ô tiêu đề bảng -> delegate vẽ nút lọc ▼
     case SpillEdgesRole: {
         int t, l, b, rg; // bitmask cạnh biên vùng spill: 1=trên,2=trái,4=dưới,8=phải
         if (!spillRangeAt(row, col, t, l, b, rg)) return 0;

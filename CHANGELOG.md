@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v2.1.0 — Nút lọc trên đầu cột bảng (Spec 16)
+
+- Bảng có cấu trúc giờ hiện **nút lọc ▼ ở mỗi ô tiêu đề** — bấm vào là mở danh sách giá trị của cột để **chọn lọc nhanh** (ẩn các hàng không cần), không phải vào menu Dữ liệu nữa.
+
 ## v2.0.0 — Phiên bản 2.0 🎉 (mốc tổng kết)
 
 Cột mốc lớn: bản dựng lại bằng C++ chạy nhanh, mượt, giao diện hiện đại và đầy đủ tính năng cho công việc bảng tính hằng ngày.

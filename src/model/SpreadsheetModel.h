@@ -57,6 +57,9 @@ public:
     // QVariant rỗng nếu ô không phải đích sparkline. Delegate vẽ biểu đồ mini.
     static constexpr int SparkLineRole = Qt::UserRole + 4;
 
+    // Role: true nếu ô thuộc HÀNG TIÊU ĐỀ của một bảng (Spec 16) -> delegate vẽ nút lọc ▼.
+    static constexpr int TableHeaderRole = Qt::UserRole + 5;
+
     explicit SpreadsheetModel(QObject *parent = nullptr);
 
     // QAbstractTableModel

@@ -11,6 +11,7 @@
 #include "view/FreezePanes.h"
 #include "view/GridView.h"
 #include "view/FormulaHint.h"
+#include "view/TableFilter.h"
 #include "formula/Functions.h"
 #include "model/RefCycle.h"
 #include "model/NameValidate.h"
@@ -2814,6 +2815,19 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *ev)
                     le->setFocus();
                     return true; // giữ editor mở, không chọn ô khác
                 }
+            }
+        }
+    }
+    // Nút lọc ▼ trên ô tiêu đề bảng (Spec 16): bấm vùng mũi tên -> lọc theo cột đó.
+    if (obj == m_view->viewport() && ev->type() == QEvent::MouseButtonPress) {
+        auto *me = static_cast<QMouseEvent *>(ev);
+        const QModelIndex idx = m_view->indexAt(me->pos());
+        if (idx.isValid() && idx.data(SpreadsheetModel::TableHeaderRole).toBool()) {
+            const QRect r = m_view->visualRect(idx);
+            if (tablefilter::arrowHit(r.x(), r.y(), r.width(), r.height(), me->pos().x(), me->pos().y())) {
+                m_view->setCurrentIndex(idx);
+                filterByValues();
+                return true;
             }
         }
     }

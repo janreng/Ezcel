@@ -1,5 +1,6 @@
 // Test thuần cho định dạng bảng sọc xen kẽ (Spec 16) — không cần GUI.
 #include "model/TableFormat.h"
+#include "view/TableFilter.h"
 #include <cstdio>
 
 static int g_pass = 0, g_fail = 0;
@@ -33,6 +34,12 @@ int main() {
     // Công thức tổng cột.
     ok(tbl::sumFormula(QStringLiteral("B"), 2, 6) == QLatin1String("=SUM(B2:B6)"), "sum formula");
     ok(tbl::sumFormula(QStringLiteral("AA"), 1, 100) == QLatin1String("=SUM(AA1:AA100)"), "sum formula cot AA");
+
+    // Nút lọc ▼: hit-test vùng mép phải ô [x=10,y=20,w=90,h=22], zone=16.
+    ok(tablefilter::arrowHit(10, 20, 90, 22, 95, 30), "click trong vung mui ten");
+    ok(!tablefilter::arrowHit(10, 20, 90, 22, 50, 30), "click giua o -> khong");
+    ok(!tablefilter::arrowHit(10, 20, 90, 22, 95, 50), "click ngoai chieu cao -> khong");
+    ok(tablefilter::arrowHit(10, 20, 90, 22, 100, 41), "click sat mep phai-duoi van trung");
 
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);
     return g_fail == 0 ? 0 : 1;

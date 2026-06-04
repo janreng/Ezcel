@@ -1,5 +1,6 @@
 #include "view/CellBorderDelegate.h"
 #include "view/FormulaHint.h"
+#include "view/TableFilter.h"
 #include "ui/Theme.h"
 #include "model/SpreadsheetModel.h" // chỉ dùng hằng SpillEdgesRole
 
@@ -146,6 +147,20 @@ void CellBorderDelegate::paint(QPainter *painter, const QStyleOptionViewItem &op
         if (spillEdges & 2) painter->drawLine(rc.topLeft(), rc.bottomLeft());     // trái
         if (spillEdges & 4) painter->drawLine(rc.bottomLeft(), rc.bottomRight()); // dưới
         if (spillEdges & 8) painter->drawLine(rc.topRight(), rc.bottomRight());   // phải
+        painter->restore();
+    }
+
+    // Nút lọc ▼ ở mép phải ô tiêu đề bảng (chữ trắng trên nền đậm -> dùng mũi tên trắng).
+    if (index.data(SpreadsheetModel::TableHeaderRole).toBool()) {
+        painter->save();
+        painter->setRenderHint(QPainter::Antialiasing, true);
+        const QRect rc = option.rect;
+        const int bx = rc.right() - tablefilter::arrowZone() + 4;
+        const int by = rc.center().y() - 1;
+        const QPointF tri[3] = { QPointF(bx, by), QPointF(bx + 8, by), QPointF(bx + 4, by + 5) };
+        painter->setPen(Qt::NoPen);
+        painter->setBrush(QColor(Qt::white));
+        painter->drawPolygon(tri, 3);
         painter->restore();
     }
 
