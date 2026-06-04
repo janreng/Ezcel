@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
-project(Ezcel VERSION 1.34.0 LANGUAGES CXX)
+project(Ezcel VERSION 1.35.0 LANGUAGES CXX)
 
 # Bản port C++ của Ezcel (gốc Python/PySide6). Dùng Qt6 Widgets + MinGW.
 set(CMAKE_CXX_STANDARD 20)
@@ -50,7 +50,8 @@ add_library(ezcel_model STATIC src/model/SpreadsheetModel.cpp src/model/Spreadsh
     src/model/SeriesFill.cpp src/model/SeriesFill.h
     src/model/FlashFill.cpp src/model/FlashFill.h
     src/model/AutoComplete.cpp src/model/AutoComplete.h
-    src/model/DataTools.cpp src/model/DataTools.h)
+    src/model/DataTools.cpp src/model/DataTools.h
+    src/model/RefCycle.cpp src/model/RefCycle.h)
 target_include_directories(ezcel_model PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(ezcel_model PUBLIC ezcel_formula ezcel_sort Qt6::Core Qt6::Gui)
 
@@ -156,6 +157,10 @@ add_executable(test_copyvisible tests/test_copyvisible.cpp src/view/CopyVisible.
 target_include_directories(test_copyvisible PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(test_copyvisible PRIVATE Qt6::Core)
 
+add_executable(test_refcycle tests/test_refcycle.cpp src/model/RefCycle.cpp)
+target_include_directories(test_refcycle PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_link_libraries(test_refcycle PRIVATE Qt6::Core)
+
 enable_testing()
 add_test(NAME formula COMMAND test_formula)
 add_test(NAME model COMMAND test_model)
@@ -176,6 +181,7 @@ add_test(NAME datatools COMMAND test_datatools)
 add_test(NAME headermenu COMMAND test_headermenu)
 add_test(NAME outline COMMAND test_outline)
 add_test(NAME copyvisible COMMAND test_copyvisible)
+add_test(NAME refcycle COMMAND test_refcycle)
 
 # --- Sort (sắp xếp vùng dữ liệu) — module logic thuần (Qt Core) -> static lib + test.
 add_library(ezcel_sort STATIC src/model/Sort.cpp src/model/Sort.h)

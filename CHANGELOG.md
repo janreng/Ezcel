@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v1.35.0 — Phím F4 khóa tham chiếu tuyệt đối (Spec 04)
+
+- **Nhấn F4 trên thanh công thức** để đảo nhanh kiểu khóa của tham chiếu ô tại con trỏ: A1 → $A$1 → A$1 → $A1 → A1.
+- Tiện khi viết công thức cần cố định cột/hàng trước khi kéo sao chép.
+
 ## v1.34.0 — Truy vết ô tham chiếu & phụ thuộc (Spec 32)
 
 - **Truy vết ô tham chiếu (precedents)**: chọn nhanh tất cả ô mà công thức của ô đang chọn đang dùng tới (lan qua nhiều cấp).

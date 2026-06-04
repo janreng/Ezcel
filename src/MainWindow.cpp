@@ -8,6 +8,7 @@
 #include "view/HeaderMenu.h"
 #include "view/Outline.h"
 #include "view/CopyVisible.h"
+#include "model/RefCycle.h"
 #include "model/Filter.h"
 #include "model/PasteOps.h"
 #include "model/GotoSpecial.h"
@@ -64,6 +65,7 @@
 #include <QItemSelection>
 #include <QPoint>
 #include <QWheelEvent>
+#include <QKeyEvent>
 #include <QEvent>
 #include <QDate>
 #include <QTime>
@@ -375,6 +377,7 @@ void MainWindow::buildFormulaBar()
     fx->setStyleSheet("font-style: italic; color: #666;");
     m_formulaBar = new QLineEdit(bar);
     m_formulaBar->setPlaceholderText(QStringLiteral("Nội dung / công thức ô đang chọn"));
+    m_formulaBar->installEventFilter(this); // bắt F4 để đảo khóa $ tham chiếu (Spec 04)
     h->addWidget(m_nameBox);
     h->addWidget(fx);
     h->addWidget(m_formulaBar, 1);
@@ -1715,6 +1718,19 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *ev)
             m_zoom = zoom::stepped(m_zoom, we->angleDelta().y() > 0 ? zoom::kStep : -zoom::kStep);
             applyZoom();
             return true; // nuốt sự kiện, không cuộn
+        }
+    }
+    // F4 trên thanh công thức: đảo trạng thái khóa $ của tham chiếu tại con trỏ (Spec 04).
+    if (obj == m_formulaBar && ev->type() == QEvent::KeyPress) {
+        auto *ke = static_cast<QKeyEvent *>(ev);
+        if (ke->key() == Qt::Key_F4) {
+            const int pos = m_formulaBar->cursorPosition();
+            const QString cycled = refcycle::cycleAt(m_formulaBar->text(), pos);
+            if (cycled != m_formulaBar->text()) {
+                m_formulaBar->setText(cycled);
+                m_formulaBar->setCursorPosition(qMin(pos + 2, cycled.size())); // bù dấu $ thêm vào
+            }
+            return true; // nuốt F4
         }
     }
     if (obj == m_zoomLabel && ev->type() == QEvent::MouseButtonRelease) {
