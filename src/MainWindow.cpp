@@ -782,6 +782,9 @@ void MainWindow::buildMenus()
         int t, l, b, r; if (selectionBox(t, l, b, r)) m_model->removeColumns(l, r - l + 1);
     });
     st->addSeparator();
+    st->addAction(QStringLiteral("Chèn ô..."), this, &MainWindow::insertCellsDialog);
+    st->addAction(QStringLiteral("Xóa ô..."), this, &MainWindow::deleteCellsDialog);
+    st->addSeparator();
     st->addAction(i18n::tr("st_hide_row"), this, [this] {
         int t, l, b, r; if (selectionBox(t, l, b, r)) viewutil::hideRows(m_view, t, b);
     });
@@ -2022,6 +2025,56 @@ void MainWindow::quickPivot()
         m_model->setData(m_model->index(i + 1, 1), QString::number(summary[i].second, 'g', 15), Qt::EditRole);
     }
     statusBar()->showMessage(QStringLiteral("Đã tạo bảng tổng hợp %1 nhóm ở trang mới").arg(summary.size()), 3000);
+}
+
+// Chèn ô có dịch chuyển một phần (Spec 09): dialog 4 lựa chọn như Excel.
+void MainWindow::insertCellsDialog()
+{
+    int t, l, b, r;
+    if (!selectionBox(t, l, b, r)) return;
+    const QStringList opts{ QStringLiteral("Dịch ô sang phải"), QStringLiteral("Dịch ô xuống dưới"),
+                            QStringLiteral("Chèn cả hàng"), QStringLiteral("Chèn cả cột") };
+    bool ok = false;
+    QString pick = QInputDialog::getItem(this, QStringLiteral("Chèn ô"),
+        QStringLiteral("Cách chèn:"), opts, 0, false, &ok);
+    if (!ok) return;
+    switch (opts.indexOf(pick)) {
+    case 0:
+        if (!m_model->shiftCells(t, l, b, r, cellshift::Dir::Right))
+            statusBar()->showMessage(QStringLiteral("Không thể chèn ô (vùng ảnh hưởng có ô gộp)"), 2500);
+        break;
+    case 1:
+        if (!m_model->shiftCells(t, l, b, r, cellshift::Dir::Down))
+            statusBar()->showMessage(QStringLiteral("Không thể chèn ô (vùng ảnh hưởng có ô gộp)"), 2500);
+        break;
+    case 2: m_model->insertRows(t, b - t + 1); break;
+    case 3: m_model->insertColumns(l, r - l + 1); break;
+    }
+}
+
+// Xóa ô có dịch chuyển một phần (Spec 09): dialog 4 lựa chọn như Excel.
+void MainWindow::deleteCellsDialog()
+{
+    int t, l, b, r;
+    if (!selectionBox(t, l, b, r)) return;
+    const QStringList opts{ QStringLiteral("Dịch ô sang trái"), QStringLiteral("Dịch ô lên trên"),
+                            QStringLiteral("Xóa cả hàng"), QStringLiteral("Xóa cả cột") };
+    bool ok = false;
+    QString pick = QInputDialog::getItem(this, QStringLiteral("Xóa ô"),
+        QStringLiteral("Cách xóa:"), opts, 0, false, &ok);
+    if (!ok) return;
+    switch (opts.indexOf(pick)) {
+    case 0:
+        if (!m_model->shiftCells(t, l, b, r, cellshift::Dir::Left))
+            statusBar()->showMessage(QStringLiteral("Không thể xóa ô (vùng ảnh hưởng có ô gộp)"), 2500);
+        break;
+    case 1:
+        if (!m_model->shiftCells(t, l, b, r, cellshift::Dir::Up))
+            statusBar()->showMessage(QStringLiteral("Không thể xóa ô (vùng ảnh hưởng có ô gộp)"), 2500);
+        break;
+    case 2: m_model->removeRows(t, b - t + 1); break;
+    case 3: m_model->removeColumns(l, r - l + 1); break;
+    }
 }
 
 // Tổng phụ (Subtotal, Spec 27.6): chèn dòng tổng sau mỗi nhóm + dòng tổng cộng.

@@ -14,6 +14,7 @@
 #include <optional>
 #include "model/CondFormat.h"
 #include "model/Validation.h"
+#include "model/CellShift.h"
 
 // Vùng ô gộp [top,left]..[bottom,right] (port tuple (t,l,b,r) của Python).
 struct MergeRange {
@@ -53,6 +54,9 @@ public:
     void removeRows(int row, int count = 1);
     void insertColumns(int col, int count = 1);
     void removeColumns(int col, int count = 1);
+    // Chèn/xóa Ô với dịch chuyển một phần (Spec 09): dời nội dung+định dạng+ghi chú
+    // theo hướng dir. Trả false nếu vùng ảnh hưởng chạm ô gộp (từ chối để khỏi vỡ merge).
+    bool shiftCells(int top, int left, int bottom, int right, cellshift::Dir dir);
     // Nạp toàn bộ lưới từ file (CSV/XLSX): thay dữ liệu, dựng lại deps, xóa undo.
     void loadGrid(const QVector<QVector<QString>> &rows);
     // Toàn bộ ô thô (để lưu file). Hàng/cột rỗng vẫn giữ nguyên kích thước lưới.

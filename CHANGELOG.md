@@ -1,5 +1,12 @@
 # Lịch sử thay đổi
 
+## v1.73.0 — Chèn / xóa ô có dịch chuyển (Spec 09)
+
+- **Chèn ô** (menu Cấu trúc → "Chèn ô..."): chọn vùng rồi đẩy ô sang phải hoặc xuống dưới để chừa chỗ trống — không phải chèn nguyên hàng/cột nữa.
+- **Xóa ô** (menu Cấu trúc → "Xóa ô..."): xóa vùng rồi dồn ô từ phải sang trái hoặc từ dưới lên trên.
+- Vẫn có sẵn lựa chọn chèn/xóa nguyên hàng hoặc nguyên cột trong cùng hộp thoại.
+- Dời cả nội dung, định dạng và ghi chú theo ô; hoàn tác (Ctrl+Z) được. Nếu vùng ảnh hưởng chạm ô đã gộp thì báo và không làm để khỏi vỡ ô gộp.
+
 ## v1.72.0 — Bảng tổng hợp chéo 2 chiều (Spec 18)
 
 - **Bảng tổng hợp giờ làm được dạng chéo 2 chiều**: chọn một cột làm hàng và một cột làm tiêu đề cột, mỗi ô là kết quả tổng hợp giao nhau (như PivotTable).

@@ -897,6 +897,52 @@ void SpreadsheetModel::removeColumns(int col, int count) {
     recalculateAll(); emit mergesChanged();
 }
 
+bool SpreadsheetModel::shiftCells(int top, int left, int bottom, int right, cellshift::Dir dir)
+{
+    const int rows = rowCount(), cols = columnCount();
+    if (top < 0 || left < 0 || bottom >= rows || right >= cols || top > bottom || left > right)
+        return false;
+
+    // Vùng ẢNH HƯỞNG: Right/Left dời cả hàng tới mép phải; Down/Up dời cả cột tới mép dưới.
+    int aTop = top, aLeft = left, aBottom = bottom, aRight = right;
+    if (dir == cellshift::Dir::Right || dir == cellshift::Dir::Left) aRight = cols - 1;
+    else                                                             aBottom = rows - 1;
+
+    // Từ chối nếu vùng ảnh hưởng chạm bất kỳ ô gộp nào (tránh xé merge).
+    for (const auto &m : m_merges)
+        if (!(m.right < aLeft || m.left > aRight || m.bottom < aTop || m.top > aBottom))
+            return false;
+
+    const auto moves = cellshift::plan(rows, cols, top, left, bottom, right, dir);
+    if (moves.isEmpty()) return false;
+
+    Snapshot before = snapshot();
+    // Đọc trạng thái CŨ trước khi ghi để các phép dời không đè lẫn nhau.
+    const QVector<QVector<QString>> oldData = m_data;
+    const QHash<qint64, Format> oldFmt = m_fmt;
+    const QHash<qint64, QString> oldNotes = m_notes;
+    for (const cellshift::Move &mv : moves) {
+        const qint64 dk = key(mv.dstR, mv.dstC);
+        if (mv.srcR < 0) {                       // ô đích để trống
+            m_data[mv.dstR][mv.dstC].clear();
+            m_fmt.remove(dk);
+            m_notes.remove(dk);
+        } else {
+            const qint64 sk = key(mv.srcR, mv.srcC);
+            m_data[mv.dstR][mv.dstC] = oldData[mv.srcR][mv.srcC];
+            if (oldFmt.contains(sk)) m_fmt[dk] = oldFmt.value(sk); else m_fmt.remove(dk);
+            if (oldNotes.contains(sk)) m_notes[dk] = oldNotes.value(sk); else m_notes.remove(dk);
+        }
+    }
+    m_evalCache.clear();
+    rebuildDeps();
+    UndoEntry e; e.snapBefore = before; e.snapAfter = snapshot();
+    pushUndo(std::move(e));
+    recalculateAll();
+    emit dataChanged(index(aTop, aLeft), index(aBottom, aRight));
+    return true;
+}
+
 // ---------------------------------------------------------------- header / flags / kích thước
 QVariant SpreadsheetModel::headerData(int section, Qt::Orientation orientation, int role) const {
     if (role != Qt::DisplayRole) return {};
