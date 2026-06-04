@@ -1,9 +1,11 @@
 // Test headless cho span ô gộp (viewutil::applyMergeSpans). Chi in ASCII.
 #include "view/MergeSpans.h"
 #include "view/Visibility.h"
+#include "ui/RibbonBar.h"
 #include "model/SpreadsheetModel.h"
 #include <QApplication>
 #include <QTableView>
+#include <QToolButton>
 #include <cstdio>
 
 static int g_pass = 0, g_fail = 0;
@@ -53,6 +55,34 @@ int main(int argc, char **argv) {
         ok(v2.isColumnHidden(1) && !v2.isColumnHidden(0), "an cot 1");
         viewutil::unhideRange(&v2, 0, 0, 5, 5);
         ok(!v2.isRowHidden(2) && !v2.isRowHidden(3) && !v2.isColumnHidden(1), "hien lai het");
+    }
+
+    // --- dải lệnh Ribbon: dựng tab/nhóm/nút đúng cấu trúc ---
+    {
+        RibbonBar rb;
+        rb.beginTab(QStringLiteral("Trang đầu"));
+        rb.beginGroup(QStringLiteral("Phông"));
+        int clicked = 0;
+        rb.addButton(QStringLiteral("bold"), QStringLiteral("Đậm"), [&clicked] { ++clicked; });
+        rb.beginGroup(QStringLiteral("Căn lề"));
+        rb.addButton(QString(), QStringLiteral("Trái"), nullptr); // nút chỉ-chữ (không icon)
+        rb.beginTab(QStringLiteral("Dữ liệu"));
+        rb.beginGroup(QStringLiteral("Sắp xếp & Lọc"));
+        rb.addButton(QString(), QStringLiteral("Lọc"), nullptr);
+        rb.finish();
+
+        ok(rb.count() == 2, "ribbon co 2 tab");
+        ok(rb.tabTitles() == QStringList({QStringLiteral("Trang đầu"), QStringLiteral("Dữ liệu")}),
+           "nhan tab dung thu tu");
+        ok(rb.groupTitles(0) == QStringList({QStringLiteral("Phông"), QStringLiteral("Căn lề")}),
+           "tab 0 co 2 nhom");
+        ok(rb.groupTitles(1) == QStringList({QStringLiteral("Sắp xếp & Lọc")}),
+           "tab 1 co 1 nhom");
+        // Nút trả về có thật và bấm chạy callback.
+        QToolButton *b = rb.addButton(QStringLiteral("copy"), QStringLiteral("Chép"), [&clicked] { ++clicked; });
+        ok(b != nullptr, "addButton tra ve nut");
+        if (b) b->click();
+        ok(clicked == 1, "click nut chay callback");
     }
 
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);

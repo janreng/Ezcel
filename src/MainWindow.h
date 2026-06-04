@@ -18,6 +18,7 @@ class QModelIndex;
 class QSplitter;
 class SpreadsheetModel;
 class CellBorderDelegate;
+class RibbonBar;
 
 // Cửa sổ chính: menu (Tệp/Sửa/Xem) + thanh công cụ + thanh công thức + lưới.
 // P5 batch 1: mở/lưu file (CSV/XLSX), undo/redo, copy/cut/paste, fill, gộp ô,
@@ -74,6 +75,13 @@ private slots:
     void toggleSplitView();   // bật/tắt chia đôi cửa sổ theo chiều dọc (Spec 14)
     void goalSeekDialog();    // dò mục tiêu: đổi ô nhập để ô công thức đạt giá trị (Spec 28)
     void quickPivot();        // bảng tổng hợp nhanh (pivot, Spec 18)
+    void autoSum();           // AutoSum (∑) ô hiện hành (Alt+=)
+    void sortSelection(bool ascending); // sắp xếp vùng theo cột hiện hành
+    void insertToday();       // chèn ngày hôm nay vào ô hiện hành (Ctrl+;)
+    void insertNow();         // chèn giờ hiện tại vào ô hiện hành (Ctrl+Shift+;)
+    void insertSparkline(int type); // chèn sparkline (sparkline::Type) vào ô hiện hành
+    void addDataBarDialog();  // thêm thanh dữ liệu cho vùng chọn
+    void addColorScaleDialog(); // thêm thang màu cho vùng chọn
     void insertCellsDialog(); // chèn ô có dịch chuyển phải/xuống (Spec 09)
     void deleteCellsDialog(); // xóa ô có dịch chuyển trái/lên (Spec 09)
     void groupRows();         // gom nhóm hàng đang chọn (Spec 09.4)
@@ -100,8 +108,7 @@ private slots:
 private:
     void buildMenus();
     void buildContextMenus();    // menu chuột phải ô + đầu hàng/cột (Spec 06)
-    void buildToolbar();
-    void buildFormatToolbar();   // định nghĩa ở MainWindowFormat.cpp
+    void buildRibbon();          // dải lệnh kiểu Excel (Trang đầu/Chèn/Công thức/Dữ liệu/Xem)
     void buildFormulaBar();
     void updateTitle();
     void applyZoom();                          // áp mức thu phóng hiện tại
@@ -123,6 +130,7 @@ private:
     void toggleFormatAttr(const QString &key);  // bật/tắt bool theo ô hiện hành
     void pickColor(const QString &key);         // "color" (chữ) hoặc "bg" (nền)
 
+    RibbonBar *m_ribbon = nullptr;  // dải lệnh trên cùng (kiểu Excel)
     QTableView *m_view = nullptr;
     SpreadsheetModel *m_model = nullptr;
     QLineEdit *m_formulaBar = nullptr;

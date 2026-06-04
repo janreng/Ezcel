@@ -1,5 +1,11 @@
 # Lịch sử thay đổi
 
+## v1.91.0 — Giao diện dải lệnh (Ribbon) (Spec 50)
+
+- Thay dãy thanh công cụ phẳng bằng **dải lệnh có thẻ (Ribbon)**: các thẻ **Trang đầu, Chèn, Công thức, Dữ liệu, Xem** — bấm thẻ để đổi nhóm lệnh.
+- Mỗi thẻ **gom lệnh thành nhóm có tiêu đề** (Bảng tạm, Phông, Căn lề, Số, Kiểu, Ô, Chỉnh sửa…), ngăn cách rõ ràng — dễ tìm hơn, đỡ rối so với danh sách dài.
+- Đưa các lệnh hay dùng (định dạng, sắp xếp, lọc, công cụ dữ liệu…) lên đúng thẻ, ngay tầm mắt thay vì nằm sâu trong menu.
+
 ## v1.90.0 — Bảo vệ trang tính, khóa ô (Spec 29)
 
 - Thêm **Dữ liệu → "Bảo vệ trang tính"**: khi bật, các ô bị **khóa không cho sửa** — tránh lỡ tay đè công thức/dữ liệu quan trọng.
