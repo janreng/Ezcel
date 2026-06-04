@@ -21,4 +21,8 @@ const LazyFn *lookupLazy(const QString &upperName);
 // Danh sách TÊN tất cả hàm dựng sẵn (đã sắp xếp, viết HOA) — cho popup gợi ý công thức.
 QStringList functionNames();
 
+// Chữ ký (cú pháp đối số) của các hàm thường dùng, vd "SUM(số1; [số2]; …)".
+// Khóa viết HOA. Hàm không có trong bảng -> không hiện gợi ý tham số.
+QHash<QString, QString> functionSignatures();
+
 } // namespace formula

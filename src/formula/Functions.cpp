@@ -1677,4 +1677,54 @@ QStringList functionNames() {
     return names;
 }
 
+QHash<QString, QString> functionSignatures() {
+    static const QHash<QString, QString> s = {
+        {"SUM", "SUM(số1; [số2]; …)"}, {"AVERAGE", "AVERAGE(số1; [số2]; …)"},
+        {"COUNT", "COUNT(giá_trị1; …)"}, {"COUNTA", "COUNTA(giá_trị1; …)"},
+        {"MAX", "MAX(số1; [số2]; …)"}, {"MIN", "MIN(số1; [số2]; …)"},
+        {"PRODUCT", "PRODUCT(số1; [số2]; …)"}, {"MEDIAN", "MEDIAN(số1; [số2]; …)"},
+        {"MODE", "MODE(số1; [số2]; …)"}, {"STDEV", "STDEV(số1; [số2]; …)"},
+        {"VAR", "VAR(số1; [số2]; …)"}, {"ROUND", "ROUND(số; số_chữ_số)"},
+        {"ROUNDUP", "ROUNDUP(số; số_chữ_số)"}, {"ROUNDDOWN", "ROUNDDOWN(số; số_chữ_số)"},
+        {"INT", "INT(số)"}, {"ABS", "ABS(số)"}, {"MOD", "MOD(số; số_chia)"},
+        {"POWER", "POWER(cơ_số; số_mũ)"}, {"SQRT", "SQRT(số)"},
+        {"IF", "IF(điều_kiện; giá_trị_đúng; [giá_trị_sai])"},
+        {"IFS", "IFS(đk1; giá_trị1; [đk2; giá_trị2]; …)"},
+        {"IFERROR", "IFERROR(giá_trị; giá_trị_nếu_lỗi)"},
+        {"AND", "AND(logic1; [logic2]; …)"}, {"OR", "OR(logic1; [logic2]; …)"},
+        {"NOT", "NOT(logic)"}, {"SWITCH", "SWITCH(biểu_thức; trị1; kq1; …; [mặc_định])"},
+        {"SUMIF", "SUMIF(vùng; tiêu_chí; [vùng_tổng])"},
+        {"SUMIFS", "SUMIFS(vùng_tổng; vùng_đk1; đk1; …)"},
+        {"COUNTIF", "COUNTIF(vùng; tiêu_chí)"},
+        {"COUNTIFS", "COUNTIFS(vùng_đk1; đk1; …)"},
+        {"AVERAGEIF", "AVERAGEIF(vùng; tiêu_chí; [vùng_tb])"},
+        {"AVERAGEIFS", "AVERAGEIFS(vùng_tb; vùng_đk1; đk1; …)"},
+        {"VLOOKUP", "VLOOKUP(giá_trị_dò; bảng; cột; [gần_đúng])"},
+        {"HLOOKUP", "HLOOKUP(giá_trị_dò; bảng; hàng; [gần_đúng])"},
+        {"XLOOKUP", "XLOOKUP(giá_trị_dò; vùng_dò; vùng_trả; [nếu_không_thấy])"},
+        {"INDEX", "INDEX(vùng; số_hàng; [số_cột])"},
+        {"MATCH", "MATCH(giá_trị_dò; vùng_dò; [kiểu])"},
+        {"CHOOSE", "CHOOSE(số_thứ_tự; giá_trị1; [giá_trị2]; …)"},
+        {"LEFT", "LEFT(văn_bản; [số_ký_tự])"}, {"RIGHT", "RIGHT(văn_bản; [số_ký_tự])"},
+        {"MID", "MID(văn_bản; vị_trí; số_ký_tự)"}, {"LEN", "LEN(văn_bản)"},
+        {"FIND", "FIND(tìm; trong; [bắt_đầu])"}, {"SEARCH", "SEARCH(tìm; trong; [bắt_đầu])"},
+        {"REPLACE", "REPLACE(văn_bản; vị_trí; số_ký_tự; mới)"},
+        {"SUBSTITUTE", "SUBSTITUTE(văn_bản; cũ; mới; [lần])"},
+        {"CONCAT", "CONCAT(văn_bản1; [văn_bản2]; …)"},
+        {"TEXTJOIN", "TEXTJOIN(dấu_ngăn; bỏ_rỗng; văn_bản1; …)"},
+        {"UPPER", "UPPER(văn_bản)"}, {"LOWER", "LOWER(văn_bản)"}, {"PROPER", "PROPER(văn_bản)"},
+        {"TRIM", "TRIM(văn_bản)"}, {"TEXT", "TEXT(giá_trị; định_dạng)"},
+        {"VALUE", "VALUE(văn_bản)"}, {"REPT", "REPT(văn_bản; số_lần)"},
+        {"DATE", "DATE(năm; tháng; ngày)"}, {"TODAY", "TODAY()"}, {"NOW", "NOW()"},
+        {"YEAR", "YEAR(ngày)"}, {"MONTH", "MONTH(ngày)"}, {"DAY", "DAY(ngày)"},
+        {"DATEDIF", "DATEDIF(ngày_đầu; ngày_cuối; đơn_vị)"},
+        {"REGEXTEST", "REGEXTEST(văn_bản; mẫu; [phân_biệt_hoa])"},
+        {"REGEXEXTRACT", "REGEXEXTRACT(văn_bản; mẫu; [chế_độ]; [phân_biệt])"},
+        {"REGEXREPLACE", "REGEXREPLACE(văn_bản; mẫu; thay; [lần]; [phân_biệt])"},
+        {"DSUM", "DSUM(csdl; cột; tiêu_chí)"}, {"DCOUNT", "DCOUNT(csdl; cột; tiêu_chí)"},
+        {"DAVERAGE", "DAVERAGE(csdl; cột; tiêu_chí)"}, {"DGET", "DGET(csdl; cột; tiêu_chí)"},
+    };
+    return s;
+}
+
 } // namespace formula

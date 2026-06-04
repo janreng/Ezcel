@@ -610,6 +610,10 @@ int main() {
         okEq(ns.contains("SUM") && ns.contains("IF") && ns.contains("VLOOKUP"), "co SUM/IF/VLOOKUP");
         okEq(std::is_sorted(ns.begin(), ns.end()), "danh sach da sap xep");
         okEq(ns.indexOf("SUM") >= 0 && !ns.contains("sum"), "ten viet HOA");
+        const auto sigs = formula::functionSignatures();
+        okEq(sigs.value("SUM").startsWith("SUM("), "chu ky SUM");
+        okEq(sigs.value("VLOOKUP").startsWith("VLOOKUP(") && sigs.value("VLOOKUP").contains(QChar(';')), "chu ky VLOOKUP co tham so");
+        okEq(sigs.value("KHONGCO").isEmpty(), "ham la -> khong co chu ky");
     }
 
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);

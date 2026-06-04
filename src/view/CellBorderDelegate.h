@@ -1,6 +1,7 @@
 #pragma once
 #include <QStyledItemDelegate>
 #include <QStringList>
+#include <QHash>
 
 class QAbstractItemView;
 
@@ -16,8 +17,10 @@ public:
     QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,
                           const QModelIndex &index) const override;
     void setFunctionNames(const QStringList &names) { m_fnNames = names; }
+    void setFunctionSignatures(const QHash<QString, QString> &sigs) { m_fnSigs = sigs; }
 
 private:
     QAbstractItemView *m_view;
     QStringList m_fnNames;
+    QHash<QString, QString> m_fnSigs;
 };

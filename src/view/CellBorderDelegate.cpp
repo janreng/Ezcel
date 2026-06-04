@@ -15,7 +15,7 @@ QWidget *CellBorderDelegate::createEditor(QWidget *parent, const QStyleOptionVie
     QWidget *editor = QStyledItemDelegate::createEditor(parent, option, index);
     if (!m_fnNames.isEmpty())
         if (auto *le = qobject_cast<QLineEdit *>(editor))
-            formulahint::install(le, m_fnNames); // popup gợi ý hàm khi gõ '='
+            formulahint::install(le, m_fnNames, m_fnSigs); // popup gợi ý hàm + tooltip tham số
     return editor;
 }
 

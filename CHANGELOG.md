@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v1.67.0 — Gợi ý tham số của hàm khi nhập công thức (Spec 12)
+
+- **Khi gõ tên hàm và mở ngoặc** (ví dụ `=VLOOKUP(`), ứng dụng hiện **gợi ý các tham số cần điền** ngay bên dưới, như ở bảng tính chuyên nghiệp.
+- Phủ các hàm thường dùng (SUM, IF, VLOOKUP, INDEX, MATCH, SUMIFS, TEXT, DATE...) với mô tả tham số bằng tiếng Việt.
+
 ## v1.66.0 — Gợi ý hàm khi gõ công thức (Spec 12)
 
 - **Gõ `=` rồi nhập chữ trong ô (hoặc thanh công thức) sẽ xổ popup gợi ý các hàm phù hợp** (SUM, IF, VLOOKUP...).
