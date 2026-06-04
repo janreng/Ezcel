@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v1.65.0 — Nhấn Backspace/Delete để xóa ô ngay (Spec 03)
+
+- **Chọn ô rồi nhấn Backspace (hoặc Delete) là xóa nội dung ngay**, không cần bấm đúp vào ô nữa.
+- Xóa được cả một vùng nhiều ô đang chọn cùng lúc.
+
 ## v1.64.0 — Bảng tổng hợp nhanh (Spec 18)
 
 - **Thêm "Bảng tổng hợp nhanh..."** trong menu Dữ liệu: gom nhóm theo một cột và tổng hợp một cột giá trị (Tổng / Đếm / Trung bình / Lớn nhất / Nhỏ nhất).

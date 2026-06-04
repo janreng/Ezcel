@@ -95,7 +95,9 @@ MainWindow::MainWindow(QWidget *parent)
     m_model = m_sheets[0];
     installCrossSheet(m_sheets[0]);
 
-    m_view = new GridView(this); // lưới có Enter-nhảy-xuống khi sửa trong ô (Spec 03)
+    auto *grid = new GridView(this); // lưới có Enter-nhảy-xuống + Backspace-xóa (Spec 03)
+    grid->onClearKey = [this] { clearSelection(); };
+    m_view = grid;
     m_view->setModel(m_model);
     m_view->horizontalHeader()->setDefaultSectionSize(theme::ColWidth);
     m_view->verticalHeader()->setDefaultSectionSize(theme::RowHeight);
