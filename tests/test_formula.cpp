@@ -521,6 +521,13 @@ int main() {
     checkNum("=IMREAL(IMSEC(\"i\"))", 0.6480542736638853);     // 1/cosh(1)
     checkNum("=IMAGINARY(IMCOT(\"i\"))", -1.3130352854993312); // -1/tanh(1)
 
+    // --- DATEDIF unit MD/YM/YD (Spec 12) ---  s=2024-01-15, e=2026-03-20
+    checkNum("=DATEDIF(DATE(2024,1,15),DATE(2026,3,20),\"Y\")", 2);
+    checkNum("=DATEDIF(DATE(2024,1,15),DATE(2026,3,20),\"M\")", 26);
+    checkNum("=DATEDIF(DATE(2024,1,15),DATE(2026,3,20),\"YM\")", 2);
+    checkNum("=DATEDIF(DATE(2024,1,15),DATE(2026,3,20),\"MD\")", 5);
+    checkNum("=DATEDIF(DATE(2024,1,15),DATE(2026,3,20),\"YD\")", 64);
+
     // --- Regex functions (Spec 22.2) ---
     checkStr("=REGEXTEST(\"abc123\",\"[0-9]+\")", "true");
     checkStr("=REGEXTEST(\"abcdef\",\"[0-9]+\")", "false");

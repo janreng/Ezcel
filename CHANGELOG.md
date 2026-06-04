@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v1.48.0 — DATEDIF hỗ trợ thêm đơn vị MD, YM, YD (Spec 12)
+
+- **DATEDIF** nay nhận thêm các đơn vị: **YM** (số tháng lẻ sau khi trừ năm), **MD** (số ngày lẻ sau khi trừ tháng), **YD** (số ngày lẻ sau khi trừ năm).
+- Tiện cho việc hiển thị khoảng cách giữa hai ngày theo dạng "X năm Y tháng Z ngày".
+
 ## v1.47.0 — Bỏ ký tự không in được cho vùng chọn (Spec 27)
 
 - **Thêm "Bỏ ký tự không in được"** trong menu Sửa: loại bỏ các ký tự điều khiển ẩn thường lẫn vào khi sao chép từ web hoặc tệp khác.

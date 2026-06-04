@@ -1078,7 +1078,24 @@ QHash<QString, Fn> &fnMap() {
         r["SECOND"] = [need](const Args &a) { need(a,1,"SECOND"); double s = toNumber(a[0]); int sec = int(std::round((s - std::floor(s)) * 86400)); return Value::number(sec % 60); };
         r["DAYS"]   = [need](const Args &a) { need(a,2,"DAYS"); return Value::number(serialToDate(toNumber(a[1])).daysTo(serialToDate(toNumber(a[0])))); };
         r["WEEKDAY"] = [](const Args &a) { if (a.size()<1||a.size()>2) argErr("WEEKDAY"); int iso = serialToDate(toNumber(a[0])).dayOfWeek(); int t = a.size()==2 ? toInt(a[1]) : 1; if (t==1) return Value::number(iso % 7 + 1); if (t==2) return Value::number(iso); if (t==3) return Value::number(iso - 1); throw FormulaError(QStringLiteral("WEEKDAY: type không hỗ trợ")); };
-        r["DATEDIF"] = [need](const Args &a) { need(a,3,"DATEDIF"); QDate s = serialToDate(toNumber(a[0])), e = serialToDate(toNumber(a[1])); QString u = toText(a[2]).toUpper(); if (u=="D") return Value::number(s.daysTo(e)); if (u=="Y") return Value::number(e.year()-s.year() - ((e.month()<s.month()||(e.month()==s.month()&&e.day()<s.day()))?1:0)); if (u=="M") return Value::number((e.year()-s.year())*12 + (e.month()-s.month()) - (e.day()<s.day()?1:0)); throw FormulaError(QStringLiteral("DATEDIF: unit phải D/M/Y")); };
+        r["DATEDIF"] = [need](const Args &a) {
+            need(a,3,"DATEDIF");
+            QDate s = serialToDate(toNumber(a[0])), e = serialToDate(toNumber(a[1]));
+            QString u = toText(a[2]).toUpper();
+            if (u=="D") return Value::number(s.daysTo(e));
+            if (u=="Y") return Value::number(e.year()-s.year() - ((e.month()<s.month()||(e.month()==s.month()&&e.day()<s.day()))?1:0));
+            if (u=="M") return Value::number((e.year()-s.year())*12 + (e.month()-s.month()) - (e.day()<s.day()?1:0));
+            if (u=="YM") { int m = (e.year()-s.year())*12 + (e.month()-s.month()) - (e.day()<s.day()?1:0); int rem = m % 12; if (rem < 0) rem += 12; return Value::number(rem); }
+            if (u=="MD") { int md = e.day() - s.day(); if (md < 0) { QDate prevEnd = QDate(e.year(), e.month(), 1).addDays(-1); md += prevEnd.day(); } return Value::number(md); }
+            if (u=="YD") {
+                int dm = e.month()*100 + e.day(), sm = s.month()*100 + s.day();
+                int yr = (dm >= sm) ? e.year() : e.year()-1;
+                int dayClamp = qMin(s.day(), QDate(yr, s.month(), 1).addMonths(1).addDays(-1).day());
+                QDate s2(yr, s.month(), dayClamp);
+                return Value::number(s2.daysTo(e));
+            }
+            throw FormulaError(QStringLiteral("DATEDIF: unit phải D/M/Y/MD/YM/YD"));
+        };
         // DATEVALUE(text): đổi chuỗi ngày -> số sê-ri. Thử ISO rồi vài định dạng phổ biến.
         r["DATEVALUE"] = [need](const Args &a) {
             need(a,1,"DATEVALUE");
