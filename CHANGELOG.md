@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v1.47.0 — Bỏ ký tự không in được cho vùng chọn (Spec 27)
+
+- **Thêm "Bỏ ký tự không in được"** trong menu Sửa: loại bỏ các ký tự điều khiển ẩn thường lẫn vào khi sao chép từ web hoặc tệp khác.
+- Đổi khoảng trắng đặc biệt (non-breaking space) thành dấu cách thường; bỏ ký tự độ rộng bằng 0 và BOM. Giữ nguyên ô công thức.
+
 ## v1.46.0 — Cắt gọn khoảng trắng cho vùng chọn (Spec 27)
 
 - **Thêm "Cắt gọn khoảng trắng"** trong menu Sửa: bỏ khoảng trắng thừa ở đầu/cuối và rút nhiều dấu cách liên tiếp thành một.

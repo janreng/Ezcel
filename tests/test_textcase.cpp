@@ -26,6 +26,12 @@ int main(int argc, char **argv) {
     eq(trimSpaces("noextra"), "noextra", "khong co trang thua");
     eq(trimSpaces("   "), "", "toan trang -> rong");
 
+    // removeNonPrintable
+    eq(removeNonPrintable(QString("a") + QChar(7) + "b"), "ab", "bo ky tu dieu khien (bell)");
+    eq(removeNonPrintable(QString("x") + QChar(0x00A0) + "y"), "x y", "nbsp -> dau cach");
+    eq(removeNonPrintable(QString("z") + QChar(0xFEFF)), "z", "bo BOM");
+    eq(removeNonPrintable("normal text"), "normal text", "van ban thuong giu nguyen");
+
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);
     return g_fail == 0 ? 0 : 1;
 }

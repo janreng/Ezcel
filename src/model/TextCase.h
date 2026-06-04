@@ -13,4 +13,8 @@ QString convert(const QString &s, Mode m);
 // khoảng trắng liên tiếp ở giữa thành một dấu cách. Cũng coi tab/xuống dòng là trắng.
 QString trimSpaces(const QString &s);
 
+// Bỏ ký tự không in được (giống hàm CLEAN): loại các ký tự điều khiển (mã < 32) và
+// các khoảng trắng đặc biệt (non-breaking space U+00A0...). Giữ nguyên nội dung khác.
+QString removeNonPrintable(const QString &s);
+
 } // namespace textcase

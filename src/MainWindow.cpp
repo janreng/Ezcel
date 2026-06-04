@@ -545,6 +545,7 @@ void MainWindow::buildMenus()
         caseSub->addAction(QStringLiteral("Viết Hoa Đầu Từ"), this, [this] { changeCase(2); });
     }
     edit->addAction(QStringLiteral("Cắt gọn khoảng trắng"), this, &MainWindow::trimSelection);
+    edit->addAction(QStringLiteral("Bỏ ký tự không in được"), this, &MainWindow::cleanSelection);
     edit->addAction(i18n::tr("edit_merge"), this, &MainWindow::toggleMergeSelection);
     edit->addSeparator();
     edit->addAction(i18n::tr("edit_find"), QKeySequence::Find, this, &MainWindow::showFindReplace);
@@ -1317,6 +1318,22 @@ void MainWindow::trimSelection()
             if (nw != raw) { m_model->setData(m_model->index(row, c), nw, Qt::EditRole); ++changed; }
         }
     statusBar()->showMessage(QStringLiteral("Đã cắt gọn khoảng trắng %1 ô").arg(changed), 2500);
+}
+
+// Bỏ ký tự không in được cho vùng chọn (Spec 27 Clean Data): bỏ ô công thức.
+void MainWindow::cleanSelection()
+{
+    int t, l, b, r;
+    if (!selectionBox(t, l, b, r)) return;
+    int changed = 0;
+    for (int row = t; row <= b; ++row)
+        for (int c = l; c <= r; ++c) {
+            const QString raw = m_model->data(m_model->index(row, c), Qt::EditRole).toString();
+            if (raw.isEmpty() || raw.startsWith(QLatin1Char('='))) continue;
+            const QString nw = textcase::removeNonPrintable(raw);
+            if (nw != raw) { m_model->setData(m_model->index(row, c), nw, Qt::EditRole); ++changed; }
+        }
+    statusBar()->showMessage(QStringLiteral("Đã làm sạch %1 ô").arg(changed), 2500);
 }
 
 void MainWindow::toggleMergeSelection()
