@@ -19,4 +19,8 @@ QString convert(const QString &s, Mode m) {
     return out;
 }
 
+QString trimSpaces(const QString &s) {
+    return s.simplified(); // Qt: bỏ trắng đầu/cuối + gộp khoảng trắng giữa thành 1 dấu cách
+}
+
 } // namespace textcase

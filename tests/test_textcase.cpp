@@ -20,6 +20,12 @@ int main(int argc, char **argv) {
     eq(convert("a1b2 c3", Mode::Proper), "A1B2 C3", "proper: chu sau so cung viet hoa (giong Excel)");
     eq(convert("", Mode::Upper), "", "rong");
 
+    // trimSpaces
+    eq(trimSpaces("  hello   world  "), "hello world", "trim dau/cuoi + gop giua");
+    eq(trimSpaces("a\tb\nc"), "a b c", "tab/newline -> 1 dau cach");
+    eq(trimSpaces("noextra"), "noextra", "khong co trang thua");
+    eq(trimSpaces("   "), "", "toan trang -> rong");
+
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);
     return g_fail == 0 ? 0 : 1;
 }

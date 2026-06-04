@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v1.46.0 — Cắt gọn khoảng trắng cho vùng chọn (Spec 27)
+
+- **Thêm "Cắt gọn khoảng trắng"** trong menu Sửa: bỏ khoảng trắng thừa ở đầu/cuối và rút nhiều dấu cách liên tiếp thành một.
+- Cũng xử lý tab và xuống dòng thành dấu cách. Chỉ tác động ô văn bản; giữ nguyên ô công thức.
+
 ## v1.45.0 — Đổi chữ hoa/thường cho vùng chọn (Spec 05)
 
 - **Thêm menu "Đổi chữ hoa/thường"** trong menu Sửa: đổi nhanh nội dung vùng chọn sang **CHỮ HOA**, **chữ thường**, hoặc **Viết Hoa Đầu Từ**.
