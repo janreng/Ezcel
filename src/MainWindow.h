@@ -16,6 +16,7 @@ class QDialog;
 class QTabBar;
 class QModelIndex;
 class SpreadsheetModel;
+class CellBorderDelegate;
 
 // Cửa sổ chính: menu (Tệp/Sửa/Xem) + thanh công cụ + thanh công thức + lưới.
 // P5 batch 1: mở/lưu file (CSV/XLSX), undo/redo, copy/cut/paste, fill, gộp ô,
@@ -148,6 +149,7 @@ private:
     void doFillDrag(const QPoint &releaseViewportPos); // thực hiện điền khi thả chuột
 
     freeze::FreezePanes *m_freeze = nullptr; // cố định dòng/cột (Spec 14)
+    CellBorderDelegate *m_cellDelegate = nullptr; // để "point mode" chèn địa chỉ ô (Spec 12)
 
     outline::Outline m_rowOutline;   // nhóm/phác thảo hàng (Spec 09.4)
     void applyRowOutline();          // áp ẩn/hiện hàng theo nhóm đang thu gọn

@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v1.70.0 — Click ô để chèn địa chỉ vào công thức đang gõ (Spec 12)
+
+- **Đang gõ công thức trong ô (bắt đầu bằng `=`) mà bấm vào một ô khác, địa chỉ ô đó tự được chèn vào công thức** tại vị trí con trỏ — như "point mode" của bảng tính chuyên nghiệp.
+- Ô đang sửa vẫn mở để tiếp tục gõ; tiện viết `=SUM(`, bấm chọn vùng/ô, rồi gõ tiếp.
+
 ## v1.69.0 — Gợi ý công thức kèm mô tả & ví dụ (Spec 12)
 
 - **Tooltip công thức nay đầy đủ hơn**: ngoài cú pháp, còn hiển thị **mô tả hàm**, **ví dụ minh họa** và **giải thích từng tham số** — như ở bảng tính chuyên nghiệp.

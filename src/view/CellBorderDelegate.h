@@ -18,9 +18,12 @@ public:
                           const QModelIndex &index) const override;
     void setFunctionNames(const QStringList &names) { m_fnNames = names; }
     void setFunctionSignatures(const QHash<QString, QString> &sigs) { m_fnSigs = sigs; }
+    // Editor (QLineEdit) đang mở, để "point mode" chèn địa chỉ ô vào công thức. null nếu không.
+    QWidget *activeEditor() const { return m_activeEditor; }
 
 private:
     QAbstractItemView *m_view;
     QStringList m_fnNames;
     QHash<QString, QString> m_fnSigs;
+    mutable QWidget *m_activeEditor = nullptr;
 };

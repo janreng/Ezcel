@@ -108,10 +108,10 @@ MainWindow::MainWindow(QWidget *parent)
     m_view->setShowGrid(true);
     m_view->horizontalHeader()->setHighlightSections(true); // header sáng khi chọn (giống Excel)
     m_view->verticalHeader()->setHighlightSections(true);
-    auto *cellDelegate = new CellBorderDelegate(m_view, m_view); // viền xanh ô đang chọn
-    cellDelegate->setFunctionNames(formula::functionNames());     // popup gợi ý hàm khi gõ '='
-    cellDelegate->setFunctionSignatures(formula::functionTooltips()); // tooltip mô tả + tham số (HTML)
-    m_view->setItemDelegate(cellDelegate);
+    m_cellDelegate = new CellBorderDelegate(m_view, m_view); // viền xanh ô đang chọn
+    m_cellDelegate->setFunctionNames(formula::functionNames());     // popup gợi ý hàm khi gõ '='
+    m_cellDelegate->setFunctionSignatures(formula::functionTooltips()); // tooltip mô tả + tham số (HTML)
+    m_view->setItemDelegate(m_cellDelegate);
     // Gõ phím là vào chế độ sửa ngay (giống Excel); Enter sau đó tự nhảy xuống ô dưới.
     m_view->setEditTriggers(QAbstractItemView::DoubleClicked | QAbstractItemView::EditKeyPressed
                             | QAbstractItemView::AnyKeyPressed);
@@ -2209,6 +2209,21 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *ev)
             m_zoom = zoom::stepped(m_zoom, we->angleDelta().y() > 0 ? zoom::kStep : -zoom::kStep);
             applyZoom();
             return true; // nuốt sự kiện, không cuộn
+        }
+    }
+    // "Point mode" (Spec 12): đang sửa CÔNG THỨC trong ô mà bấm vào ô khác -> chèn địa chỉ ô
+    // đó vào công thức tại con trỏ (không commit/di chuyển). Giống Excel/Sheets.
+    if (obj == m_view->viewport() && ev->type() == QEvent::MouseButtonPress && m_cellDelegate) {
+        if (auto *le = qobject_cast<QLineEdit *>(m_cellDelegate->activeEditor())) {
+            if (le->text().startsWith(QLatin1Char('='))) {
+                auto *me = static_cast<QMouseEvent *>(ev);
+                const QModelIndex idx = m_view->indexAt(me->pos());
+                if (idx.isValid() && idx != m_view->currentIndex()) {
+                    le->insert(SpreadsheetModel::columnLabel(idx.column()) + QString::number(idx.row() + 1));
+                    le->setFocus();
+                    return true; // giữ editor mở, không chọn ô khác
+                }
+            }
         }
     }
     // Kéo nút điền (fill handle) để tự điền chuỗi xuống/sang phải (Spec 05).

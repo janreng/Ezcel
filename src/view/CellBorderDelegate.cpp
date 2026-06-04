@@ -16,6 +16,11 @@ QWidget *CellBorderDelegate::createEditor(QWidget *parent, const QStyleOptionVie
     if (!m_fnNames.isEmpty())
         if (auto *le = qobject_cast<QLineEdit *>(editor))
             formulahint::install(le, m_fnNames, m_fnSigs); // popup gợi ý hàm + tooltip tham số
+    // Theo dõi editor đang mở để hỗ trợ "point mode" (click ô chèn địa chỉ vào công thức).
+    m_activeEditor = editor;
+    QObject::connect(editor, &QObject::destroyed, this, [this](QObject *o) {
+        if (m_activeEditor == o) m_activeEditor = nullptr;
+    });
     return editor;
 }
 
