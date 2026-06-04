@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v1.97.0 — Hàng tiêu đề bảng chữ trắng in đậm (Spec 16)
+
+- Hàng tiêu đề của bảng giờ hiển thị **chữ trắng in đậm** trên nền xanh đậm — nổi bật và dễ đọc hơn, đúng kiểu bảng chuẩn.
+
 ## v1.96.0 — Định dạng vùng thành bảng sọc màu (Spec 16)
 
 - Thêm **Chèn → "Định dạng là bảng"**: biến vùng đang chọn thành **bảng có hàng tiêu đề tô đậm** và **các hàng dữ liệu sọc xen kẽ hai màu** — dễ đọc theo dòng.

@@ -159,8 +159,15 @@ QVariant SpreadsheetModel::data(const QModelIndex &index, int role) const {
     }
     case Qt::TextAlignmentRole:
         return alignmentFlags(row, col);
-    case Qt::FontRole:
-        return fontFor(row, col);
+    case Qt::FontRole: {
+        QVariant fv = fontFor(row, col);
+        if (isTableHeader(row, col)) { // hàng tiêu đề bảng -> in đậm
+            QFont f = fv.isValid() ? fv.value<QFont>() : QFont();
+            f.setBold(true);
+            return f;
+        }
+        return fv;
+    }
     case Qt::BackgroundRole: {
         QString cbg = condColorFor(row, col, /*fg*/ false); // định dạng điều kiện đè màu nền
         if (!cbg.isEmpty()) return QColor(cbg);
@@ -175,6 +182,7 @@ QVariant SpreadsheetModel::data(const QModelIndex &index, int role) const {
     case Qt::ForegroundRole: {
         QString cfg = condColorFor(row, col, /*fg*/ true);
         if (!cfg.isEmpty()) return QColor(cfg);
+        if (isTableHeader(row, col)) return QColor(Qt::white); // chữ trắng trên nền tiêu đề đậm
         const Format &f = m_fmt[key(row, col)];
         auto it = f.constFind(QStringLiteral("color"));
         return it != f.constEnd() ? QColor(it->toString()) : QVariant();
@@ -527,6 +535,12 @@ QString SpreadsheetModel::tableColorAt(int row, int col) const {
         if (!hit.isEmpty()) c = hit;
     }
     return c;
+}
+
+bool SpreadsheetModel::isTableHeader(int row, int col) const {
+    for (const tbl::Table &t : m_tables)
+        if (t.header && row == t.top && col >= t.left && col <= t.right) return true;
+    return false;
 }
 
 void SpreadsheetModel::addIconSet(const cond::IconSet &is) {

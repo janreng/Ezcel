@@ -222,6 +222,7 @@ private:
     QString colorScaleColorAt(int row, int col) const; // màu nền nội suy; rỗng nếu không thuộc
     QVector<tbl::Table> m_tables;                 // bảng có cấu trúc (Spec 16)
     QString tableColorAt(int row, int col) const; // màu sọc bảng; rỗng nếu không thuộc
+    bool isTableHeader(int row, int col) const;   // ô có thuộc hàng tiêu đề của bảng?
     QVector<cond::IconSet> m_iconSets;           // bộ biểu tượng (Icon Set)
     QString iconColorAt(int row, int col) const; // màu chấm biểu tượng; rỗng nếu không thuộc
     QVector<sparkline::Spark> m_sparklines;      // sparkline (biểu đồ mini)
