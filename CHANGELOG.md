@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v2.4.0 — Tự xuống dòng trong ô (Spec 07)
+
+- Nhóm **Căn lề** thêm nút **"Xuống dòng"**: bật cho ô/vùng đang chọn để **chữ dài tự ngắt thành nhiều dòng** trong ô, hàng tự cao lên vừa đủ — khỏi bị che chữ.
+- Bật/tắt theo từng ô; bấm lại để tắt.
+
 ## v2.3.0 — Slicer: bộ lọc trực quan bằng nút bấm (Spec 54)
 
 - Thêm **Chèn → "Slicer"**: mở bảng nút bấm liệt kê các giá trị của cột đang chọn — **bấm bật/tắt từng giá trị** là lọc ngay (ẩn/hiện hàng tương ứng), trực quan và nhanh.

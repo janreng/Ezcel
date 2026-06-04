@@ -1443,6 +1443,11 @@ void MainWindow::buildRibbon()
     m_ribbon->addSmallButton(QStringLiteral("align_center"), QStringLiteral("Căn giữa"), [this] { applyFormatAttr(QStringLiteral("halign"), QStringLiteral("center")); });
     m_ribbon->addSmallButton(QStringLiteral("align_right"), QStringLiteral("Căn phải"), [this] { applyFormatAttr(QStringLiteral("halign"), QStringLiteral("right")); });
     m_ribbon->addSmallButton(QStringLiteral("merge"), QStringLiteral("Gộp ô"), [this] { toggleMergeSelection(); });
+    m_ribbon->addSmallButton(QStringLiteral("wrap_text"), QStringLiteral("Xuống dòng"), [this] {
+        toggleFormatAttr(QStringLiteral("wrap"));
+        int t, l, b, r;
+        if (selectionBox(t, l, b, r)) for (int row = t; row <= b; ++row) m_view->resizeRowToContents(row);
+    });
 
     m_ribbon->beginGroup(QStringLiteral("Số"));
     auto *numBox = new QComboBox(m_ribbon);

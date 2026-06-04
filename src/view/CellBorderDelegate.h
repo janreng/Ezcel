@@ -14,6 +14,7 @@ public:
     explicit CellBorderDelegate(QAbstractItemView *view, QObject *parent = nullptr);
     void paint(QPainter *painter, const QStyleOptionViewItem &option,
                const QModelIndex &index) const override;
+    QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override;
     QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,
                           const QModelIndex &index) const override;
     // Chặn commit-khi-mất-focus của QStyledItemDelegate khi đang sửa CÔNG THỨC và

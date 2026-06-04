@@ -5,7 +5,9 @@
 #include "model/SpreadsheetModel.h" // chỉ dùng hằng SpillEdgesRole
 
 #include <QAbstractItemView>
+#include <QTableView>
 #include <QPainter>
+#include <QFontMetrics>
 #include <QLineEdit>
 #include <QApplication>
 #include <QFocusEvent>
@@ -65,7 +67,11 @@ void CellBorderDelegate::paint(QPainter *painter, const QStyleOptionViewItem &op
         }
     }
 
-    QStyledItemDelegate::paint(painter, option, index);
+    // Tự xuống dòng (wrap): bật cờ WrapText để delegate mặc định vẽ chữ nhiều dòng.
+    QStyleOptionViewItem opt(option);
+    if (index.data(SpreadsheetModel::WrapRole).toBool())
+        opt.features |= QStyleOptionViewItem::WrapText;
+    QStyledItemDelegate::paint(painter, opt, index);
 
     // Chấm bộ biểu tượng (Icon Set) ở mép TRÁI ô — số căn phải nên không đè chữ.
     const QString iconColor = index.data(SpreadsheetModel::IconSetRole).toString();
@@ -175,4 +181,21 @@ void CellBorderDelegate::paint(QPainter *painter, const QStyleOptionViewItem &op
     // Lùi 1px để viền 2px nằm gọn trong ô, không bị xén.
     painter->drawRect(option.rect.adjusted(1, 1, -1, -1));
     painter->restore();
+}
+
+// Gợi ý kích thước: ô bật "tự xuống dòng" -> chiều cao đủ chứa chữ bao theo bề rộng cột.
+QSize CellBorderDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
+{
+    if (index.data(SpreadsheetModel::WrapRole).toBool()) {
+        const QString text = index.data(Qt::DisplayRole).toString();
+        int w = option.rect.width();
+        if (auto *tv = qobject_cast<QTableView *>(m_view)) w = tv->columnWidth(index.column());
+        w -= 6;
+        if (w > 10 && !text.isEmpty()) {
+            QFontMetrics fm(option.font);
+            const QRect br = fm.boundingRect(QRect(0, 0, w, 100000), Qt::TextWordWrap, text);
+            return QSize(w, br.height() + 6);
+        }
+    }
+    return QStyledItemDelegate::sizeHint(option, index);
 }

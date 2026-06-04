@@ -60,6 +60,9 @@ public:
     // Role: true nếu ô thuộc HÀNG TIÊU ĐỀ của một bảng (Spec 16) -> delegate vẽ nút lọc ▼.
     static constexpr int TableHeaderRole = Qt::UserRole + 5;
 
+    // Role: true nếu ô bật "tự xuống dòng" (wrap) -> delegate vẽ chữ nhiều dòng (Spec 07).
+    static constexpr int WrapRole = Qt::UserRole + 6;
+
     explicit SpreadsheetModel(QObject *parent = nullptr);
 
     // QAbstractTableModel
