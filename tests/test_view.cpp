@@ -85,6 +85,13 @@ int main(int argc, char **argv) {
         if (b) b->click();
         ok(clicked == 1, "click nut chay callback");
 
+        // Nút nhỏ (icon canh chu, xep 3 hang) — kieu Excel.
+        QToolButton *sb = rb.addSmallButton(QStringLiteral("cut"), QStringLiteral("Cắt"), [&clicked] { ++clicked; });
+        ok(sb != nullptr, "addSmallButton tra ve nut");
+        ok(sb && sb->toolButtonStyle() == Qt::ToolButtonTextBesideIcon, "nut nho icon canh chu");
+        if (sb) sb->click();
+        ok(clicked == 2, "click nut nho chay callback");
+
         // Nút thả menu giữ đúng QMenu được gắn (dropdown kiểu Excel).
         QMenu menu;
         menu.addAction(QStringLiteral("Mục 1"));

@@ -1,5 +1,11 @@
 # Lịch sử thay đổi
 
+## v1.94.0 — Bố cục dải lệnh gọn theo lưới 3 hàng (Spec 07)
+
+- **Sắp xếp lại nút theo lưới 3 hàng/cột** như bộ ứng dụng văn phòng: nút phụ thu nhỏ (biểu tượng + chữ nằm cạnh) xếp 3 cái một cột, chỉ vài nút chính để to (Dán, Định dạng có điều kiện, AutoSum, Bảng tổng hợp…).
+- Nhờ vậy mỗi thẻ **gọn hơn, chứa được nhiều lệnh hơn** trong cùng chiều ngang, nhìn cân đối — sát với giao diện chuẩn.
+- Dải lệnh **ôm sát chiều cao nội dung**, không chiếm thừa khoảng trống phía trên lưới.
+
 ## v1.93.0 — Thêm biểu tượng cho nút trên dải lệnh (Spec 07)
 
 - **Mọi nút trên dải lệnh nay đều có biểu tượng** rõ ràng (trước nhiều nút chỉ có chữ trông trống trải).
