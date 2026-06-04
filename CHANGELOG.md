@@ -1,5 +1,11 @@
 # Lịch sử thay đổi
 
+## v1.44.0 — Hàm cơ sở dữ liệu nâng cao: DGET, DVAR, DSTDEV... (Spec 27)
+
+- **DGET** — lấy đúng một giá trị duy nhất khớp tiêu chí (báo lỗi nếu không có hoặc có nhiều hơn một).
+- **DVAR, DVARP, DSTDEV, DSTDEVP** — tính phương sai và độ lệch chuẩn (mẫu hoặc tổng thể) trên bản ghi khớp tiêu chí.
+- Hoàn thiện bộ hàm cơ sở dữ liệu.
+
 ## v1.43.0 — Hàm cơ sở dữ liệu: DSUM, DCOUNT, DAVERAGE... (Spec 27)
 
 - Thêm nhóm hàm **CSDL**: **DSUM, DCOUNT, DCOUNTA, DAVERAGE, DMAX, DMIN, DPRODUCT**.

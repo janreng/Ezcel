@@ -30,6 +30,8 @@ static QVariant resolver(int row, int col) {
         // Tieu chi N1:N2 (Loai=A) va O1:O2 (Tien>15)
         {"0,13", "Loai"}, {"1,13", "A"},
         {"0,14", "Tien"}, {"1,14", ">15"},
+        // Tieu chi P1:P2 (Tien=10) -> khop dung 1 ban ghi
+        {"0,15", "Tien"}, {"1,15", "10"},
     };
     auto it = cells.constFind(QString("%1,%2").arg(row).arg(col));
     return it == cells.constEnd() ? QVariant(QString()) : QVariant(it.value());
@@ -549,6 +551,13 @@ int main() {
     checkNum("=DMIN(K1:L5,\"Tien\",N1:N2)", 10);
     checkNum("=DSUM(K1:L5,\"Tien\",O1:O2)", 90);      // Tien>15 -> 20+30+40
     checkNum("=DSUM(K1:L5,2,N1:N2)", 40);             // field theo so cot (2)
+    // DGET (P1:P2 = Tien=10 -> dung 1 ban ghi), DVAR/DSTDEV (Loai=A -> 10,30)
+    checkStr("=DGET(K1:L5,\"Loai\",P1:P2)", "A");
+    checkNum("=DGET(K1:L5,\"Tien\",P1:P2)", 10);
+    checkStr("=IFERROR(DGET(K1:L5,\"Tien\",N1:N2),\"nhieu\")", "nhieu"); // 2 khop -> #NUM
+    checkNum("=DVAR(K1:L5,\"Tien\",N1:N2)", 200);     // ((10-20)^2+(30-20)^2)/1
+    checkNum("=DVARP(K1:L5,\"Tien\",N1:N2)", 100);    // /2
+    checkNum("=DSTDEVP(K1:L5,\"Tien\",N1:N2)", 10);   // sqrt(100)
 
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);
     return g_fail == 0 ? 0 : 1;

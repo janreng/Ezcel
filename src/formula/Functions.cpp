@@ -247,6 +247,26 @@ QHash<QString, Fn> &fnMap() {
         r["DMAX"] = [](const Args &a) { auto n = dNumbers(dQuery(a, "DMAX")); if (n.empty()) return Value::number(0); return Value::number(*std::max_element(n.begin(), n.end())); };
         r["DMIN"] = [](const Args &a) { auto n = dNumbers(dQuery(a, "DMIN")); if (n.empty()) return Value::number(0); return Value::number(*std::min_element(n.begin(), n.end())); };
         r["DPRODUCT"] = [](const Args &a) { auto n = dNumbers(dQuery(a, "DPRODUCT")); double p = 1.0; for (double x : n) p *= x; return Value::number(n.empty() ? 0.0 : p); };
+        // DGET: lấy DUY NHẤT một giá trị khớp; 0 khớp -> #VALUE, >1 khớp -> #NUM.
+        r["DGET"] = [](const Args &a) {
+            auto vs = dQuery(a, "DGET");
+            if (vs.empty()) throw FormulaError(QStringLiteral("DGET: không có bản ghi khớp"), ERR_VALUE);
+            if (vs.size() > 1) throw FormulaError(QStringLiteral("DGET: nhiều hơn một bản ghi khớp"), ERR_NUM);
+            return vs.front();
+        };
+        // DVAR/DVARP/DSTDEV/DSTDEVP: phương sai/độ lệch chuẩn mẫu (n-1) hoặc tổng thể (n).
+        auto dVarCore = [](const Args &a, const char *fn, bool sample) {
+            auto n = dNumbers(dQuery(a, fn));
+            const int cnt = int(n.size());
+            if (cnt < (sample ? 2 : 1)) throw FormulaError(QString::fromLatin1(fn) + QStringLiteral(": không đủ số"), ERR_DIV0);
+            double mean = sumv(n) / cnt, s = 0;
+            for (double x : n) s += (x - mean) * (x - mean);
+            return s / (sample ? (cnt - 1) : cnt);
+        };
+        r["DVAR"]    = [dVarCore](const Args &a) { return Value::number(dVarCore(a, "DVAR", true)); };
+        r["DVARP"]   = [dVarCore](const Args &a) { return Value::number(dVarCore(a, "DVARP", false)); };
+        r["DSTDEV"]  = [dVarCore](const Args &a) { return Value::number(std::sqrt(dVarCore(a, "DSTDEV", true))); };
+        r["DSTDEVP"] = [dVarCore](const Args &a) { return Value::number(std::sqrt(dVarCore(a, "DSTDEVP", false))); };
         // --- Hàm biểu thức chính quy (Regex, Spec 22.2) ---
         // case_sensitivity: 0 = phân biệt hoa/thường (mặc định), 1 = không phân biệt.
         auto reOpts = [](const Args &a, int idx) {
