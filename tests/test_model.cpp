@@ -451,6 +451,13 @@ int main(int argc, char **argv) {
         // Dich trong, Add -> coi dich = 0.
         auto de = pasteops::applyOperation({{""}}, {{"7"}}, Op::Add, false);
         ok(de[0][0] == "7", "Dich trong coi nhu 0");
+
+        // applyConstant: ap phep tinh voi hang so
+        ok(pasteops::applyConstant("10", Op::Add, 5) == "15", "applyConstant +5");
+        ok(pasteops::applyConstant("10", Op::Multiply, 2) == "20", "applyConstant x2");
+        ok(pasteops::applyConstant("10", Op::Divide, 0) == "10", "applyConstant chia 0 giu nguyen");
+        ok(pasteops::applyConstant("abc", Op::Add, 5) == "abc", "applyConstant text giu nguyen");
+        ok(pasteops::applyConstant("", Op::Add, 5) == "", "applyConstant o rong giu nguyen");
     }
 
     // --- thong ke vung chon ---

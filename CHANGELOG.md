@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v1.55.0 — Áp phép tính với hằng số lên vùng chọn (Spec 13)
+
+- **Thêm "Áp phép tính với hằng số..."** trong menu Dữ liệu: cộng, trừ, nhân hoặc chia tất cả các ô số trong vùng chọn với một số nhất định.
+- Chỉ tác động ô số; bỏ qua ô công thức và ô văn bản. Chia cho 0 giữ nguyên giá trị.
+
 ## v1.54.0 — Đảo ngược thứ tự cột (Spec 15)
 
 - **Thêm "Đảo ngược thứ tự cột"** trong menu Dữ liệu: lật ngược thứ tự các cột trong vùng chọn (cột đầu thành cột cuối).

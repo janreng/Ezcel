@@ -54,6 +54,20 @@ QVector<QVector<QString>> applyOperation(const QVector<QVector<QString>> &dest,
     return out;
 }
 
+QString applyConstant(const QString &cell, Op op, double k) {
+    double x = 0.0;
+    if (!toNum(cell, x)) return cell;       // không phải số -> giữ nguyên
+    double res = x;
+    switch (op) {
+    case Op::Add:      res = x + k; break;
+    case Op::Subtract: res = x - k; break;
+    case Op::Multiply: res = x * k; break;
+    case Op::Divide:   if (k == 0.0) return cell; res = x / k; break;
+    default:           return cell;
+    }
+    return numStr(res);
+}
+
 QVector<QVector<QString>> transpose(const QVector<QVector<QString>> &block) {
     if (block.isEmpty()) return {};
     int cols = 0;

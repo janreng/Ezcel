@@ -21,4 +21,8 @@ QVector<QVector<QString>> applyOperation(const QVector<QVector<QString>> &dest,
                                          const QVector<QVector<QString>> &src,
                                          Op op, bool skipBlanks);
 
+// Áp một phép tính với HẰNG SỐ `k` lên một ô: nếu ô là số -> trả `cell op k` dạng chuỗi;
+// nếu không phải số (hoặc rỗng) -> giữ nguyên. Chia cho 0 -> giữ nguyên.
+QString applyConstant(const QString &cell, Op op, double k);
+
 } // namespace pasteops

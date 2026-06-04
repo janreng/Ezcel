@@ -714,6 +714,7 @@ void MainWindow::buildMenus()
     data->addAction(QStringLiteral("Đảo ngược thứ tự hàng"), this, &MainWindow::reverseRowsSelection);
     data->addAction(QStringLiteral("Đảo ngược thứ tự cột"), this, &MainWindow::reverseColsSelection);
     data->addAction(QStringLiteral("Chọn ô trùng giá trị"), this, &MainWindow::selectDuplicates);
+    data->addAction(QStringLiteral("Áp phép tính với hằng số..."), this, &MainWindow::applyConstantSelection);
     data->addAction(QStringLiteral("Điền ô trống bằng giá trị trên"), this, &MainWindow::fillBlanksDownSelection);
     data->addAction(QStringLiteral("AutoSum (∑)"), QKeySequence(QStringLiteral("Alt+=")), this, [this] {
         QModelIndex idx = m_view->currentIndex();
@@ -1308,6 +1309,32 @@ void MainWindow::reverseRowsSelection()
         for (int c = l; c <= r; ++c)
             m_model->setData(m_model->index(t + i, c), rev[i][c - l], Qt::EditRole);
     statusBar()->showMessage(QStringLiteral("Đã đảo ngược %1 hàng").arg(rev.size()), 2500);
+}
+
+// Áp một phép tính với hằng số lên các ô SỐ trong vùng chọn (Spec 13).
+void MainWindow::applyConstantSelection()
+{
+    int t, l, b, r;
+    if (!selectionBox(t, l, b, r)) return;
+    bool ok = false;
+    const QStringList ops{QStringLiteral("Cộng (+)"), QStringLiteral("Trừ (−)"),
+                          QStringLiteral("Nhân (×)"), QStringLiteral("Chia (÷)")};
+    const QString pick = QInputDialog::getItem(this, QStringLiteral("Áp phép tính"),
+        QStringLiteral("Phép tính:"), ops, 0, false, &ok);
+    if (!ok) return;
+    const auto op = static_cast<pasteops::Op>(ops.indexOf(pick) + 1); // +1: bỏ Op::None
+    const double k = QInputDialog::getDouble(this, QStringLiteral("Áp phép tính"),
+        QStringLiteral("Hằng số:"), 0, -1e12, 1e12, 6, &ok);
+    if (!ok) return;
+    int n = 0;
+    for (int row = t; row <= b; ++row)
+        for (int c = l; c <= r; ++c) {
+            const QString raw = m_model->data(m_model->index(row, c), Qt::EditRole).toString();
+            if (raw.startsWith(QLatin1Char('='))) continue; // bỏ công thức
+            const QString nw = pasteops::applyConstant(raw, op, k);
+            if (nw != raw) { m_model->setData(m_model->index(row, c), nw, Qt::EditRole); ++n; }
+        }
+    statusBar()->showMessage(QStringLiteral("Đã áp phép tính lên %1 ô").arg(n), 2500);
 }
 
 // Đảo ngược thứ tự cột trong vùng chọn (Spec 15): cột đầu thành cuối.
