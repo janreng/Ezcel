@@ -103,6 +103,16 @@ int main(int argc, char **argv) {
         ok(jc[0] == "Nguyen, Van, A", "separator nhieu ky tu");
     }
 
+    // --- duplicateValueIndices ---
+    {
+        QVector<QString> vals = {"a", "b", "A", "c", "b", ""};
+        auto d = datatools::duplicateValueIndices(vals);
+        // 'a'(0) & 'A'(2) trung (ci); 'b'(1) & 'b'(4) trung -> indices 0,1,2,4
+        ok(d.size() == 4 && d.contains(0) && d.contains(2) && d.contains(1) && d.contains(4), "tim 4 o trung (ci)");
+        ok(!d.contains(3) && !d.contains(5), "c don nhat + o rong khong tinh");
+        ok(datatools::duplicateValueIndices({"x", "y", "z"}).isEmpty(), "khong trung -> rong");
+    }
+
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);
     return g_fail == 0 ? 0 : 1;
 }

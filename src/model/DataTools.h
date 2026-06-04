@@ -41,4 +41,8 @@ QVector<QVector<QString>> fillBlanksDown(const QVector<QVector<QString>> &rows);
 // Nếu skipEmpty=true thì bỏ qua ô rỗng khi ghép. Trả 1 chuỗi cho mỗi hàng.
 QStringList joinColumns(const QVector<QVector<QString>> &rows, const QString &sep, bool skipEmpty);
 
+// Trả chỉ số các phần tử có giá trị XUẤT HIỆN NHIỀU HƠN MỘT LẦN (tất cả các lần lặp).
+// So sánh không phân biệt hoa/thường; bỏ qua ô rỗng. Dùng để tô/chọn ô trùng.
+QVector<int> duplicateValueIndices(const QVector<QString> &values);
+
 } // namespace datatools

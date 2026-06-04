@@ -712,6 +712,7 @@ void MainWindow::buildMenus()
     });
     data->addAction(QStringLiteral("Sắp xếp nhiều cấp..."), this, &MainWindow::sortMultiLevel);
     data->addAction(QStringLiteral("Đảo ngược thứ tự hàng"), this, &MainWindow::reverseRowsSelection);
+    data->addAction(QStringLiteral("Chọn ô trùng giá trị"), this, &MainWindow::selectDuplicates);
     data->addAction(QStringLiteral("Điền ô trống bằng giá trị trên"), this, &MainWindow::fillBlanksDownSelection);
     data->addAction(QStringLiteral("AutoSum (∑)"), QKeySequence(QStringLiteral("Alt+=")), this, [this] {
         QModelIndex idx = m_view->currentIndex();
@@ -1325,6 +1326,24 @@ void MainWindow::fillBlanksDownSelection()
         for (int c = l; c <= r; ++c)
             if (filled[i][c - l] != block[i][c - l]) { m_model->setData(m_model->index(t + i, c), filled[i][c - l], Qt::EditRole); ++n; }
     statusBar()->showMessage(QStringLiteral("Đã điền %1 ô trống").arg(n), 2500);
+}
+
+// Chọn các ô trùng giá trị trong cột của vùng chọn (Spec 15/27).
+void MainWindow::selectDuplicates()
+{
+    int t, l, b, r;
+    if (!selectionBox(t, l, b, r)) return;
+    QModelIndex cur = m_view->currentIndex();
+    const int col = cur.isValid() ? qBound(l, cur.column(), r) : l;
+    QVector<QString> vals;
+    for (int row = t; row <= b; ++row)
+        vals.push_back(m_model->data(m_model->index(row, col), Qt::DisplayRole).toString());
+    const auto dup = datatools::duplicateValueIndices(vals);
+    if (dup.isEmpty()) { statusBar()->showMessage(QStringLiteral("Không có ô trùng giá trị"), 3000); return; }
+    QItemSelection sel;
+    for (int i : dup) { QModelIndex idx = m_model->index(t + i, col); sel.select(idx, idx); }
+    m_view->selectionModel()->select(sel, QItemSelectionModel::ClearAndSelect);
+    statusBar()->showMessage(QStringLiteral("Đã chọn %1 ô trùng giá trị").arg(dup.size()), 3000);
 }
 
 // Gộp các cột trong vùng chọn thành một cột (Spec 27): ngược với tách cột.

@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v1.53.0 — Chọn ô trùng giá trị (Spec 15)
+
+- **Thêm "Chọn ô trùng giá trị"** trong menu Dữ liệu: tự đánh dấu tất cả các ô có giá trị xuất hiện nhiều hơn một lần trong cột đang chọn.
+- So sánh không phân biệt hoa/thường; bỏ qua ô trống. Giúp rà soát trùng lặp nhanh trước khi xử lý.
+
 ## v1.52.0 — Gộp nhiều cột thành một (Spec 27)
 
 - **Thêm "Gộp cột thành một..."** trong menu Dữ liệu: nối nội dung nhiều cột của mỗi hàng thành một chuỗi, ngăn cách bằng dấu tùy chọn.

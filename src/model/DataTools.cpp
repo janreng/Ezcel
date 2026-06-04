@@ -1,6 +1,7 @@
 // Công cụ dữ liệu (Spec 27).
 #include "model/DataTools.h"
 #include <QSet>
+#include <QHash>
 #include <limits>
 
 namespace datatools {
@@ -125,6 +126,20 @@ QStringList joinColumns(const QVector<QVector<QString>> &rows, const QString &se
             parts << cell;
         }
         out << parts.join(sep);
+    }
+    return out;
+}
+
+QVector<int> duplicateValueIndices(const QVector<QString> &values) {
+    QHash<QString, int> counts;
+    for (const QString &v : values) {
+        const QString k = v.trimmed().toLower();
+        if (!k.isEmpty()) ++counts[k];
+    }
+    QVector<int> out;
+    for (int i = 0; i < values.size(); ++i) {
+        const QString k = values[i].trimmed().toLower();
+        if (!k.isEmpty() && counts.value(k) > 1) out.push_back(i);
     }
     return out;
 }
