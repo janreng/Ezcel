@@ -12,6 +12,7 @@ struct Result {
     double avg = 0;     // trung bình các ô số (0 nếu không có số)
     double min = 0;     // giá trị nhỏ nhất (0 nếu không có số)
     double max = 0;     // giá trị lớn nhất (0 nếu không có số)
+    double median = 0;  // trung vị các ô số (0 nếu không có số)
 };
 
 // Tính từ danh sách giá trị hiển thị của các ô đang chọn.

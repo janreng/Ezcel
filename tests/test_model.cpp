@@ -474,6 +474,14 @@ int main(int argc, char **argv) {
         ok(e.min == 0 && e.max == 0, "khong co so -> min/max 0");
         stats::Result neg = stats::compute({"-5", "-1", "-9"});
         ok(neg.min == -9.0 && neg.max == -1.0, "so am: min -9 max -1");
+        ok(r.median == 20.0, "trung vi le -> 20 (10,20,30)");
+        stats::Result m4 = stats::compute({"1", "2", "3", "4"});
+        ok(m4.median == 2.5, "trung vi chan -> trung binh 2 giua (2.5)");
+        stats::Result m1 = stats::compute({"7"});
+        ok(m1.median == 7.0, "1 so -> trung vi = chinh no");
+        ok(e.median == 0, "khong co so -> trung vi 0");
+        stats::Result mu = stats::compute({"5", "1", "3"}); // chua sap xep
+        ok(mu.median == 3.0, "trung vi tu sap xep (1,3,5 -> 3)");
     }
 
     // --- AutoSum: dem run so cuoi danh sach ---

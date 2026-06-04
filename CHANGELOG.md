@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v1.56.0 — Hiện trung vị ở thanh trạng thái (Spec 11)
+
+- **Thanh trạng thái** nay hiển thị thêm **Trung vị** của vùng chọn, bên cạnh Đếm, Tổng, Trung bình, Nhỏ nhất và Lớn nhất.
+- Tự sắp xếp các ô số để tính; rất tiện để xem giá trị giữa mà không cần công thức.
+
 ## v1.55.0 — Áp phép tính với hằng số lên vùng chọn (Spec 13)
 
 - **Thêm "Áp phép tính với hằng số..."** trong menu Dữ liệu: cộng, trừ, nhân hoặc chia tất cả các ô số trong vùng chọn với một số nhất định.
