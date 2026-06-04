@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v1.50.0 — Đảo ngược thứ tự hàng (Spec 15)
+
+- **Thêm "Đảo ngược thứ tự hàng"** trong menu Dữ liệu: lật ngược thứ tự các hàng trong vùng chọn (hàng đầu thành hàng cuối).
+- Hữu ích khi cần xem danh sách theo chiều ngược mà không phải sắp xếp lại.
+
 ## v1.49.0 — Hàm ngày làm việc tùy chỉnh cuối tuần (Spec 12)
 
 - **NETWORKDAYSINTL(ngày đầu, ngày cuối, [mã cuối tuần], [ngày nghỉ])** — đếm số ngày làm việc, cho phép chọn ngày nào trong tuần là cuối tuần.

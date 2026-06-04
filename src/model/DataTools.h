@@ -30,4 +30,7 @@ QVector<QVector<QString>> subtotal(const QVector<QVector<QString>> &rows,
                                    int groupCol, const QVector<int> &aggCols, Agg fn,
                                    const QString &totalLabel, const QString &grandLabel);
 
+// Đảo ngược thứ tự các HÀNG của khối (hàng đầu thành cuối). Giữ nguyên thứ tự cột.
+QVector<QVector<QString>> reverseRows(const QVector<QVector<QString>> &rows);
+
 } // namespace datatools

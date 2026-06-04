@@ -62,6 +62,15 @@ int main(int argc, char **argv) {
 
     ok(datatools::subtotal({}, 0, {1}, datatools::Agg::Sum, "T", "G").isEmpty(), "rong -> rong");
 
+    // --- reverseRows ---
+    {
+        QVector<QVector<QString>> blk = {{"a", "1"}, {"b", "2"}, {"c", "3"}};
+        auto rev = datatools::reverseRows(blk);
+        ok(rev.size() == 3 && rev[0][0] == "c" && rev[2][0] == "a", "reverseRows dao hang");
+        ok(rev[0][1] == "3" && rev[1][0] == "b", "reverseRows giu nguyen cot");
+        ok(datatools::reverseRows({}).isEmpty(), "reverse rong -> rong");
+    }
+
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);
     return g_fail == 0 ? 0 : 1;
 }

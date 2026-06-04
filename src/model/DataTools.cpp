@@ -108,4 +108,11 @@ QVector<QVector<QString>> subtotal(const QVector<QVector<QString>> &rows,
     return out;
 }
 
+QVector<QVector<QString>> reverseRows(const QVector<QVector<QString>> &rows) {
+    QVector<QVector<QString>> out;
+    out.reserve(rows.size());
+    for (int i = rows.size() - 1; i >= 0; --i) out.push_back(rows[i]);
+    return out;
+}
+
 } // namespace datatools

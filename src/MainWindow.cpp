@@ -711,6 +711,7 @@ void MainWindow::buildMenus()
         m_model->sortRange(t, l, b, r, qBound(l, kc, r), false);
     });
     data->addAction(QStringLiteral("Sắp xếp nhiều cấp..."), this, &MainWindow::sortMultiLevel);
+    data->addAction(QStringLiteral("Đảo ngược thứ tự hàng"), this, &MainWindow::reverseRowsSelection);
     data->addAction(QStringLiteral("AutoSum (∑)"), QKeySequence(QStringLiteral("Alt+=")), this, [this] {
         QModelIndex idx = m_view->currentIndex();
         if (!idx.isValid()) return;
@@ -1285,6 +1286,24 @@ void MainWindow::fillSeries()
     if (vertical) for (int c = l; c <= r; ++c) fillLine(t, c, b - t + 1, true);
     else          for (int row = t; row <= b; ++row) fillLine(row, l, r - l + 1, false);
     statusBar()->showMessage(QStringLiteral("Đã điền chuỗi"), 2500);
+}
+
+// Đảo ngược thứ tự hàng trong vùng chọn (Spec 15): hàng đầu thành cuối.
+void MainWindow::reverseRowsSelection()
+{
+    int t, l, b, r;
+    if (!selectionBox(t, l, b, r) || b <= t) { statusBar()->showMessage(QStringLiteral("Hãy chọn từ 2 hàng trở lên"), 2500); return; }
+    QVector<QVector<QString>> block;
+    for (int row = t; row <= b; ++row) {
+        QVector<QString> line;
+        for (int c = l; c <= r; ++c) line.push_back(m_model->data(m_model->index(row, c), Qt::EditRole).toString());
+        block.push_back(line);
+    }
+    const auto rev = datatools::reverseRows(block);
+    for (int i = 0; i < rev.size(); ++i)
+        for (int c = l; c <= r; ++c)
+            m_model->setData(m_model->index(t + i, c), rev[i][c - l], Qt::EditRole);
+    statusBar()->showMessage(QStringLiteral("Đã đảo ngược %1 hàng").arg(rev.size()), 2500);
 }
 
 // Đổi chữ hoa/thường cho vùng chọn (Spec 05/30): chỉ đổi ô là văn bản, bỏ qua công thức.
