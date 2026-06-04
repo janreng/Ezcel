@@ -115,6 +115,20 @@ QVector<QVector<QString>> reverseRows(const QVector<QVector<QString>> &rows) {
     return out;
 }
 
+QStringList joinColumns(const QVector<QVector<QString>> &rows, const QString &sep, bool skipEmpty) {
+    QStringList out;
+    out.reserve(rows.size());
+    for (const auto &row : rows) {
+        QStringList parts;
+        for (const QString &cell : row) {
+            if (skipEmpty && cell.trimmed().isEmpty()) continue;
+            parts << cell;
+        }
+        out << parts.join(sep);
+    }
+    return out;
+}
+
 QVector<QVector<QString>> fillBlanksDown(const QVector<QVector<QString>> &rows) {
     QVector<QVector<QString>> out = rows;
     int width = 0;

@@ -51,6 +51,7 @@ private slots:
     void cleanSelection();    // bỏ ký tự không in được vùng chọn (Spec 27)
     void reverseRowsSelection(); // đảo ngược thứ tự hàng vùng chọn (Spec 15)
     void fillBlanksDownSelection(); // điền ô trống bằng giá trị trên (Spec 27)
+    void joinColumnsSelection(); // gộp các cột thành một (Spec 27)
     void flashFill();         // tự điền theo mẫu (Spec 05)
     void pickFromList();      // chọn từ danh sách trong cột (Alt+Down, Spec 05)
     void filterByValues();    // lọc theo giá trị chọn trong cột (Spec 15)

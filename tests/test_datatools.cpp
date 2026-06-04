@@ -91,6 +91,18 @@ int main(int argc, char **argv) {
         ok(f2[0][0].isEmpty() && f2[1][0] == "x", "o trong dau cot giu trong");
     }
 
+    // --- joinColumns ---
+    {
+        QVector<QVector<QString>> blk = {{"Nguyen", "Van", "A"}, {"Tran", "", "B"}};
+        auto j = datatools::joinColumns(blk, " ", false);
+        ok(j.size() == 2 && j[0] == "Nguyen Van A", "join 3 cot");
+        ok(j[1] == "Tran  B", "giu o trong -> 2 dau cach");
+        auto js = datatools::joinColumns(blk, " ", true);
+        ok(js[1] == "Tran B", "skipEmpty bo o trong");
+        auto jc = datatools::joinColumns(blk, ", ", false);
+        ok(jc[0] == "Nguyen, Van, A", "separator nhieu ky tu");
+    }
+
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);
     return g_fail == 0 ? 0 : 1;
 }

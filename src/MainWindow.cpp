@@ -776,6 +776,7 @@ void MainWindow::buildMenus()
     data->addAction(QStringLiteral("Lọc tùy chỉnh (2 điều kiện)..."), this, &MainWindow::customFilter);
     data->addAction(QStringLiteral("Xóa hàng trùng"), this, &MainWindow::removeDuplicates);
     data->addAction(QStringLiteral("Tách cột theo dấu phân cách..."), this, &MainWindow::textToColumns);
+    data->addAction(QStringLiteral("Gộp cột thành một..."), this, &MainWindow::joinColumnsSelection);
     data->addAction(QStringLiteral("Tổng phụ theo nhóm..."), this, &MainWindow::subtotalRange);
     data->addSeparator();
     {
@@ -1324,6 +1325,31 @@ void MainWindow::fillBlanksDownSelection()
         for (int c = l; c <= r; ++c)
             if (filled[i][c - l] != block[i][c - l]) { m_model->setData(m_model->index(t + i, c), filled[i][c - l], Qt::EditRole); ++n; }
     statusBar()->showMessage(QStringLiteral("Đã điền %1 ô trống").arg(n), 2500);
+}
+
+// Gộp các cột trong vùng chọn thành một cột (Spec 27): ngược với tách cột.
+void MainWindow::joinColumnsSelection()
+{
+    int t, l, b, r;
+    if (!selectionBox(t, l, b, r) || r <= l) { statusBar()->showMessage(QStringLiteral("Hãy chọn từ 2 cột trở lên"), 2500); return; }
+    bool ok = false;
+    const QString sep = QInputDialog::getText(this, QStringLiteral("Gộp cột"),
+        QStringLiteral("Dấu ngăn giữa các cột (vd dấu cách, , hoặc -):"),
+        QLineEdit::Normal, QStringLiteral(" "), &ok);
+    if (!ok) return;
+
+    QVector<QVector<QString>> block;
+    for (int row = t; row <= b; ++row) {
+        QVector<QString> line;
+        for (int c = l; c <= r; ++c) line.push_back(m_model->data(m_model->index(row, c), Qt::EditRole).toString());
+        block.push_back(line);
+    }
+    const QStringList joined = datatools::joinColumns(block, sep, /*skipEmpty*/ true);
+    for (int i = 0; i < joined.size(); ++i) {
+        m_model->setData(m_model->index(t + i, l), joined[i], Qt::EditRole);          // kết quả vào cột đầu
+        for (int c = l + 1; c <= r; ++c) m_model->setData(m_model->index(t + i, c), QString(), Qt::EditRole); // xóa cột còn lại
+    }
+    statusBar()->showMessage(QStringLiteral("Đã gộp %1 cột vào cột đầu").arg(r - l + 1), 3000);
 }
 
 // Đổi chữ hoa/thường cho vùng chọn (Spec 05/30): chỉ đổi ô là văn bản, bỏ qua công thức.

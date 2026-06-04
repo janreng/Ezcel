@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v1.52.0 — Gộp nhiều cột thành một (Spec 27)
+
+- **Thêm "Gộp cột thành một..."** trong menu Dữ liệu: nối nội dung nhiều cột của mỗi hàng thành một chuỗi, ngăn cách bằng dấu tùy chọn.
+- Là thao tác ngược của "Tách cột"; tự bỏ qua các ô trống khi ghép. Kết quả ghi vào cột đầu tiên.
+
 ## v1.51.0 — Điền ô trống bằng giá trị phía trên (Spec 27)
 
 - **Thêm "Điền ô trống bằng giá trị trên"** trong menu Dữ liệu: tự điền các ô trống bằng giá trị không rỗng gần nhất phía trên (theo từng cột).

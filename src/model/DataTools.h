@@ -37,4 +37,8 @@ QVector<QVector<QString>> reverseRows(const QVector<QVector<QString>> &rows);
 // khi dữ liệu xuất ra chỉ ghi nhãn nhóm ở hàng đầu mỗi nhóm. Trả khối đã điền.
 QVector<QVector<QString>> fillBlanksDown(const QVector<QVector<QString>> &rows);
 
+// Gộp các cột của mỗi hàng thành MỘT chuỗi, ngăn bằng `sep` (ngược với tách cột).
+// Nếu skipEmpty=true thì bỏ qua ô rỗng khi ghép. Trả 1 chuỗi cho mỗi hàng.
+QStringList joinColumns(const QVector<QVector<QString>> &rows, const QString &sep, bool skipEmpty);
+
 } // namespace datatools
