@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v1.45.0 — Đổi chữ hoa/thường cho vùng chọn (Spec 05)
+
+- **Thêm menu "Đổi chữ hoa/thường"** trong menu Sửa: đổi nhanh nội dung vùng chọn sang **CHỮ HOA**, **chữ thường**, hoặc **Viết Hoa Đầu Từ**.
+- Chỉ tác động lên ô văn bản; ô công thức được giữ nguyên.
+
 ## v1.44.0 — Hàm cơ sở dữ liệu nâng cao: DGET, DVAR, DSTDEV... (Spec 27)
 
 - **DGET** — lấy đúng một giá trị duy nhất khớp tiêu chí (báo lỗi nếu không có hoặc có nhiều hơn một).

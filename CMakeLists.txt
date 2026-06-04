@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
-project(Ezcel VERSION 1.44.0 LANGUAGES CXX)
+project(Ezcel VERSION 1.45.0 LANGUAGES CXX)
 
 # Bản port C++ của Ezcel (gốc Python/PySide6). Dùng Qt6 Widgets + MinGW.
 set(CMAKE_CXX_STANDARD 20)
@@ -54,7 +54,8 @@ add_library(ezcel_model STATIC src/model/SpreadsheetModel.cpp src/model/Spreadsh
     src/model/RefCycle.cpp src/model/RefCycle.h
     src/model/NameValidate.cpp src/model/NameValidate.h
     src/model/RangeParse.cpp src/model/RangeParse.h
-    src/model/SeriesGen.cpp src/model/SeriesGen.h)
+    src/model/SeriesGen.cpp src/model/SeriesGen.h
+    src/model/TextCase.cpp src/model/TextCase.h)
 target_include_directories(ezcel_model PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(ezcel_model PUBLIC ezcel_formula ezcel_sort Qt6::Core Qt6::Gui)
 
@@ -175,6 +176,10 @@ add_executable(test_seriesgen tests/test_seriesgen.cpp src/model/SeriesGen.cpp)
 target_include_directories(test_seriesgen PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(test_seriesgen PRIVATE Qt6::Core)
 
+add_executable(test_textcase tests/test_textcase.cpp src/model/TextCase.cpp)
+target_include_directories(test_textcase PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_link_libraries(test_textcase PRIVATE Qt6::Core)
+
 enable_testing()
 add_test(NAME formula COMMAND test_formula)
 add_test(NAME model COMMAND test_model)
@@ -199,6 +204,7 @@ add_test(NAME refcycle COMMAND test_refcycle)
 add_test(NAME namevalidate COMMAND test_namevalidate)
 add_test(NAME rangeparse COMMAND test_rangeparse)
 add_test(NAME seriesgen COMMAND test_seriesgen)
+add_test(NAME textcase COMMAND test_textcase)
 
 # --- Sort (sắp xếp vùng dữ liệu) — module logic thuần (Qt Core) -> static lib + test.
 add_library(ezcel_sort STATIC src/model/Sort.cpp src/model/Sort.h)

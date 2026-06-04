@@ -12,6 +12,7 @@
 #include "model/NameValidate.h"
 #include "model/RangeParse.h"
 #include "model/SeriesGen.h"
+#include "model/TextCase.h"
 #include "model/Filter.h"
 #include "model/PasteOps.h"
 #include "model/GotoSpecial.h"
@@ -537,6 +538,12 @@ void MainWindow::buildMenus()
     edit->addAction(i18n::tr("edit_fill_down"), QKeySequence(QStringLiteral("Ctrl+D")), this, &MainWindow::fillDown);
     edit->addAction(i18n::tr("edit_fill_right"), QKeySequence(QStringLiteral("Ctrl+R")), this, &MainWindow::fillRight);
     edit->addAction(QStringLiteral("Điền chuỗi..."), this, &MainWindow::fillSeries);
+    {
+        QMenu *caseSub = edit->addMenu(QStringLiteral("Đổi chữ hoa/thường"));
+        caseSub->addAction(QStringLiteral("CHỮ HOA"), this, [this] { changeCase(0); });
+        caseSub->addAction(QStringLiteral("chữ thường"), this, [this] { changeCase(1); });
+        caseSub->addAction(QStringLiteral("Viết Hoa Đầu Từ"), this, [this] { changeCase(2); });
+    }
     edit->addAction(i18n::tr("edit_merge"), this, &MainWindow::toggleMergeSelection);
     edit->addSeparator();
     edit->addAction(i18n::tr("edit_find"), QKeySequence::Find, this, &MainWindow::showFindReplace);
@@ -1276,6 +1283,23 @@ void MainWindow::fillSeries()
     if (vertical) for (int c = l; c <= r; ++c) fillLine(t, c, b - t + 1, true);
     else          for (int row = t; row <= b; ++row) fillLine(row, l, r - l + 1, false);
     statusBar()->showMessage(QStringLiteral("Đã điền chuỗi"), 2500);
+}
+
+// Đổi chữ hoa/thường cho vùng chọn (Spec 05/30): chỉ đổi ô là văn bản, bỏ qua công thức.
+void MainWindow::changeCase(int mode)
+{
+    int t, l, b, r;
+    if (!selectionBox(t, l, b, r)) return;
+    const auto m = static_cast<textcase::Mode>(mode);
+    int changed = 0;
+    for (int row = t; row <= b; ++row)
+        for (int c = l; c <= r; ++c) {
+            const QString raw = m_model->data(m_model->index(row, c), Qt::EditRole).toString();
+            if (raw.isEmpty() || raw.startsWith(QLatin1Char('='))) continue; // bỏ công thức
+            const QString nw = textcase::convert(raw, m);
+            if (nw != raw) { m_model->setData(m_model->index(row, c), nw, Qt::EditRole); ++changed; }
+        }
+    statusBar()->showMessage(QStringLiteral("Đã đổi kiểu chữ %1 ô").arg(changed), 2500);
 }
 
 void MainWindow::toggleMergeSelection()
