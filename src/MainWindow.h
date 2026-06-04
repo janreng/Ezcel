@@ -5,6 +5,8 @@
 #include <QVector>
 #include "view/Outline.h"
 
+namespace freeze { class FreezePanes; }
+
 class QTableView;
 class QLineEdit;
 class QLabel;
@@ -143,6 +145,8 @@ private:
     int m_fillT = 0, m_fillL = 0, m_fillB = 0, m_fillR = 0; // vùng nguồn khi bắt đầu kéo
     void positionFillHandle();       // đặt lại vị trí nút theo vùng chọn
     void doFillDrag(const QPoint &releaseViewportPos); // thực hiện điền khi thả chuột
+
+    freeze::FreezePanes *m_freeze = nullptr; // cố định dòng/cột (Spec 14)
 
     outline::Outline m_rowOutline;   // nhóm/phác thảo hàng (Spec 09.4)
     void applyRowOutline();          // áp ẩn/hiện hàng theo nhóm đang thu gọn

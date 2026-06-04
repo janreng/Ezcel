@@ -8,6 +8,7 @@
 #include "view/HeaderMenu.h"
 #include "view/Outline.h"
 #include "view/CopyVisible.h"
+#include "view/FreezePanes.h"
 #include "model/RefCycle.h"
 #include "model/NameValidate.h"
 #include "model/RangeParse.h"
@@ -117,6 +118,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_fillHandle->installEventFilter(this);
     connect(m_view->verticalScrollBar(), &QScrollBar::valueChanged, this, [this] { positionFillHandle(); });
     connect(m_view->horizontalScrollBar(), &QScrollBar::valueChanged, this, [this] { positionFillHandle(); });
+    m_freeze = new freeze::FreezePanes(m_view, this); // cố định dòng/cột (Spec 14)
     buildContextMenus(); // menu chuột phải: ô + đầu hàng/cột (Spec 06)
 
     buildFormulaBar();
@@ -248,6 +250,7 @@ void MainWindow::switchToSheet(int i)
     m_model = m_sheets[i];
     m_view->setModel(m_model);
     bindActiveModel();
+    if (m_freeze) m_freeze->rebind(m_model, m_view->selectionModel()); // gắn lại freeze cho model mới
     onCurrentCellChanged(m_view->currentIndex(), QModelIndex());
     updateStats();
 }
@@ -879,6 +882,25 @@ void MainWindow::buildMenus()
     view->addAction(i18n::tr("view_zoom_in"), QKeySequence::ZoomIn, this, [this] { m_zoom += 10; applyZoom(); });
     view->addAction(i18n::tr("view_zoom_out"), QKeySequence::ZoomOut, this, [this] { m_zoom -= 10; applyZoom(); });
     view->addAction(i18n::tr("view_zoom_reset"), QKeySequence(QStringLiteral("Ctrl+0")), this, [this] { m_zoom = 100; applyZoom(); });
+    view->addSeparator();
+    {
+        QMenu *fz = view->addMenu(QStringLiteral("Cố định dòng/cột"));
+        fz->addAction(QStringLiteral("Cố định tại ô hiện hành"), this, [this] {
+            QModelIndex cur = m_view->currentIndex();
+            int r = cur.isValid() ? cur.row() : 0, c = cur.isValid() ? cur.column() : 0;
+            m_freeze->apply(r, c);
+            statusBar()->showMessage(QStringLiteral("Đã cố định %1 hàng + %2 cột").arg(r).arg(c), 3000);
+        });
+        fz->addAction(QStringLiteral("Cố định hàng đầu"), this, [this] {
+            m_freeze->apply(1, 0); statusBar()->showMessage(QStringLiteral("Đã cố định hàng đầu"), 2500);
+        });
+        fz->addAction(QStringLiteral("Cố định cột đầu"), this, [this] {
+            m_freeze->apply(0, 1); statusBar()->showMessage(QStringLiteral("Đã cố định cột đầu"), 2500);
+        });
+        fz->addAction(QStringLiteral("Bỏ cố định"), this, [this] {
+            m_freeze->apply(0, 0); statusBar()->showMessage(QStringLiteral("Đã bỏ cố định"), 2500);
+        });
+    }
     view->addSeparator();
     QAction *gl = view->addAction(QStringLiteral("Hiện đường lưới"));
     gl->setCheckable(true);

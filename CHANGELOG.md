@@ -1,5 +1,11 @@
 # Lịch sử thay đổi
 
+## v1.62.0 — Cố định dòng/cột (Spec 14)
+
+- **Cố định dòng/cột** trong menu Xem: giữ các hàng trên và cột trái luôn hiển thị khi cuộn bảng.
+- **Cố định tại ô hiện hành** (giữ mọi hàng/cột phía trên-trái ô đang chọn), **Cố định hàng đầu**, **Cố định cột đầu**, và **Bỏ cố định**.
+- Vùng cố định và vùng cuộn được đồng bộ với nhau khi cuộn ngang/dọc.
+
 ## v1.61.0 — Tham chiếu chéo trang tính (Spec 10)
 
 - **Công thức nay đọc được ô của trang tính khác**: dùng cú pháp `Tên!Ô`, ví dụ `=Sheet2!A1`, `=SUM(Báocáo!A1:A10)`.
