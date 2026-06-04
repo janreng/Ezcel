@@ -30,4 +30,17 @@ std::optional<QPair<int, int>> findNext(
     return std::nullopt;
 }
 
+QVector<QPair<int, int>> findAll(
+    int rows, int cols, const QString &needle, bool matchCase,
+    const std::function<QString(int, int)> &cellText)
+{
+    QVector<QPair<int, int>> out;
+    if (rows <= 0 || cols <= 0 || needle.trimmed().isEmpty()) return out;
+    Qt::CaseSensitivity cs = matchCase ? Qt::CaseSensitive : Qt::CaseInsensitive;
+    for (int r = 0; r < rows; ++r)
+        for (int c = 0; c < cols; ++c)
+            if (cellText(r, c).contains(needle, cs)) out.push_back({r, c});
+    return out;
+}
+
 } // namespace textsearch

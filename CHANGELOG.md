@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v1.38.0 — Tìm tất cả (Spec 32)
+
+- **Thêm nút "Tìm tất cả"** trong hộp thoại Tìm & Thay thế: chọn cùng lúc mọi ô có chứa từ khóa.
+- Báo số lượng ô tìm thấy ở thanh trạng thái; tôn trọng tùy chọn phân biệt hoa/thường.
+
 ## v1.37.0 — Quản lý vùng đặt tên (Spec 31)
 
 - **Thêm "Quản lý tên vùng..."** trong menu Sửa: liệt kê tất cả vùng đã đặt tên kèm địa chỉ (ví dụ `DoanhThu → A1:C5`).

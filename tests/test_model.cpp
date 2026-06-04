@@ -259,6 +259,14 @@ int main(int argc, char **argv) {
         auto h3 = textsearch::findNext(2, 2, 0, -1, "zzz", false, cell);
         ok(!h3.has_value(), "findNext khong thay -> rong");
 
+        // findAll (Spec 32): quet ca luoi. grid: foo(0,0), Foo(1,1)
+        auto all = textsearch::findAll(2, 2, "foo", false, cell); // ci -> ca hai
+        ok(all.size() == 2 && all.contains(qMakePair(0, 0)) && all.contains(qMakePair(1, 1)), "findAll ci -> 2 o");
+        auto allCase = textsearch::findAll(2, 2, "foo", true, cell); // case -> chi foo(0,0)
+        ok(allCase.size() == 1 && allCase.contains(qMakePair(0, 0)), "findAll case -> 1 o");
+        ok(textsearch::findAll(2, 2, "", false, cell).isEmpty(), "findAll rong -> rong");
+        ok(textsearch::findAll(2, 2, "zzz", false, cell).isEmpty(), "findAll khong thay -> rong");
+
         // model.replaceAll undoable
         SpreadsheetModel mm;
         mm.resizeGrid(3, 3);

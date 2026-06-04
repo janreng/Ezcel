@@ -1,6 +1,7 @@
 #pragma once
 #include <QString>
 #include <QPair>
+#include <QVector>
 #include <functional>
 #include <optional>
 
@@ -16,6 +17,12 @@ QString replaceSubstr(const QString &text, const QString &find, const QString &r
 std::optional<QPair<int, int>> findNext(
     int rows, int cols, int startRow, int startCol,
     const QString &needle, bool matchCase,
+    const std::function<QString(int, int)> &cellText);
+
+// Tìm TẤT CẢ ô chứa needle, quét theo thứ tự hàng-rồi-cột (Find All, Spec 32).
+// needle rỗng -> trả rỗng. Trả danh sách (row,col).
+QVector<QPair<int, int>> findAll(
+    int rows, int cols, const QString &needle, bool matchCase,
     const std::function<QString(int, int)> &cellText);
 
 } // namespace textsearch

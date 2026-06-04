@@ -13,6 +13,8 @@
 #include <QLabel>
 #include <QGridLayout>
 #include <QStatusBar>
+#include <QItemSelection>
+#include <QItemSelectionModel>
 #include <QComboBox>
 #include <QColorDialog>
 #include <QDialogButtonBox>
@@ -36,13 +38,16 @@ void MainWindow::showFindReplace()
         g->addWidget(m_matchCase, 2, 1, 1, 2);
 
         auto *btnFind = new QPushButton(QStringLiteral("Tìm tiếp"), m_findDialog);
+        auto *btnFindAll = new QPushButton(QStringLiteral("Tìm tất cả"), m_findDialog);
         auto *btnRepl = new QPushButton(QStringLiteral("Thay"), m_findDialog);
         auto *btnReplAll = new QPushButton(QStringLiteral("Thay tất cả"), m_findDialog);
         g->addWidget(btnFind, 3, 0);
-        g->addWidget(btnRepl, 3, 1);
-        g->addWidget(btnReplAll, 3, 2);
+        g->addWidget(btnFindAll, 3, 1);
+        g->addWidget(btnRepl, 4, 0);
+        g->addWidget(btnReplAll, 4, 1);
 
         connect(btnFind, &QPushButton::clicked, this, &MainWindow::findNextFromDialog);
+        connect(btnFindAll, &QPushButton::clicked, this, &MainWindow::findAllFromDialog);
         connect(btnRepl, &QPushButton::clicked, this, &MainWindow::replaceOne);
         connect(btnReplAll, &QPushButton::clicked, this, &MainWindow::replaceAllFromDialog);
         connect(m_findField, &QLineEdit::returnPressed, this, &MainWindow::findNextFromDialog);
@@ -80,6 +85,23 @@ bool MainWindow::findNext()
 }
 
 void MainWindow::findNextFromDialog() { findNext(); }
+
+// Tìm tất cả (Spec 32): chọn mọi ô khớp + báo số lượng ở thanh trạng thái.
+void MainWindow::findAllFromDialog()
+{
+    const QString needle = m_findField->text();
+    if (needle.isEmpty()) return;
+    const bool mc = m_matchCase && m_matchCase->isChecked();
+    const auto cells = textsearch::findAll(
+        m_model->rowCount(), m_model->columnCount(), needle, mc,
+        [this](int r, int c) { return m_model->data(m_model->index(r, c), Qt::DisplayRole).toString(); });
+    if (cells.isEmpty()) { statusBar()->showMessage(QStringLiteral("Không tìm thấy \"%1\"").arg(needle), 3000); return; }
+    QItemSelection sel;
+    for (const auto &p : cells) { QModelIndex i = m_model->index(p.first, p.second); sel.select(i, i); }
+    m_view->selectionModel()->select(sel, QItemSelectionModel::ClearAndSelect);
+    m_view->setCurrentIndex(m_model->index(cells.first().first, cells.first().second));
+    statusBar()->showMessage(QStringLiteral("Đã tìm thấy %1 ô chứa \"%2\"").arg(cells.size()).arg(needle), 4000);
+}
 
 void MainWindow::replaceOne()
 {

@@ -69,6 +69,7 @@ private slots:
     void showCondFormat();    // định dạng có điều kiện (MainWindowFind.cpp)
     void showDataValidation();// kiểm tra dữ liệu (MainWindowFind.cpp)
     void findNextFromDialog();
+    void findAllFromDialog();    // tìm tất cả ô khớp (Spec 32)
     void replaceOne();
     void replaceAllFromDialog();
     void onCurrentCellChanged(const QModelIndex &cur, const QModelIndex &prev);
