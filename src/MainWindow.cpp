@@ -71,6 +71,9 @@
 #include <QSlider>
 #include <QToolButton>
 #include <QFontComboBox>
+#include <QScrollArea>
+#include <QGridLayout>
+#include <QSharedPointer>
 #include <QPrinter>
 #include <QPrintDialog>
 #include <QPainter>
@@ -1224,6 +1227,64 @@ void MainWindow::applyCellStyle(const QString &name)
     m_model->setFormat(t, l, b, r, f);
 }
 
+// ---------------------------------------------------------------- slicer (Spec 54)
+// Panel KHÔNG modal: mỗi giá trị duy nhất của cột hiện hành là một nút bật/tắt;
+// bật/tắt -> lọc hàng ngay (ẩn hàng có giá trị đang tắt). Tái dùng filterutil.
+void MainWindow::showSlicer()
+{
+    QModelIndex cur = m_view->currentIndex();
+    const int col = cur.isValid() ? cur.column() : 0;
+    auto colVals = QSharedPointer<QVector<QString>>::create();
+    for (int r = 0; r < m_model->rowCount(); ++r)
+        colVals->push_back(m_model->data(m_model->index(r, col), Qt::DisplayRole).toString());
+    const QVector<QString> values = filterutil::uniqueValues(*colVals);
+    if (values.isEmpty()) { statusBar()->showMessage(QStringLiteral("Cột không có giá trị để lọc"), 2500); return; }
+
+    auto *dlg = new QDialog(this);
+    dlg->setAttribute(Qt::WA_DeleteOnClose);
+    dlg->setWindowTitle(QStringLiteral("Slicer — cột %1").arg(SpreadsheetModel::columnLabel(col)));
+    dlg->resize(220, 340);
+    auto *lay = new QVBoxLayout(dlg);
+    lay->addWidget(new QLabel(QStringLiteral("Bấm để bật/tắt giá trị:"), dlg));
+
+    auto *scroll = new QScrollArea(dlg);
+    scroll->setWidgetResizable(true);
+    auto *inner = new QWidget(scroll);
+    auto *gl = new QGridLayout(inner);
+    gl->setContentsMargins(2, 2, 2, 2);
+    auto btns = QSharedPointer<QVector<QToolButton *>>::create();
+    int row = 0;
+    for (const QString &v : values) {
+        auto *b = new QToolButton(inner);
+        b->setText(v.isEmpty() ? QStringLiteral("(trống)") : v);
+        b->setCheckable(true);
+        b->setChecked(true);
+        b->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+        b->setStyleSheet(QStringLiteral(
+            "QToolButton{text-align:left;padding:3px 8px;border:1px solid #C8C6C4;border-radius:3px;margin:1px;}"
+            "QToolButton:checked{background:#CEEAD9;border-color:#107C41;}"));
+        gl->addWidget(b, row++, 0);
+        btns->push_back(b);
+    }
+    scroll->setWidget(inner);
+    lay->addWidget(scroll, 1);
+
+    auto applyFn = [this, colVals, btns, values]() {
+        QSet<QString> keep;
+        for (int i = 0; i < btns->size(); ++i)
+            if (btns->at(i)->isChecked()) keep.insert(values[i]); // dùng giá trị gốc (kể cả rỗng)
+        for (int r = 0; r < m_model->rowCount(); ++r) m_view->setRowHidden(r, false);
+        for (int r : filterutil::rowsToHideByValues(*colVals, keep)) m_view->setRowHidden(r, true);
+    };
+    for (auto *b : *btns) connect(b, &QToolButton::toggled, this, [applyFn] { applyFn(); });
+
+    auto *clearBtn = new QPushButton(QStringLiteral("Xóa lọc (hiện hết)"), dlg);
+    connect(clearBtn, &QPushButton::clicked, dlg, [btns] { for (auto *b : *btns) b->setChecked(true); });
+    lay->addWidget(clearBtn);
+
+    dlg->show();
+}
+
 // ---------------------------------------------------------------- khung xem (Sheet View, Spec 56)
 void MainWindow::saveSheetView()
 {
@@ -1438,6 +1499,8 @@ void MainWindow::buildRibbon()
     m_ribbon->addButton(QStringLiteral("table"), QStringLiteral("Định dạng\nlà bảng"), [this] { formatAsTable(); });
     m_ribbon->addSmallButton(QStringLiteral("sigma"), QStringLiteral("Hàng tổng"), [this] { addTableTotalRow(); });
     m_ribbon->addSmallButton(QStringLiteral("cell_delete"), QStringLiteral("Bỏ định dạng bảng"), [this] { m_model->clearTables(); });
+    m_ribbon->beginGroup(QStringLiteral("Lọc"));
+    m_ribbon->addButton(QStringLiteral("filter"), QStringLiteral("Slicer"), [this] { showSlicer(); });
     m_ribbon->beginGroup(QStringLiteral("Sparkline"));
     m_ribbon->addSmallButton(QStringLiteral("chart_line"), QStringLiteral("Đường"), [this] { insertSparkline(int(sparkline::Type::Line)); });
     m_ribbon->addSmallButton(QStringLiteral("chart_column"), QStringLiteral("Cột"), [this] { insertSparkline(int(sparkline::Type::Column)); });

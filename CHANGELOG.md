@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v2.3.0 — Slicer: bộ lọc trực quan bằng nút bấm (Spec 54)
+
+- Thêm **Chèn → "Slicer"**: mở bảng nút bấm liệt kê các giá trị của cột đang chọn — **bấm bật/tắt từng giá trị** là lọc ngay (ẩn/hiện hàng tương ứng), trực quan và nhanh.
+- Nút **"Xóa lọc (hiện hết)"** để bật lại tất cả. Bảng nút mở dạng cửa sổ phụ, vừa lọc vừa thao tác trên lưới.
+
 ## v2.2.0 — Khung xem: lưu & chuyển nhanh trạng thái lọc (Spec 56)
 
 - Thẻ **Xem** thêm nhóm **Khung xem**: **"Lưu khung xem"** ghi lại trạng thái lọc hiện tại (các hàng đang ẩn) kèm tên.

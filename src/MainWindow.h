@@ -84,6 +84,7 @@ private slots:
     void addTableTotalRow();  // thêm hàng tổng (SUM theo cột) dưới bảng hiện hành (Spec 16)
     void saveSheetView();     // lưu khung xem hiện tại (trạng thái lọc) (Spec 56)
     void applySheetView();    // chọn + áp lại một khung xem đã lưu (Spec 56)
+    void showSlicer();        // panel lọc trực quan theo giá trị cột (Slicer, Spec 54)
     void autoSum();           // AutoSum (∑) ô hiện hành (Alt+=)
     void sortSelection(bool ascending); // sắp xếp vùng theo cột hiện hành
     void insertToday();       // chèn ngày hôm nay vào ô hiện hành (Ctrl+;)
