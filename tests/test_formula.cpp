@@ -637,6 +637,22 @@ int main() {
         // 1 ô -> vô hướng (không phải vùng).
         formula::Value v4 = formula::evaluateValue(QStringLiteral("=SEQUENCE(1)"), resolver);
         okEq(!v4.isRange() && v4.num == 1, "SEQUENCE(1) -> vo huong 1");
+
+        // SORT: H1:H3 = {1,3,2} (ô lưới giữ dạng Text, so sánh số qua toNumber).
+        formula::Value s = formula::evaluateValue(QStringLiteral("=SORT(H1:H3)"), resolver);
+        auto sf = s.range.flat();
+        okEq(s.isRange() && sf.size() == 3 && formula::toNumber(sf[0]) == 1
+                 && formula::toNumber(sf[1]) == 2 && formula::toNumber(sf[2]) == 3, "SORT tang dan");
+        formula::Value sd = formula::evaluateValue(QStringLiteral("=SORT(H1:H3,1,-1)"), resolver);
+        auto sdf = sd.range.flat();
+        okEq(formula::toNumber(sdf[0]) == 3 && formula::toNumber(sdf[1]) == 2
+                 && formula::toNumber(sdf[2]) == 1, "SORT giam dan");
+        // SORT 2D theo cột khóa giảm dần: D1:E3 (keys 1,2,3 / one,two,three) -> 3,2,1.
+        formula::Value s2 = formula::evaluateValue(QStringLiteral("=SORT(D1:E3,1,-1)"), resolver);
+        okEq(s2.isRange() && s2.range.height() == 3 && s2.range.width() == 2, "SORT 2D giu kich thuoc 3x2");
+        auto s2m = *s2.range.rows;
+        okEq(formula::toNumber(s2m[0][0]) == 3 && formula::toNumber(s2m[2][0]) == 1, "SORT 2D thu tu hang dung");
+        okEq(formula::toText(s2m[0][1]) == QStringLiteral("three"), "SORT 2D keo cot kem theo");
     }
 
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);

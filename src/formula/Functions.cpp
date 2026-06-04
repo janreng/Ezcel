@@ -27,6 +27,28 @@ std::vector<Value> critValues(const Value &a) {
     return {a};
 }
 
+// --- tiện ích ma trận cho hàm mảng động (SORT/UNIQUE/FILTER...) ---
+// Lấy ma trận từ đối số: Range -> bản sao; vô hướng -> 1×1.
+std::vector<std::vector<Value>> toMatrix(const Value &a) {
+    if (a.isRange() && a.range.rows) return *a.range.rows;
+    return {{a}};
+}
+// Bọc ma trận thành Value vùng (để spill đổ ra ô).
+Value matrixToRange(std::vector<std::vector<Value>> m) {
+    auto grid = std::make_shared<std::vector<std::vector<Value>>>(std::move(m));
+    Range rg; rg.rows = grid;
+    return Value::rangev(rg);
+}
+// Chuyển vị ma trận (hàng <-> cột); giả định chữ nhật.
+std::vector<std::vector<Value>> transposeM(const std::vector<std::vector<Value>> &m) {
+    if (m.empty() || m[0].empty()) return m;
+    const size_t h = m.size(), w = m[0].size();
+    std::vector<std::vector<Value>> t(w, std::vector<Value>(h));
+    for (size_t r = 0; r < h; ++r)
+        for (size_t c = 0; c < w && c < m[r].size(); ++c) t[c][r] = m[r][c];
+    return t;
+}
+
 // --- ngày tháng: serial Excel (epoch 1899-12-30) <-> QDate ---
 const QDate kExcelEpoch(1899, 12, 30);
 double dateToSerial(const QDate &d) { return double(kExcelEpoch.daysTo(d)); }
@@ -1088,6 +1110,27 @@ QHash<QString, Fn> &fnMap() {
             }
             Range rg; rg.rows = grid;
             return Value::rangev(rg);
+        };
+
+        // SORT(array,[sort_index],[sort_order],[by_col]) -> sắp xếp vùng, trả vùng mới.
+        r["SORT"] = [](const Args &a) {
+            if (a.empty() || a.size() > 4) argErr("SORT");
+            const int sortIndex = a.size() >= 2 ? toInt(a[1]) : 1;
+            const int sortOrder = a.size() >= 3 ? toInt(a[2]) : 1;
+            const bool byCol    = a.size() >= 4 ? toBool(a[3]) : false;
+            auto m = toMatrix(a[0]);
+            if (byCol) m = transposeM(m);
+            const int n = m.empty() ? 0 : int(m[0].size());
+            const int ci = sortIndex - 1;
+            if (ci < 0 || ci >= n)
+                throw FormulaError(QStringLiteral("SORT: chỉ số sắp xếp ngoài phạm vi"), ERR_VALUE);
+            std::stable_sort(m.begin(), m.end(),
+                [&](const std::vector<Value> &x, const std::vector<Value> &y) {
+                    const int c = cmp(x[ci], y[ci]); // vùng chữ nhật -> ci luôn hợp lệ
+                    return sortOrder >= 0 ? c < 0 : c > 0;
+                });
+            if (byCol) m = transposeM(m);
+            return matrixToRange(std::move(m));
         };
 
         // --- ngày / giờ (serial Excel) ---

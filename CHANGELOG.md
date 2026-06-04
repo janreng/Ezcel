@@ -1,5 +1,11 @@
 # Lịch sử thay đổi
 
+## v1.75.0 — Hàm SORT: sắp xếp cả vùng bằng công thức (Spec 12)
+
+- Thêm hàm **`SORT(vùng, [cột_khóa], [thứ_tự], [theo_cột])`** — sắp xếp một vùng dữ liệu rồi tự tràn kết quả ra ô bên cạnh (mảng động).
+- `=SORT(A1:A10)` sắp xếp tăng dần; `=SORT(A1:B10, 2, -1)` sắp theo cột thứ 2 giảm dần; đặt `theo_cột` = TRUE để sắp các cột thay vì hàng.
+- Sắp xếp số theo giá trị số, chữ theo bảng chữ cái; vùng nhiều cột được kéo theo nguyên hàng.
+
 ## v1.74.0 — Mảng động: công thức tự tràn ra nhiều ô (Spec 12)
 
 - **Công thức trả về một dãy/khối số giờ tự "tràn" sang các ô bên cạnh** thay vì báo lỗi — gọi là mảng động (spill), giống bảng tính hiện đại.
