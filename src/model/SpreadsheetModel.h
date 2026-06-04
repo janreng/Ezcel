@@ -69,6 +69,9 @@ public:
     void resizeGrid(int rows, int cols);
     // Biên vùng tràn (spill) chứa ô (row,col): true + [top,left,bottom,right]; false nếu ô không thuộc spill.
     bool spillRangeAt(int row, int col, int &top, int &left, int &bottom, int &right) const;
+    // Dò mục tiêu (Goal Seek, Spec 28): đổi giá trị ô nhập (inRow,inCol) để ô công thức
+    // (fRow,fCol) đạt `target`. Trả true + ghi giá trị tìm được (undoable); false nếu thất bại.
+    bool goalSeek(int fRow, int fCol, double target, int inRow, int inCol);
     // Chèn/xóa hàng-cột (đều undoable, dời định dạng + ô gộp theo). Port insert/removeRows/Columns.
     void insertRows(int row, int count = 1);
     void removeRows(int row, int count = 1);

@@ -72,6 +72,7 @@ private slots:
     void consolidateRanges(); // gộp dữ liệu nhiều vùng theo nhãn (Spec 27)
     void forecastSheet();     // dự báo xu hướng tuyến tính + TB trượt (Spec 27)
     void toggleSplitView();   // bật/tắt chia đôi cửa sổ theo chiều dọc (Spec 14)
+    void goalSeekDialog();    // dò mục tiêu: đổi ô nhập để ô công thức đạt giá trị (Spec 28)
     void quickPivot();        // bảng tổng hợp nhanh (pivot, Spec 18)
     void insertCellsDialog(); // chèn ô có dịch chuyển phải/xuống (Spec 09)
     void deleteCellsDialog(); // xóa ô có dịch chuyển trái/lên (Spec 09)

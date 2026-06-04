@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
-project(Ezcel VERSION 1.88.0 LANGUAGES CXX)
+project(Ezcel VERSION 1.89.0 LANGUAGES CXX)
 
 # Bản port C++ của Ezcel (gốc Python/PySide6). Dùng Qt6 Widgets + MinGW.
 set(CMAKE_CXX_STANDARD 20)
@@ -59,7 +59,8 @@ add_library(ezcel_model STATIC src/model/SpreadsheetModel.cpp src/model/Spreadsh
     src/model/CellShift.cpp src/model/CellShift.h
     src/model/Consolidate.cpp src/model/Consolidate.h
     src/model/Forecast.cpp src/model/Forecast.h
-    src/model/Sparkline.cpp src/model/Sparkline.h)
+    src/model/Sparkline.cpp src/model/Sparkline.h
+    src/model/GoalSeek.cpp src/model/GoalSeek.h)
 target_include_directories(ezcel_model PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(ezcel_model PUBLIC ezcel_formula ezcel_sort Qt6::Core Qt6::Gui)
 
@@ -173,6 +174,10 @@ add_executable(test_sparkline tests/test_sparkline.cpp src/model/Sparkline.cpp)
 target_include_directories(test_sparkline PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(test_sparkline PRIVATE Qt6::Core)
 
+add_executable(test_goalseek tests/test_goalseek.cpp src/model/GoalSeek.cpp)
+target_include_directories(test_goalseek PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_link_libraries(test_goalseek PRIVATE Qt6::Core)
+
 add_executable(test_headermenu tests/test_headermenu.cpp src/view/HeaderMenu.cpp)
 target_include_directories(test_headermenu PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(test_headermenu PRIVATE Qt6::Core)
@@ -233,6 +238,7 @@ add_test(NAME cellshift COMMAND test_cellshift)
 add_test(NAME consolidate COMMAND test_consolidate)
 add_test(NAME forecast COMMAND test_forecast)
 add_test(NAME sparkline COMMAND test_sparkline)
+add_test(NAME goalseek COMMAND test_goalseek)
 
 # --- Sort (sắp xếp vùng dữ liệu) — module logic thuần (Qt Core) -> static lib + test.
 add_library(ezcel_sort STATIC src/model/Sort.cpp src/model/Sort.h)

@@ -1,5 +1,11 @@
 # Lịch sử thay đổi
 
+## v1.89.0 — Dò mục tiêu (Goal Seek) (Spec 28)
+
+- Thêm **Dữ liệu → "Dò mục tiêu..."**: chọn ô công thức + giá trị muốn đạt + ô nhập → ứng dụng tự **dò ra giá trị ô nhập** để ô công thức cho ra đúng mục tiêu.
+- Ví dụ: lợi nhuận ở B5 = doanh thu (B1) − chi phí; muốn B5 = 0 thì để máy tìm B1 bằng bao nhiêu.
+- Dùng được với cả công thức phi tuyến; kết quả ghi vào ô nhập và hoàn tác (Ctrl+Z) được.
+
 ## v1.88.0 — Chia đôi cửa sổ (Spec 14)
 
 - Thêm **Xem → "Chia đôi cửa sổ"**: tách lưới thành **hai khung cuộn dọc độc lập** trên cùng một trang — xem phần đầu và phần cuối bảng cùng lúc, kéo thanh chia giữa để chỉnh tỉ lệ.

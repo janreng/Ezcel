@@ -2,6 +2,8 @@
 #include "formula/Formula.h"
 #include "model/TextSearch.h"
 #include "model/Sort.h"
+#include "model/GoalSeek.h"
+#include <limits>
 #include "model/Validation.h"
 #include "model/NumberFormat.h"
 #include "model/SeriesFill.h"
@@ -283,6 +285,36 @@ void SpreadsheetModel::rebuildSpills() const {
                 registerSpill(r, c, vv);
         }
     }
+}
+
+bool SpreadsheetModel::goalSeek(int fRow, int fCol, double target, int inRow, int inCol) {
+    const int rows = rowCount(), cols = columnCount();
+    if (fRow < 0 || fCol < 0 || fRow >= rows || fCol >= cols) return false;
+    if (inRow < 0 || inCol < 0 || inRow >= rows || inCol >= cols) return false;
+    if (fRow == inRow && fCol == inCol) return false;
+
+    const QString origInput = m_data[inRow][inCol];
+    // f(x): đặt ô nhập = x, tính lại, đọc ô công thức.
+    auto f = [&](double x) -> double {
+        m_data[inRow][inCol] = QString::number(x, 'g', 15);
+        m_evalCache.clear();
+        m_spillVals.clear(); m_spillSize.clear(); m_spillOwner.clear();
+        bool ok = false;
+        const double y = evalCell(fRow, fCol).toDouble(&ok);
+        return ok ? y : std::numeric_limits<double>::quiet_NaN();
+    };
+    bool okGuess = false;
+    const double guess = origInput.toDouble(&okGuess);
+    const goalseek::Result res = goalseek::solve(f, target, okGuess ? guess : 0.0);
+
+    // Khôi phục giá trị gốc trước khi ghi chính thức (để undo đúng).
+    m_data[inRow][inCol] = origInput;
+    m_evalCache.clear();
+    if (!res.ok) { recalculate(inRow, inCol); return false; } // vẽ lại trạng thái cũ
+
+    // Ghi giá trị tìm được qua setData -> undoable + recalc + spill.
+    setData(index(inRow, inCol), QString::number(res.x, 'g', 12), Qt::EditRole);
+    return true;
 }
 
 bool SpreadsheetModel::spillRangeAt(int row, int col, int &top, int &left, int &bottom, int &right) const {

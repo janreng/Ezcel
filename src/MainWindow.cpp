@@ -973,6 +973,7 @@ void MainWindow::buildMenus()
     data->addAction(QStringLiteral("Tổng phụ theo nhóm..."), this, &MainWindow::subtotalRange);
     data->addAction(QStringLiteral("Gộp dữ liệu nhiều vùng..."), this, &MainWindow::consolidateRanges);
     data->addAction(QStringLiteral("Dự báo xu hướng..."), this, &MainWindow::forecastSheet);
+    data->addAction(QStringLiteral("Dò mục tiêu..."), this, &MainWindow::goalSeekDialog);
     data->addAction(QStringLiteral("Bảng tổng hợp nhanh..."), this, &MainWindow::quickPivot);
     data->addSeparator();
     {
@@ -2279,6 +2280,33 @@ void MainWindow::consolidateRanges()
             m_model->setData(m_model->index(r, c), out[r][c], Qt::EditRole);
     statusBar()->showMessage(QStringLiteral("Đã gộp %1 vùng → %2 nhãn hàng ở trang mới")
         .arg(tables.size()).arg(out.size() - 1), 3000);
+}
+
+// Dò mục tiêu (Goal Seek, Spec 28): đổi ô nhập để ô công thức đạt giá trị mong muốn.
+void MainWindow::goalSeekDialog()
+{
+    const QModelIndex cur = m_view->currentIndex();
+    bool ok = false;
+    const QString curRef = cur.isValid()
+        ? SpreadsheetModel::columnLabel(cur.column()) + QString::number(cur.row() + 1) : QString();
+    QString fcell = QInputDialog::getText(this, QStringLiteral("Dò mục tiêu"),
+        QStringLiteral("Ô công thức cần đạt giá trị (ví dụ B5):"), QLineEdit::Normal, curRef, &ok);
+    if (!ok || fcell.trimmed().isEmpty()) return;
+    double target = QInputDialog::getDouble(this, QStringLiteral("Dò mục tiêu"),
+        QStringLiteral("Giá trị mục tiêu:"), 0, -1e12, 1e12, 4, &ok);
+    if (!ok) return;
+    QString icell = QInputDialog::getText(this, QStringLiteral("Dò mục tiêu"),
+        QStringLiteral("Ô nhập sẽ được thay đổi (ví dụ A1):"), QLineEdit::Normal, QString(), &ok);
+    if (!ok || icell.trimmed().isEmpty()) return;
+
+    const int rows = m_model->rowCount(), cols = m_model->columnCount();
+    auto fb = rangeparse::parseOne(fcell.trimmed(), rows, cols);
+    auto ib = rangeparse::parseOne(icell.trimmed(), rows, cols);
+    if (!fb || !ib) { statusBar()->showMessage(QStringLiteral("Địa chỉ ô không hợp lệ"), 2500); return; }
+    if (m_model->goalSeek(fb->top, fb->left, target, ib->top, ib->left))
+        statusBar()->showMessage(QStringLiteral("Đã dò ra giá trị để đạt mục tiêu"), 3000);
+    else
+        statusBar()->showMessage(QStringLiteral("Không dò được giá trị phù hợp (không hội tụ)"), 3500);
 }
 
 // Dự báo xu hướng tuyến tính + trung bình trượt (Forecast, Spec 27). Chọn cột thời gian +
