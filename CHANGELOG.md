@@ -1,5 +1,11 @@
 # Lịch sử thay đổi
 
+## v1.76.0 — Hàm UNIQUE: lọc giá trị trùng bằng công thức (Spec 12)
+
+- Thêm hàm **`UNIQUE(vùng, [theo_cột], [chỉ_một_lần])`** — lấy ra các dòng (hoặc cột) khác nhau từ một vùng rồi tự tràn kết quả ra ô.
+- `=UNIQUE(A1:A20)` trả danh sách giá trị không trùng; đặt `chỉ_một_lần` = TRUE để chỉ lấy những giá trị xuất hiện đúng một lần.
+- So khớp không phân biệt hoa/thường; vùng nhiều cột so cả dòng để xác định trùng.
+
 ## v1.75.0 — Hàm SORT: sắp xếp cả vùng bằng công thức (Spec 12)
 
 - Thêm hàm **`SORT(vùng, [cột_khóa], [thứ_tự], [theo_cột])`** — sắp xếp một vùng dữ liệu rồi tự tràn kết quả ra ô bên cạnh (mảng động).

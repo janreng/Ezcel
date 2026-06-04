@@ -4,6 +4,9 @@
 #include <QRegularExpression>
 #include <QDate>
 #include <QDateTime>
+#include <QHash>
+#include <QSet>
+#include <QStringList>
 #include <cmath>
 #include <algorithm>
 #include <numeric>
@@ -1131,6 +1134,32 @@ QHash<QString, Fn> &fnMap() {
                 });
             if (byCol) m = transposeM(m);
             return matrixToRange(std::move(m));
+        };
+
+        // UNIQUE(array,[by_col],[exactly_once]) -> lọc hàng (hoặc cột) trùng nhau.
+        r["UNIQUE"] = [](const Args &a) {
+            if (a.empty() || a.size() > 3) argErr("UNIQUE");
+            const bool byCol = a.size() >= 2 ? toBool(a[1]) : false;
+            const bool exactlyOnce = a.size() >= 3 ? toBool(a[2]) : false;
+            auto m = toMatrix(a[0]);
+            if (byCol) m = transposeM(m);
+            auto rowKey = [](const std::vector<Value> &row) {
+                QStringList parts;
+                for (const Value &v : row) parts << toText(v).toLower();
+                return parts.join(QChar(0x1f)); // dấu ngăn không có trong dữ liệu
+            };
+            QHash<QString, int> count;
+            for (const auto &row : m) ++count[rowKey(row)];
+            std::vector<std::vector<Value>> out;
+            QSet<QString> emitted;
+            for (const auto &row : m) {
+                const QString k = rowKey(row);
+                if (exactlyOnce) { if (count.value(k) == 1) out.push_back(row); }
+                else if (!emitted.contains(k)) { emitted.insert(k); out.push_back(row); }
+            }
+            if (out.empty()) throw FormulaError(QStringLiteral("UNIQUE: không có kết quả"), ERR_CALC);
+            if (byCol) out = transposeM(out);
+            return matrixToRange(std::move(out));
         };
 
         // --- ngày / giờ (serial Excel) ---

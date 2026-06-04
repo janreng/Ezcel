@@ -18,6 +18,7 @@ inline constexpr const char *ERR_NUM   = "#NUM!";
 inline constexpr const char *ERR_NAME  = "#NAME?";
 inline constexpr const char *ERR_REF   = "#REF!";
 inline constexpr const char *ERR_SPILL = "#SPILL!";
+inline constexpr const char *ERR_CALC  = "#CALC!";
 
 // Lỗi khi phân tích/tính công thức; etype mang mã lỗi kiểu Excel.
 class FormulaError : public std::exception {

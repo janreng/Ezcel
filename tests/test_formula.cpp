@@ -653,6 +653,17 @@ int main() {
         auto s2m = *s2.range.rows;
         okEq(formula::toNumber(s2m[0][0]) == 3 && formula::toNumber(s2m[2][0]) == 1, "SORT 2D thu tu hang dung");
         okEq(formula::toText(s2m[0][1]) == QStringLiteral("three"), "SORT 2D keo cot kem theo");
+
+        // UNIQUE: K2:K5 = {A,B,A,B} -> distinct {A,B}.
+        formula::Value u = formula::evaluateValue(QStringLiteral("=UNIQUE(K2:K5)"), resolver);
+        auto uf = u.range.flat();
+        okEq(u.isRange() && uf.size() == 2 && formula::toText(uf[0]) == QStringLiteral("A")
+                 && formula::toText(uf[1]) == QStringLiteral("B"), "UNIQUE distinct A,B");
+        // exactly_once: A,B đều xuất hiện 2 lần -> rỗng -> #CALC!.
+        QVariant ucalc;
+        try { ucalc = evaluate(QStringLiteral("=UNIQUE(K2:K5,FALSE,TRUE)"), resolver); }
+        catch (const formula::FormulaError &e) { ucalc = e.etype(); }
+        okEq(ucalc.toString() == QStringLiteral("#CALC!"), "UNIQUE exactly_once het -> #CALC!");
     }
 
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);
