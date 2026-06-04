@@ -115,4 +115,19 @@ QVector<QVector<QString>> reverseRows(const QVector<QVector<QString>> &rows) {
     return out;
 }
 
+QVector<QVector<QString>> fillBlanksDown(const QVector<QVector<QString>> &rows) {
+    QVector<QVector<QString>> out = rows;
+    int width = 0;
+    for (const auto &r : out) width = qMax(width, int(r.size()));
+    QVector<QString> last(width); // giá trị gần nhất theo từng cột
+    for (auto &row : out) {
+        for (int c = 0; c < width; ++c) {
+            if (c >= row.size()) continue;
+            if (row[c].trimmed().isEmpty()) { if (!last[c].isEmpty()) row[c] = last[c]; }
+            else last[c] = row[c];
+        }
+    }
+    return out;
+}
+
 } // namespace datatools

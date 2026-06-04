@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v1.51.0 — Điền ô trống bằng giá trị phía trên (Spec 27)
+
+- **Thêm "Điền ô trống bằng giá trị trên"** trong menu Dữ liệu: tự điền các ô trống bằng giá trị không rỗng gần nhất phía trên (theo từng cột).
+- Rất hữu ích khi dữ liệu xuất ra chỉ ghi nhãn nhóm ở hàng đầu mỗi nhóm, để lại các ô bên dưới trống.
+
 ## v1.50.0 — Đảo ngược thứ tự hàng (Spec 15)
 
 - **Thêm "Đảo ngược thứ tự hàng"** trong menu Dữ liệu: lật ngược thứ tự các hàng trong vùng chọn (hàng đầu thành hàng cuối).

@@ -33,4 +33,8 @@ QVector<QVector<QString>> subtotal(const QVector<QVector<QString>> &rows,
 // Đảo ngược thứ tự các HÀNG của khối (hàng đầu thành cuối). Giữ nguyên thứ tự cột.
 QVector<QVector<QString>> reverseRows(const QVector<QVector<QString>> &rows);
 
+// Điền ô trống bằng giá trị KHÔNG RỖNG gần nhất phía trên (theo từng cột). Hữu ích
+// khi dữ liệu xuất ra chỉ ghi nhãn nhóm ở hàng đầu mỗi nhóm. Trả khối đã điền.
+QVector<QVector<QString>> fillBlanksDown(const QVector<QVector<QString>> &rows);
+
 } // namespace datatools

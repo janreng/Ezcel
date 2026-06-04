@@ -71,6 +71,26 @@ int main(int argc, char **argv) {
         ok(datatools::reverseRows({}).isEmpty(), "reverse rong -> rong");
     }
 
+    // --- fillBlanksDown ---
+    {
+        QVector<QVector<QString>> blk = {
+            {"Bac", "10"},
+            {"",    "20"},
+            {"",    "30"},
+            {"Nam", "5"},
+            {"",    "15"},
+        };
+        auto f = datatools::fillBlanksDown(blk);
+        ok(f[1][0] == "Bac" && f[2][0] == "Bac", "fill blank lay nhom Bac");
+        ok(f[4][0] == "Nam", "doi nhom -> Nam");
+        ok(f[0][0] == "Bac" && f[3][0] == "Nam", "o khong rong giu nguyen");
+        ok(f[2][1] == "30", "cot khac khong bi anh huong");
+        // o trong dau cot (chua co gia tri tren) -> giu trong
+        QVector<QVector<QString>> blk2 = {{""}, {"x"}};
+        auto f2 = datatools::fillBlanksDown(blk2);
+        ok(f2[0][0].isEmpty() && f2[1][0] == "x", "o trong dau cot giu trong");
+    }
+
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);
     return g_fail == 0 ? 0 : 1;
 }
