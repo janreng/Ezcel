@@ -205,6 +205,12 @@ QVariant SpreadsheetModel::registerSpill(int row, int col, const formula::Value 
         m_spillVals.insert(anchor, QString::fromLatin1(formula::ERR_SPILL));
         return m_spillVals.value(anchor);
     }
+    // Vùng tràn đè lên ô gộp (merge) -> #SPILL! (không xé merge).
+    for (const MergeRange &m : m_merges)
+        if (!(m.right < col || m.left > col + w - 1 || m.bottom < row || m.top > row + h - 1)) {
+            m_spillVals.insert(anchor, QString::fromLatin1(formula::ERR_SPILL));
+            return m_spillVals.value(anchor);
+        }
     // Kiểm tra chặn: ô tràn (trừ anchor) phải trống & chưa bị spill khác chiếm.
     for (int r = 0; r < h; ++r)
         for (int c = 0; c < w; ++c) {

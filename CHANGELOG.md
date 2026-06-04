@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v1.81.0 — Mảng động không đè lên ô đã gộp (Spec 12)
+
+- **Sửa lỗi:** công thức mảng động (ví dụ `=SEQUENCE(...)`) khi tràn trúng vùng có **ô đã gộp** thì trước đây làm hỏng ô gộp; nay báo `#SPILL!` đúng như mong đợi.
+- Bỏ gộp ô ở chỗ vướng là mảng tự tràn ra lại bình thường.
+
 ## v1.80.0 — Dự báo xu hướng tương lai (Spec 27)
 
 - Thêm **Dữ liệu → "Dự báo xu hướng..."**: chọn cột thời gian + cột giá trị + số kỳ muốn dự báo, kết quả gồm dữ liệu thực tế và phần **dự báo** theo đường xu hướng tuyến tính được tạo ở trang mới.

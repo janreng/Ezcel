@@ -694,6 +694,38 @@ int main(int argc, char **argv) {
         ok(disp(sm, 0, 0) == "99" && disp(sm, 1, 0) == "" && disp(sm, 2, 0) == "", "xoa anchor -> het spill");
     }
 
+    // --- Spill: ca bien (undo, merge, chen hang) ---
+    {
+        SpreadsheetModel sm;
+        sm.resizeGrid(10, 5);
+        // Undo: go =SEQUENCE(3) roi undo -> het spill, o tran sua lai duoc.
+        put(sm, 0, 0, "=SEQUENCE(3)");
+        ok(disp(sm, 1, 0) == "2", "spill truoc undo");
+        sm.undo();
+        ok(disp(sm, 0, 0) == "" && disp(sm, 1, 0) == "" && disp(sm, 2, 0) == "", "undo -> het spill");
+        ok(sm.flags(sm.index(1, 0)) & Qt::ItemIsEditable, "o cu tran sua lai duoc sau undo");
+        sm.redo();
+        ok(disp(sm, 1, 0) == "2", "redo -> spill lai");
+
+        // Spill de len o gop -> #SPILL!.
+        SpreadsheetModel sg;
+        sg.resizeGrid(10, 5);
+        sg.toggleMergeRanges({ MergeRange{1, 0, 1, 1} }); // gop B2:... thuc ra A2:B2 (hang1, cot0-1)
+        put(sg, 0, 0, "=SEQUENCE(3)");                    // muon tran A1:A3, dung o gop tai hang1
+        ok(disp(sg, 0, 0) == "#SPILL!", "tran vao o gop -> #SPILL!");
+        // Bo gop -> tran lai.
+        sg.toggleMergeRanges({ MergeRange{1, 0, 1, 1} });
+        ok(disp(sg, 0, 0) == "1" && disp(sg, 1, 0) == "2", "bo gop -> spill lai");
+
+        // Chen hang phia tren anchor -> spill dich theo, van dung.
+        SpreadsheetModel si;
+        si.resizeGrid(10, 5);
+        put(si, 2, 0, "=SEQUENCE(3)"); // A3 -> A3:A5
+        ok(disp(si, 2, 0) == "1" && disp(si, 4, 0) == "3", "spill A3:A5");
+        si.insertRows(0, 1);            // chen 1 hang dau -> anchor xuong A4
+        ok(disp(si, 3, 0) == "1" && disp(si, 5, 0) == "3", "sau chen hang: spill A4:A6");
+    }
+
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);
     return g_fail == 0 ? 0 : 1;
 }
