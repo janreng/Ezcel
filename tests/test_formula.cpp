@@ -528,6 +528,14 @@ int main() {
     checkNum("=DATEDIF(DATE(2024,1,15),DATE(2026,3,20),\"MD\")", 5);
     checkNum("=DATEDIF(DATE(2024,1,15),DATE(2026,3,20),\"YD\")", 64);
 
+    // --- NETWORKDAYSINTL / WORKDAYINTL (Spec 12) --- 7 ngay lien tiep phu moi thu trong tuan 1 lan
+    checkNum("=NETWORKDAYSINTL(DATE(2026,6,1),DATE(2026,6,7))", 5);        // mac dinh T7+CN nghi
+    checkNum("=NETWORKDAYSINTL(DATE(2026,6,1),DATE(2026,6,7),11)", 6);     // chi CN nghi
+    checkNum("=NETWORKDAYSINTL(DATE(2026,6,1),DATE(2026,6,7),3)", 5);      // T2+T3 nghi
+    checkNum("=NETWORKDAYSINTL(DATE(2026,6,1),DATE(2026,6,7),\"0000000\")", 7); // khong nghi
+    checkNum("=NETWORKDAYSINTL(DATE(2026,6,1),DATE(2026,6,7),\"1111111\")", 0); // nghi het
+    checkNum("=WORKDAYINTL(DATE(2026,6,1),5,\"0000000\")-DATE(2026,6,1)", 5);   // khong nghi -> +5 ngay
+
     // --- Regex functions (Spec 22.2) ---
     checkStr("=REGEXTEST(\"abc123\",\"[0-9]+\")", "true");
     checkStr("=REGEXTEST(\"abcdef\",\"[0-9]+\")", "false");

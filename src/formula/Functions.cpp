@@ -1166,6 +1166,42 @@ QHash<QString, Fn> &fnMap() {
             for (QDate d = s; d <= e; d = d.addDays(1)) if (isWorkday(d, hs)) ++cnt;
             return Value::number(double(sign * cnt));
         };
+        // Xác định ngày cuối tuần theo mã weekend (giống NETWORKDAYS.INTL của Excel).
+        // Mã số 1..7, 11..17, hoặc chuỗi 7 ký tự "0000011" (T2..CN, 1 = nghỉ).
+        auto weekendPred = [](const Value &wv) -> std::function<bool(const QDate &)> {
+            if (wv.type == Type::Text && wv.text.size() == 7) {
+                const QString s = wv.text;
+                return [s](const QDate &d) { int dow = d.dayOfWeek(); return s.at(dow-1) == QLatin1Char('1'); };
+            }
+            int code = 1;
+            try { code = toInt(wv); } catch (...) { code = 1; }
+            static const QHash<int, QSet<int>> tbl = {
+                {1,{6,7}}, {2,{7,1}}, {3,{1,2}}, {4,{2,3}}, {5,{3,4}}, {6,{4,5}}, {7,{5,6}},
+                {11,{7}}, {12,{1}}, {13,{2}}, {14,{3}}, {15,{4}}, {16,{5}}, {17,{6}}
+            };
+            QSet<int> we = tbl.value(code, QSet<int>{6,7});
+            return [we](const QDate &d) { return we.contains(d.dayOfWeek()); };
+        };
+        // NETWORKDAYSINTL(start, end, [weekend], [holidays]): đếm ngày làm việc, tùy chỉnh cuối tuần.
+        r["NETWORKDAYSINTL"] = [holidaySet, weekendPred](const Args &a) {
+            if (a.size() < 2) argErr("NETWORKDAYSINTL");
+            QDate s = serialToDate(toNumber(a[0])), e = serialToDate(toNumber(a[1]));
+            int sign = 1; if (s > e) { std::swap(s, e); sign = -1; }
+            auto isWe = a.size() >= 3 ? weekendPred(a[2]) : weekendPred(Value::number(1));
+            auto hs = holidaySet(a, 3); int cnt = 0;
+            for (QDate d = s; d <= e; d = d.addDays(1))
+                if (!isWe(d) && !hs.count(qint64(dateToSerial(d)))) ++cnt;
+            return Value::number(double(sign * cnt));
+        };
+        // WORKDAYINTL(start, days, [weekend], [holidays]): ngày làm việc thứ N, tùy chỉnh cuối tuần.
+        r["WORKDAYINTL"] = [holidaySet, weekendPred](const Args &a) {
+            if (a.size() < 2) argErr("WORKDAYINTL");
+            QDate d = serialToDate(toNumber(a[0])); int days = toInt(a[1]);
+            auto isWe = a.size() >= 3 ? weekendPred(a[2]) : weekendPred(Value::number(1));
+            auto hs = holidaySet(a, 3); int step = days >= 0 ? 1 : -1; int left = std::abs(days);
+            while (left > 0) { d = d.addDays(step); if (!isWe(d) && !hs.count(qint64(dateToSerial(d)))) --left; }
+            return Value::number(dateToSerial(d));
+        };
         // ISOWEEKNUM(serial): tuần ISO 8601 (tuần bắt đầu Thứ Hai, tuần 1 chứa Thứ Năm đầu năm).
         r["ISOWEEKNUM"] = [need](const Args &a) { need(a,1,"ISOWEEKNUM"); return Value::number(serialToDate(toNumber(a[0])).weekNumber()); };
         // WEEKNUM(serial, [type]): tuần 1 chứa ngày 1/1. type 1 (mặc định) tuần bắt đầu CN, type 2 bắt đầu T2.

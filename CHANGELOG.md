@@ -1,5 +1,11 @@
 # Lịch sử thay đổi
 
+## v1.49.0 — Hàm ngày làm việc tùy chỉnh cuối tuần (Spec 12)
+
+- **NETWORKDAYSINTL(ngày đầu, ngày cuối, [mã cuối tuần], [ngày nghỉ])** — đếm số ngày làm việc, cho phép chọn ngày nào trong tuần là cuối tuần.
+- **WORKDAYINTL(ngày đầu, số ngày, [mã cuối tuần], [ngày nghỉ])** — tìm ngày làm việc thứ N với quy ước cuối tuần tùy chỉnh.
+- Mã cuối tuần theo số (1–7, 11–17) hoặc chuỗi 7 ký tự (T2…CN, 1 = nghỉ). Hữu ích cho lịch làm việc không theo thứ Bảy–Chủ Nhật.
+
 ## v1.48.0 — DATEDIF hỗ trợ thêm đơn vị MD, YM, YD (Spec 12)
 
 - **DATEDIF** nay nhận thêm các đơn vị: **YM** (số tháng lẻ sau khi trừ năm), **MD** (số ngày lẻ sau khi trừ tháng), **YD** (số ngày lẻ sau khi trừ năm).
