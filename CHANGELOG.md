@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v1.57.0 — Hiện độ lệch chuẩn ở thanh trạng thái (Spec 11)
+
+- **Thanh trạng thái** nay hiển thị thêm **Độ lệch chuẩn** (mẫu) của vùng chọn khi có từ 2 ô số trở lên.
+- Bổ sung cho Đếm, Tổng, Trung bình, Trung vị, Nhỏ nhất và Lớn nhất — xem nhanh mức phân tán dữ liệu mà không cần công thức.
+
 ## v1.56.0 — Hiện trung vị ở thanh trạng thái (Spec 11)
 
 - **Thanh trạng thái** nay hiển thị thêm **Trung vị** của vùng chọn, bên cạnh Đếm, Tổng, Trung bình, Nhỏ nhất và Lớn nhất.

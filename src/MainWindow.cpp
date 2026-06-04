@@ -2075,11 +2075,13 @@ void MainWindow::updateStats()
     stats::Result r = stats::compute(vals);
     if (r.count == 0) { m_statsLabel->clear(); return; }
     QString s = QStringLiteral("Đếm: %1").arg(r.count);
-    if (r.numCount > 0)
+    if (r.numCount > 0) {
         s += QStringLiteral("   Đếm số: %1   Tổng: %2   TB: %3   Trung vị: %4   Nhỏ nhất: %5   Lớn nhất: %6")
                  .arg(r.numCount)
                  .arg(r.sum, 0, 'g', 10).arg(r.avg, 0, 'g', 10).arg(r.median, 0, 'g', 10)
                  .arg(r.min, 0, 'g', 10).arg(r.max, 0, 'g', 10);
+        if (r.numCount >= 2) s += QStringLiteral("   Độ lệch chuẩn: %1").arg(r.stdev, 0, 'g', 10);
+    }
     m_statsLabel->setText(s);
 }
 

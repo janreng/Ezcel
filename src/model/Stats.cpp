@@ -1,5 +1,6 @@
 #include "model/Stats.h"
 #include <algorithm>
+#include <cmath>
 
 namespace stats {
 
@@ -23,6 +24,11 @@ Result compute(const QVector<QString> &values) {
         std::sort(nums.begin(), nums.end());
         const int n = int(nums.size());
         r.median = (n % 2 == 1) ? nums[n/2] : (nums[n/2 - 1] + nums[n/2]) / 2.0;
+        if (n >= 2) {
+            double ss = 0;
+            for (double x : nums) ss += (x - r.avg) * (x - r.avg);
+            r.stdev = std::sqrt(ss / (n - 1));
+        }
     }
     return r;
 }

@@ -482,6 +482,11 @@ int main(int argc, char **argv) {
         ok(e.median == 0, "khong co so -> trung vi 0");
         stats::Result mu = stats::compute({"5", "1", "3"}); // chua sap xep
         ok(mu.median == 3.0, "trung vi tu sap xep (1,3,5 -> 3)");
+        // stdev mau (n-1): {2,4,4,4,5,5,7,9} -> 2.138...; {1,2,3,4,5} mean3 var=2.5 stdev~1.5811
+        stats::Result sd = stats::compute({"1", "2", "3", "4", "5"});
+        ok(std::abs(sd.stdev - 1.5811388300841898) < 1e-9, "stdev mau (1..5) ~1.5811");
+        ok(m1.stdev == 0, "1 so -> stdev 0");
+        ok(e.stdev == 0, "khong co so -> stdev 0");
     }
 
     // --- AutoSum: dem run so cuoi danh sach ---
