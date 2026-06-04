@@ -863,6 +863,7 @@ void MainWindow::buildMenus()
     data->addAction(QStringLiteral("Tách cột theo dấu phân cách..."), this, &MainWindow::textToColumns);
     data->addAction(QStringLiteral("Gộp cột thành một..."), this, &MainWindow::joinColumnsSelection);
     data->addAction(QStringLiteral("Tổng phụ theo nhóm..."), this, &MainWindow::subtotalRange);
+    data->addAction(QStringLiteral("Bảng tổng hợp nhanh..."), this, &MainWindow::quickPivot);
     data->addSeparator();
     {
         QAction *aGroup = data->addAction(QStringLiteral("Gom nhóm hàng"), this, &MainWindow::groupRows);
@@ -1929,6 +1930,58 @@ void MainWindow::textToColumns()
         ++filled;
     }
     statusBar()->showMessage(QStringLiteral("Đã tách %1 hàng theo '%2'").arg(filled).arg(delim), 3000);
+}
+
+// Bảng tổng hợp nhanh (Pivot đơn giản, Spec 18): gom nhóm 1 cột + tổng hợp 1 cột,
+// kết quả ghi sang TRANG MỚI.
+void MainWindow::quickPivot()
+{
+    const int rows = m_model->rowCount(), cols = m_model->columnCount();
+    int lastRow = -1;
+    for (int r = 0; r < rows; ++r) {
+        bool empty = true;
+        for (int c = 0; c < cols; ++c)
+            if (!m_model->data(m_model->index(r, c), Qt::EditRole).toString().trimmed().isEmpty()) { empty = false; break; }
+        if (empty) break;
+        lastRow = r;
+    }
+    if (lastRow < 1) { statusBar()->showMessage(QStringLiteral("Không đủ dữ liệu để tổng hợp"), 2500); return; }
+
+    bool ok = false;
+    int groupCol = QInputDialog::getInt(this, QStringLiteral("Bảng tổng hợp"),
+        QStringLiteral("Cột gom nhóm (số thứ tự, A=1):"), 1, 1, cols, 1, &ok) - 1;
+    if (!ok) return;
+    int valueCol = QInputDialog::getInt(this, QStringLiteral("Bảng tổng hợp"),
+        QStringLiteral("Cột giá trị cần tổng hợp (A=1):"), qMin(groupCol + 2, cols), 1, cols, 1, &ok) - 1;
+    if (!ok) return;
+    const QStringList fnNames{QStringLiteral("Tổng"), QStringLiteral("Đếm"),
+        QStringLiteral("Trung bình"), QStringLiteral("Lớn nhất"), QStringLiteral("Nhỏ nhất")};
+    QString fnPick = QInputDialog::getItem(this, QStringLiteral("Bảng tổng hợp"),
+        QStringLiteral("Hàm tổng hợp:"), fnNames, 0, false, &ok);
+    if (!ok) return;
+    const auto fn = static_cast<datatools::Agg>(qMax(0, fnNames.indexOf(fnPick)));
+
+    // Lấy dữ liệu (bỏ hàng tiêu đề 0); nhớ tiêu đề để đặt tên cột kết quả.
+    const QString groupHdr = m_model->data(m_model->index(0, groupCol), Qt::DisplayRole).toString();
+    const QString valueHdr = m_model->data(m_model->index(0, valueCol), Qt::DisplayRole).toString();
+    QVector<QVector<QString>> data;
+    for (int r = 1; r <= lastRow; ++r) {
+        QVector<QString> row;
+        for (int c = 0; c < cols; ++c) row.push_back(m_model->data(m_model->index(r, c), Qt::EditRole).toString());
+        data.push_back(row);
+    }
+    const auto summary = datatools::pivotSummary(data, groupCol, valueCol, fn);
+    if (summary.isEmpty()) { statusBar()->showMessage(QStringLiteral("Không có nhóm nào để tổng hợp"), 2500); return; }
+
+    // Ghi kết quả sang trang mới.
+    addSheet(QStringLiteral("Tổng hợp"));
+    m_model->setData(m_model->index(0, 0), groupHdr.isEmpty() ? QStringLiteral("Nhóm") : groupHdr, Qt::EditRole);
+    m_model->setData(m_model->index(0, 1), QStringLiteral("%1 (%2)").arg(fnPick, valueHdr), Qt::EditRole);
+    for (int i = 0; i < summary.size(); ++i) {
+        m_model->setData(m_model->index(i + 1, 0), summary[i].first, Qt::EditRole);
+        m_model->setData(m_model->index(i + 1, 1), QString::number(summary[i].second, 'g', 15), Qt::EditRole);
+    }
+    statusBar()->showMessage(QStringLiteral("Đã tạo bảng tổng hợp %1 nhóm ở trang mới").arg(summary.size()), 3000);
 }
 
 // Tổng phụ (Subtotal, Spec 27.6): chèn dòng tổng sau mỗi nhóm + dòng tổng cộng.

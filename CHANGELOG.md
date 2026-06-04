@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v1.64.0 — Bảng tổng hợp nhanh (Spec 18)
+
+- **Thêm "Bảng tổng hợp nhanh..."** trong menu Dữ liệu: gom nhóm theo một cột và tổng hợp một cột giá trị (Tổng / Đếm / Trung bình / Lớn nhất / Nhỏ nhất).
+- Kết quả được xuất ra một **trang tính mới** với mỗi nhóm một dòng, sắp xếp theo tên nhóm — như một bảng tổng hợp (pivot) thu gọn.
+
 ## v1.63.0 — Sửa trong ô nhấn Enter tự xuống dòng (Spec 03)
 
 - **Sửa lỗi**: khi gõ nội dung NGAY TRONG Ô rồi nhấn Enter, con trỏ nay tự chuyển xuống ô bên dưới (trước đây vẫn đứng yên).

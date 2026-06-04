@@ -2,6 +2,7 @@
 #include "model/DataTools.h"
 #include <QSet>
 #include <QHash>
+#include <algorithm>
 #include <limits>
 
 namespace datatools {
@@ -139,6 +140,28 @@ QStringList joinColumns(const QVector<QVector<QString>> &rows, const QString &se
         }
         out << parts.join(sep);
     }
+    return out;
+}
+
+QVector<QPair<QString, double>> pivotSummary(const QVector<QVector<QString>> &rows,
+                                             int groupCol, int valueCol, Agg fn) {
+    // Gom giá trị cột valueCol theo từng nhóm (giữ thứ tự xuất hiện của nhãn nhóm).
+    QHash<QString, QVector<QString>> buckets; // khóa thường-hóa -> các giá trị
+    QHash<QString, QString> labelOf;          // khóa thường -> nhãn gốc đầu tiên
+    for (const auto &row : rows) {
+        if (groupCol < 0 || groupCol >= row.size()) continue;
+        const QString g = row[groupCol].trimmed();
+        if (g.isEmpty()) continue;
+        const QString key = g.toLower();
+        if (!labelOf.contains(key)) labelOf.insert(key, g);
+        buckets[key].push_back(valueCol >= 0 && valueCol < row.size() ? row[valueCol] : QString());
+    }
+    QVector<QPair<QString, double>> out;
+    for (auto it = buckets.constBegin(); it != buckets.constEnd(); ++it)
+        out.push_back({labelOf.value(it.key()), aggregate(it.value(), fn).toDouble()});
+    std::sort(out.begin(), out.end(), [](const auto &a, const auto &b) {
+        return a.first.compare(b.first, Qt::CaseInsensitive) < 0;
+    });
     return out;
 }
 

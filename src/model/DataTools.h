@@ -3,6 +3,7 @@
 #include <QString>
 #include <QStringList>
 #include <QVector>
+#include <QPair>
 #include <vector>
 
 namespace datatools {
@@ -47,5 +48,11 @@ QStringList joinColumns(const QVector<QVector<QString>> &rows, const QString &se
 // Trả chỉ số các phần tử có giá trị XUẤT HIỆN NHIỀU HƠN MỘT LẦN (tất cả các lần lặp).
 // So sánh không phân biệt hoa/thường; bỏ qua ô rỗng. Dùng để tô/chọn ô trùng.
 QVector<int> duplicateValueIndices(const QVector<QString> &values);
+
+// Bảng tổng hợp 1 chiều (Pivot đơn giản, Spec 18): gom nhóm theo `groupCol`, tổng hợp
+// cột `valueCol` theo hàm `fn`. Trả danh sách (giá trị nhóm, kết quả), nhóm sắp xếp
+// tăng dần (không phân biệt hoa/thường). Bỏ qua hàng có ô nhóm rỗng.
+QVector<QPair<QString, double>> pivotSummary(const QVector<QVector<QString>> &rows,
+                                             int groupCol, int valueCol, Agg fn);
 
 } // namespace datatools

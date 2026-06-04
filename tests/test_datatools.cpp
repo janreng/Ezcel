@@ -118,6 +118,24 @@ int main(int argc, char **argv) {
         ok(datatools::duplicateValueIndices({"x", "y", "z"}).isEmpty(), "khong trung -> rong");
     }
 
+    // --- pivotSummary (Spec 18) ---
+    {
+        QVector<QVector<QString>> data = {
+            {"Bac", "10"}, {"Nam", "5"}, {"Bac", "30"}, {"Nam", "20"}, {"Trung", "7"},
+        };
+        auto sum = datatools::pivotSummary(data, 0, 1, datatools::Agg::Sum);
+        // nhom sap xep: Bac(40), Nam(25), Trung(7)
+        ok(sum.size() == 3, "3 nhom");
+        ok(sum[0].first == "Bac" && sum[0].second == 40, "Bac tong 40");
+        ok(sum[1].first == "Nam" && sum[1].second == 25, "Nam tong 25");
+        ok(sum[2].first == "Trung" && sum[2].second == 7, "Trung tong 7");
+        auto cnt = datatools::pivotSummary(data, 0, 1, datatools::Agg::Count);
+        ok(cnt[0].second == 2, "Count Bac = 2");
+        auto avg = datatools::pivotSummary(data, 0, 1, datatools::Agg::Average);
+        ok(avg[0].second == 20, "Average Bac = 20");
+        ok(datatools::pivotSummary({}, 0, 1, datatools::Agg::Sum).isEmpty(), "rong -> rong");
+    }
+
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);
     return g_fail == 0 ? 0 : 1;
 }

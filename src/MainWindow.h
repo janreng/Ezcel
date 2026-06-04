@@ -67,6 +67,7 @@ private slots:
     void removeDuplicates();  // xóa hàng trùng (Spec 27)
     void textToColumns();     // tách cột theo dấu phân cách (Spec 27)
     void subtotalRange();     // tổng phụ theo nhóm (Spec 27.6)
+    void quickPivot();        // bảng tổng hợp nhanh (pivot, Spec 18)
     void groupRows();         // gom nhóm hàng đang chọn (Spec 09.4)
     void ungroupRows();       // bỏ nhóm hàng tại ô hiện hành
     void toggleGroupRows();   // thu gọn/mở rộng nhóm tại ô hiện hành
