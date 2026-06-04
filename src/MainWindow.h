@@ -15,6 +15,7 @@ class QCheckBox;
 class QDialog;
 class QTabBar;
 class QModelIndex;
+class QSplitter;
 class SpreadsheetModel;
 class CellBorderDelegate;
 
@@ -70,6 +71,7 @@ private slots:
     void subtotalRange();     // tổng phụ theo nhóm (Spec 27.6)
     void consolidateRanges(); // gộp dữ liệu nhiều vùng theo nhãn (Spec 27)
     void forecastSheet();     // dự báo xu hướng tuyến tính + TB trượt (Spec 27)
+    void toggleSplitView();   // bật/tắt chia đôi cửa sổ theo chiều dọc (Spec 14)
     void quickPivot();        // bảng tổng hợp nhanh (pivot, Spec 18)
     void insertCellsDialog(); // chèn ô có dịch chuyển phải/xuống (Spec 09)
     void deleteCellsDialog(); // xóa ô có dịch chuyển trái/lên (Spec 09)
@@ -154,6 +156,8 @@ private:
 
     freeze::FreezePanes *m_freeze = nullptr; // cố định dòng/cột (Spec 14)
     CellBorderDelegate *m_cellDelegate = nullptr; // để "point mode" chèn địa chỉ ô (Spec 12)
+    QSplitter *m_splitter = nullptr;  // bọc lưới để chia đôi cửa sổ (Spec 14)
+    QTableView *m_splitView = nullptr; // pane thứ 2 khi chia đôi (chung model + vùng chọn)
 
     outline::Outline m_rowOutline;   // nhóm/phác thảo hàng (Spec 09.4)
     void applyRowOutline();          // áp ẩn/hiện hàng theo nhóm đang thu gọn

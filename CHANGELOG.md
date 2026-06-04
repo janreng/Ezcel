@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v1.88.0 — Chia đôi cửa sổ (Spec 14)
+
+- Thêm **Xem → "Chia đôi cửa sổ"**: tách lưới thành **hai khung cuộn dọc độc lập** trên cùng một trang — xem phần đầu và phần cuối bảng cùng lúc, kéo thanh chia giữa để chỉnh tỉ lệ.
+- Hai khung dùng chung dữ liệu, vùng chọn và độ rộng cột; bấm lại để bỏ chia.
+
 ## v1.87.0 — Sparkline: biểu đồ mini trong ô (Spec 19)
 
 - Thêm **Dữ liệu → "Sparkline đường..." / "Sparkline cột..."**: chọn ô đích, nhập vùng dữ liệu nguồn (ví dụ `B2:M2`) → ô đó hiển thị một **biểu đồ tí hon** (đường hoặc cột) tóm tắt xu hướng dãy số.

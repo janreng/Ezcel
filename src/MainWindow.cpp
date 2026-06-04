@@ -38,6 +38,7 @@
 
 #include <QTableView>
 #include <QHeaderView>
+#include <QSplitter>
 #include <QLineEdit>
 #include <QLabel>
 #include <QWidget>
@@ -184,7 +185,10 @@ MainWindow::MainWindow(QWidget *parent)
     lay->setContentsMargins(0, 0, 0, 0);
     lay->setSpacing(0);
     lay->addWidget(m_formulaBar->parentWidget()); // dải thanh công thức
-    lay->addWidget(m_view);
+    m_splitter = new QSplitter(Qt::Vertical, central); // bọc lưới để chia đôi (Spec 14)
+    m_splitter->setChildrenCollapsible(false);
+    m_splitter->addWidget(m_view);
+    lay->addWidget(m_splitter);
     lay->addWidget(tabRow);
     setCentralWidget(central);
 
@@ -254,12 +258,41 @@ void MainWindow::installCrossSheet(SpreadsheetModel *m)
     });
 }
 
+// Chia đôi cửa sổ theo chiều dọc (Spec 14): bật/tắt pane thứ 2 chung model + vùng chọn,
+// cuộn dọc độc lập, đồng bộ độ rộng cột từ lưới chính.
+void MainWindow::toggleSplitView()
+{
+    if (!m_splitter) return;
+    if (m_splitView) { // đang bật -> tắt
+        m_splitView->deleteLater();
+        m_splitView = nullptr;
+        statusBar()->showMessage(QStringLiteral("Đã bỏ chia đôi cửa sổ"), 2000);
+        return;
+    }
+    auto *v = new QTableView(m_splitter);
+    v->setModel(m_model);
+    v->setSelectionModel(m_view->selectionModel()); // chung vùng chọn với lưới chính
+    v->setItemDelegate(m_cellDelegate);              // cùng cách vẽ (định dạng/spill/sparkline)
+    v->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
+    v->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+    for (int c = 0; c < m_model->columnCount(); ++c) v->setColumnWidth(c, m_view->columnWidth(c));
+    connect(m_view->horizontalHeader(), &QHeaderView::sectionResized, v,
+            [v](int idx, int, int sz) { v->setColumnWidth(idx, sz); });
+    m_splitter->addWidget(v);
+    m_splitView = v;
+    statusBar()->showMessage(QStringLiteral("Đã chia đôi cửa sổ (cuộn dọc độc lập)"), 2500);
+}
+
 void MainWindow::switchToSheet(int i)
 {
     if (i < 0 || i >= m_sheets.size()) return;
     m_model = m_sheets[i];
     m_view->setModel(m_model);
     bindActiveModel();
+    if (m_splitView) { // pane chia đôi theo model mới + chung lại vùng chọn
+        m_splitView->setModel(m_model);
+        m_splitView->setSelectionModel(m_view->selectionModel());
+    }
     if (m_freeze) m_freeze->rebind(m_model, m_view->selectionModel()); // gắn lại freeze cho model mới
     onCurrentCellChanged(m_view->currentIndex(), QModelIndex());
     updateStats();
@@ -980,6 +1013,7 @@ void MainWindow::buildMenus()
             m_freeze->apply(0, 0); statusBar()->showMessage(QStringLiteral("Đã bỏ cố định"), 2500);
         });
     }
+    view->addAction(QStringLiteral("Chia đôi cửa sổ"), this, &MainWindow::toggleSplitView);
     view->addSeparator();
     QAction *gl = view->addAction(QStringLiteral("Hiện đường lưới"));
     gl->setCheckable(true);
