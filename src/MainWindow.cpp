@@ -10,6 +10,8 @@
 #include "view/CopyVisible.h"
 #include "view/FreezePanes.h"
 #include "view/GridView.h"
+#include "view/FormulaHint.h"
+#include "formula/Functions.h"
 #include "model/RefCycle.h"
 #include "model/NameValidate.h"
 #include "model/RangeParse.h"
@@ -106,7 +108,9 @@ MainWindow::MainWindow(QWidget *parent)
     m_view->setShowGrid(true);
     m_view->horizontalHeader()->setHighlightSections(true); // header sáng khi chọn (giống Excel)
     m_view->verticalHeader()->setHighlightSections(true);
-    m_view->setItemDelegate(new CellBorderDelegate(m_view, m_view)); // viền xanh ô đang chọn
+    auto *cellDelegate = new CellBorderDelegate(m_view, m_view); // viền xanh ô đang chọn
+    cellDelegate->setFunctionNames(formula::functionNames());     // popup gợi ý hàm khi gõ '='
+    m_view->setItemDelegate(cellDelegate);
     // Gõ phím là vào chế độ sửa ngay (giống Excel); Enter sau đó tự nhảy xuống ô dưới.
     m_view->setEditTriggers(QAbstractItemView::DoubleClicked | QAbstractItemView::EditKeyPressed
                             | QAbstractItemView::AnyKeyPressed);
@@ -423,6 +427,7 @@ void MainWindow::buildFormulaBar()
     m_formulaBar = new QLineEdit(bar);
     m_formulaBar->setPlaceholderText(QStringLiteral("Nội dung / công thức ô đang chọn"));
     m_formulaBar->installEventFilter(this); // bắt F4 để đảo khóa $ tham chiếu (Spec 04)
+    formulahint::install(m_formulaBar, formula::functionNames()); // popup gợi ý hàm khi gõ '='
     h->addWidget(m_nameBox);
     h->addWidget(fx);
     h->addWidget(m_formulaBar, 1);

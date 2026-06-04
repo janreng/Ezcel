@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v1.66.0 — Gợi ý hàm khi gõ công thức (Spec 12)
+
+- **Gõ `=` rồi nhập chữ trong ô (hoặc thanh công thức) sẽ xổ popup gợi ý các hàm phù hợp** (SUM, IF, VLOOKUP...).
+- Chọn một hàm là tự chèn tên hàm kèm dấu mở ngoặc, giúp viết công thức nhanh và đỡ gõ sai tên.
+
 ## v1.65.0 — Nhấn Backspace/Delete để xóa ô ngay (Spec 03)
 
 - **Chọn ô rồi nhấn Backspace (hoặc Delete) là xóa nội dung ngay**, không cần bấm đúp vào ô nữa.

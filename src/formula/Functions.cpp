@@ -1669,4 +1669,12 @@ const LazyFn *lookupLazy(const QString &upperName) {
     return it == m.constEnd() ? nullptr : &it.value();
 }
 
+QStringList functionNames() {
+    QStringList names = fnMap().keys();
+    names += lazyMap().keys();
+    names.removeDuplicates();
+    names.sort();
+    return names;
+}
+
 } // namespace formula

@@ -1,6 +1,9 @@
 // Test headless engine cong thuc. CHI in ASCII (console cp1252).
 #include "formula/Formula.h"
+#include "formula/Functions.h"
 #include <QHash>
+#include <QStringList>
+#include <algorithm>
 #include <QString>
 #include <QVariant>
 #include <cstdio>
@@ -597,6 +600,16 @@ int main() {
         try { noSheet = evaluate(QStringLiteral("=Sheet2!A1"), resolver); }
         catch (const formula::FormulaError &e) { noSheet = e.etype(); }
         okEq(noSheet.toString() == QStringLiteral("#REF!"), "khong co sheetResolver -> #REF!");
+    }
+
+    // --- functionNames (popup gợi ý hàm, Spec 12) ---
+    {
+        auto okEq = [&](bool c, const char *n) { if (c) ++g_pass; else { ++g_fail; std::printf("FAIL %s\n", n); } };
+        const QStringList ns = formula::functionNames();
+        okEq(ns.size() > 100, "co tren 100 ham");
+        okEq(ns.contains("SUM") && ns.contains("IF") && ns.contains("VLOOKUP"), "co SUM/IF/VLOOKUP");
+        okEq(std::is_sorted(ns.begin(), ns.end()), "danh sach da sap xep");
+        okEq(ns.indexOf("SUM") >= 0 && !ns.contains("sum"), "ten viet HOA");
     }
 
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);

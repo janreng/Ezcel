@@ -1,11 +1,23 @@
 #include "view/CellBorderDelegate.h"
+#include "view/FormulaHint.h"
 #include "ui/Theme.h"
 
 #include <QAbstractItemView>
 #include <QPainter>
+#include <QLineEdit>
 
 CellBorderDelegate::CellBorderDelegate(QAbstractItemView *view, QObject *parent)
     : QStyledItemDelegate(parent), m_view(view) {}
+
+QWidget *CellBorderDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option,
+                                          const QModelIndex &index) const
+{
+    QWidget *editor = QStyledItemDelegate::createEditor(parent, option, index);
+    if (!m_fnNames.isEmpty())
+        if (auto *le = qobject_cast<QLineEdit *>(editor))
+            formulahint::install(le, m_fnNames); // popup gợi ý hàm khi gõ '='
+    return editor;
+}
 
 void CellBorderDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
                                const QModelIndex &index) const
