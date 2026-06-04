@@ -34,6 +34,7 @@
 #include "model/AutoComplete.h"
 #include "model/DataTools.h"
 #include "model/Consolidate.h"
+#include "model/Forecast.h"
 
 #include <QTableView>
 #include <QHeaderView>
@@ -890,6 +891,7 @@ void MainWindow::buildMenus()
     data->addAction(QStringLiteral("Gộp cột thành một..."), this, &MainWindow::joinColumnsSelection);
     data->addAction(QStringLiteral("Tổng phụ theo nhóm..."), this, &MainWindow::subtotalRange);
     data->addAction(QStringLiteral("Gộp dữ liệu nhiều vùng..."), this, &MainWindow::consolidateRanges);
+    data->addAction(QStringLiteral("Dự báo xu hướng..."), this, &MainWindow::forecastSheet);
     data->addAction(QStringLiteral("Bảng tổng hợp nhanh..."), this, &MainWindow::quickPivot);
     data->addSeparator();
     {
@@ -2195,6 +2197,74 @@ void MainWindow::consolidateRanges()
             m_model->setData(m_model->index(r, c), out[r][c], Qt::EditRole);
     statusBar()->showMessage(QStringLiteral("Đã gộp %1 vùng → %2 nhãn hàng ở trang mới")
         .arg(tables.size()).arg(out.size() - 1), 3000);
+}
+
+// Dự báo xu hướng tuyến tính + trung bình trượt (Forecast, Spec 27). Chọn cột thời gian +
+// cột giá trị + số kỳ dự báo; kết quả (thực tế / dự báo / TB trượt) ghi sang trang mới.
+void MainWindow::forecastSheet()
+{
+    const int rows = m_model->rowCount(), cols = m_model->columnCount();
+    int lastRow = -1;
+    for (int r = 0; r < rows; ++r) {
+        bool empty = true;
+        for (int c = 0; c < cols; ++c)
+            if (!m_model->data(m_model->index(r, c), Qt::EditRole).toString().trimmed().isEmpty()) { empty = false; break; }
+        if (empty) break;
+        lastRow = r;
+    }
+    if (lastRow < 2) { statusBar()->showMessage(QStringLiteral("Cần ít nhất 2 mốc dữ liệu để dự báo"), 2500); return; }
+
+    bool ok = false;
+    int timeCol = QInputDialog::getInt(this, QStringLiteral("Dự báo"),
+        QStringLiteral("Cột thời gian (số thứ tự, A=1):"), 1, 1, cols, 1, &ok) - 1;
+    if (!ok) return;
+    int valCol = QInputDialog::getInt(this, QStringLiteral("Dự báo"),
+        QStringLiteral("Cột giá trị (A=1):"), qMin(timeCol + 2, cols), 1, cols, 1, &ok) - 1;
+    if (!ok) return;
+    int periods = QInputDialog::getInt(this, QStringLiteral("Dự báo"),
+        QStringLiteral("Số kỳ muốn dự báo:"), 3, 1, 1000, 1, &ok);
+    if (!ok) return;
+    int window = QInputDialog::getInt(this, QStringLiteral("Dự báo"),
+        QStringLiteral("Cửa sổ trung bình trượt (0 = không dùng):"), 0, 0, lastRow, 1, &ok);
+    if (!ok) return;
+
+    // Đọc x, y (bỏ hàng tiêu đề 0); chỉ lấy hàng có cả hai là số.
+    QVector<double> x, y;
+    const QString timeHdr = m_model->data(m_model->index(0, timeCol), Qt::DisplayRole).toString();
+    const QString valHdr  = m_model->data(m_model->index(0, valCol), Qt::DisplayRole).toString();
+    for (int r = 1; r <= lastRow; ++r) {
+        bool okx = false, oky = false;
+        double vx = m_model->data(m_model->index(r, timeCol), Qt::EditRole).toString().trimmed().toDouble(&okx);
+        double vy = m_model->data(m_model->index(r, valCol), Qt::EditRole).toString().trimmed().toDouble(&oky);
+        if (okx && oky) { x.push_back(vx); y.push_back(vy); }
+    }
+    if (x.size() < 2) { statusBar()->showMessage(QStringLiteral("Cột thời gian/giá trị phải là số (>=2 mốc)"), 3000); return; }
+
+    const auto fc = forecast::linearForecast(x, y, periods);
+    if (fc.isEmpty()) { statusBar()->showMessage(QStringLiteral("Không dự báo được (dữ liệu không hợp lệ)"), 2500); return; }
+    const QVector<double> ma = window > 0 ? forecast::movingAverage(y, window) : QVector<double>();
+
+    addSheet(QStringLiteral("Dự báo"));
+    int col = 0;
+    m_model->setData(m_model->index(0, col++), timeHdr.isEmpty() ? QStringLiteral("Thời gian") : timeHdr, Qt::EditRole);
+    m_model->setData(m_model->index(0, col++), QStringLiteral("Thực tế"), Qt::EditRole);
+    m_model->setData(m_model->index(0, col++), QStringLiteral("Dự báo"), Qt::EditRole);
+    const int maCol = window > 0 ? col++ : -1;
+    if (maCol >= 0) m_model->setData(m_model->index(0, maCol), QStringLiteral("TB trượt"), Qt::EditRole);
+
+    int row = 1;
+    for (int i = 0; i < x.size(); ++i, ++row) {
+        m_model->setData(m_model->index(row, 0), QString::number(x[i], 'g', 15), Qt::EditRole);
+        m_model->setData(m_model->index(row, 1), QString::number(y[i], 'g', 15), Qt::EditRole);
+        if (maCol >= 0 && !std::isnan(ma[i]))
+            m_model->setData(m_model->index(row, maCol), QString::number(ma[i], 'g', 15), Qt::EditRole);
+    }
+    for (const auto &p : fc) {
+        m_model->setData(m_model->index(row, 0), QString::number(p.first, 'g', 15), Qt::EditRole);
+        m_model->setData(m_model->index(row, 2), QString::number(p.second, 'g', 15), Qt::EditRole);
+        ++row;
+    }
+    statusBar()->showMessage(QStringLiteral("Đã dự báo %1 kỳ tiếp theo ở trang mới").arg(periods), 3000);
 }
 
 // --- Gom nhóm / phác thảo hàng (Spec 09.4) ---

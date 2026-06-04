@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
-project(Ezcel VERSION 1.79.0 LANGUAGES CXX)
+project(Ezcel VERSION 1.80.0 LANGUAGES CXX)
 
 # Bản port C++ của Ezcel (gốc Python/PySide6). Dùng Qt6 Widgets + MinGW.
 set(CMAKE_CXX_STANDARD 20)
@@ -57,7 +57,8 @@ add_library(ezcel_model STATIC src/model/SpreadsheetModel.cpp src/model/Spreadsh
     src/model/SeriesGen.cpp src/model/SeriesGen.h
     src/model/TextCase.cpp src/model/TextCase.h
     src/model/CellShift.cpp src/model/CellShift.h
-    src/model/Consolidate.cpp src/model/Consolidate.h)
+    src/model/Consolidate.cpp src/model/Consolidate.h
+    src/model/Forecast.cpp src/model/Forecast.h)
 target_include_directories(ezcel_model PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(ezcel_model PUBLIC ezcel_formula ezcel_sort Qt6::Core Qt6::Gui)
 
@@ -161,6 +162,10 @@ target_link_libraries(test_cellshift PRIVATE Qt6::Core)
 add_executable(test_consolidate tests/test_consolidate.cpp src/model/Consolidate.cpp src/model/DataTools.cpp)
 target_include_directories(test_consolidate PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(test_consolidate PRIVATE Qt6::Core)
+
+add_executable(test_forecast tests/test_forecast.cpp src/model/Forecast.cpp)
+target_include_directories(test_forecast PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_link_libraries(test_forecast PRIVATE Qt6::Core)
 
 add_executable(test_headermenu tests/test_headermenu.cpp src/view/HeaderMenu.cpp)
 target_include_directories(test_headermenu PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)

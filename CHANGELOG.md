@@ -1,5 +1,11 @@
 # Lịch sử thay đổi
 
+## v1.80.0 — Dự báo xu hướng tương lai (Spec 27)
+
+- Thêm **Dữ liệu → "Dự báo xu hướng..."**: chọn cột thời gian + cột giá trị + số kỳ muốn dự báo, kết quả gồm dữ liệu thực tế và phần **dự báo** theo đường xu hướng tuyến tính được tạo ở trang mới.
+- Tùy chọn thêm cột **trung bình trượt** để làm mượt dữ liệu (đặt cửa sổ = 0 nếu không cần).
+- Bảng kết quả đặt thực tế và dự báo ở hai cột riêng, tiện vẽ biểu đồ so sánh.
+
 ## v1.79.0 — Gộp dữ liệu từ nhiều trang tính (Spec 27)
 
 - "Gộp dữ liệu nhiều vùng" giờ lấy được vùng **từ trang tính khác** bằng cú pháp `Tên!Vùng` — ví dụ `Tháng 2!A1:C4 ; Tháng 3!A1:C4`.
