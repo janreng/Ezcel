@@ -166,6 +166,8 @@ QVariant SpreadsheetModel::data(const QModelIndex &index, int role) const {
         if (!cbg.isEmpty()) return QColor(cbg);
         QString csbg = colorScaleColorAt(row, col);          // thang màu (sau cond rule)
         if (!csbg.isEmpty()) return QColor(csbg);
+        QString tbg = tableColorAt(row, col);                 // sọc bảng (sau thang màu, trước fmt nền)
+        if (!tbg.isEmpty()) return QColor(tbg);
         const Format &f = m_fmt[key(row, col)];
         auto it = f.constFind(QStringLiteral("bg"));
         return it != f.constEnd() ? QColor(it->toString()) : QVariant();
@@ -503,6 +505,28 @@ QString SpreadsheetModel::colorScaleColorAt(int row, int col) const {
     if (!has) return QString();
     const double frac = cond::dataBarFraction(v, mn, mx);
     return cond::colorScale(frac, hit->low, hit->mid, hit->high);
+}
+
+void SpreadsheetModel::addTable(const tbl::Table &t) {
+    m_tables.push_back(t);
+    emit dataChanged(index(t.top, t.left), index(t.bottom, t.right),
+                     {Qt::BackgroundRole, Qt::ForegroundRole});
+}
+
+void SpreadsheetModel::clearTables() {
+    if (m_tables.isEmpty()) return;
+    m_tables.clear();
+    if (rowCount() && columnCount())
+        emit dataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1), {Qt::BackgroundRole});
+}
+
+QString SpreadsheetModel::tableColorAt(int row, int col) const {
+    QString c;
+    for (const tbl::Table &t : m_tables) {
+        QString hit = tbl::stripeColorAt(t, row, col); // bảng sau cùng thắng
+        if (!hit.isEmpty()) c = hit;
+    }
+    return c;
 }
 
 void SpreadsheetModel::addIconSet(const cond::IconSet &is) {

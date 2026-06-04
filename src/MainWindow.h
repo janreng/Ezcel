@@ -78,6 +78,7 @@ private slots:
     void toggleSplitView();   // bật/tắt chia đôi cửa sổ theo chiều dọc (Spec 14)
     void goalSeekDialog();    // dò mục tiêu: đổi ô nhập để ô công thức đạt giá trị (Spec 28)
     void quickPivot();        // bảng tổng hợp nhanh (pivot, Spec 18)
+    void formatAsTable();     // định dạng vùng chọn thành bảng sọc xen kẽ (Spec 16)
     void autoSum();           // AutoSum (∑) ô hiện hành (Alt+=)
     void sortSelection(bool ascending); // sắp xếp vùng theo cột hiện hành
     void insertToday();       // chèn ngày hôm nay vào ô hiện hành (Ctrl+;)

@@ -17,6 +17,7 @@
 #include "model/Validation.h"
 #include "model/CellShift.h"
 #include "model/Sparkline.h"
+#include "model/TableFormat.h"
 
 // Vùng ô gộp [top,left]..[bottom,right] (port tuple (t,l,b,r) của Python).
 struct MergeRange {
@@ -161,6 +162,9 @@ public:
     // Bộ biểu tượng (Icon Set, Spec 08): thêm cho vùng chọn; xóa hết.
     void addIconSet(const cond::IconSet &is);
     void clearIconSets();
+    // Bảng có cấu trúc (Spec 16): tô sọc xen kẽ + hàng tiêu đề cho một vùng; xóa hết.
+    void addTable(const tbl::Table &t);
+    void clearTables();
     // Bảo vệ trang tính (Spec 29): khi bật, ô đang KHÓA không sửa được. Mặc định mọi ô khóa.
     void setSheetProtected(bool on);
     bool isSheetProtected() const { return m_protected; }
@@ -216,6 +220,8 @@ private:
     QVector<cond::DataBar> m_dataBars;           // thanh dữ liệu (Data Bar)
     QVector<cond::ColorScale> m_colorScales;     // thang màu (Color Scale)
     QString colorScaleColorAt(int row, int col) const; // màu nền nội suy; rỗng nếu không thuộc
+    QVector<tbl::Table> m_tables;                 // bảng có cấu trúc (Spec 16)
+    QString tableColorAt(int row, int col) const; // màu sọc bảng; rỗng nếu không thuộc
     QVector<cond::IconSet> m_iconSets;           // bộ biểu tượng (Icon Set)
     QString iconColorAt(int row, int col) const; // màu chấm biểu tượng; rỗng nếu không thuộc
     QVector<sparkline::Spark> m_sparklines;      // sparkline (biểu đồ mini)

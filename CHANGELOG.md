@@ -1,5 +1,11 @@
 # Lịch sử thay đổi
 
+## v1.96.0 — Định dạng vùng thành bảng sọc màu (Spec 16)
+
+- Thêm **Chèn → "Định dạng là bảng"**: biến vùng đang chọn thành **bảng có hàng tiêu đề tô đậm** và **các hàng dữ liệu sọc xen kẽ hai màu** — dễ đọc theo dòng.
+- **"Bỏ định dạng bảng"** để gỡ về như cũ.
+- Màu sọc nằm dưới định dạng có điều kiện và thang màu (không che các quy tắc đó), nằm trên màu nền tự đặt.
+
 ## v1.95.0 — In bảng tính (Spec 24)
 
 - Thêm **Tệp → "In..." (Ctrl+P)** và nút **In** trên dải lệnh: mở hộp thoại in, chọn máy in/khổ giấy rồi in.

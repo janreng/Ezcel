@@ -1212,6 +1212,26 @@ void MainWindow::addColorScaleDialog()
     m_model->addColorScale(cond::ColorScale{t, l, b, r, presets[i].lo, presets[i].mid, presets[i].hi});
 }
 
+// ---------------------------------------------------------------- bảng có cấu trúc (Spec 16)
+// Định dạng vùng chọn thành "bảng": hàng đầu là tiêu đề tô đậm, các hàng dữ liệu
+// tô sọc xen kẽ hai màu (kiểu bảng xanh dựng sẵn). Bỏ qua nếu chưa chọn vùng.
+void MainWindow::formatAsTable()
+{
+    int t, l, b, r;
+    if (!selectionBox(t, l, b, r)) {
+        statusBar()->showMessage(QStringLiteral("Hãy chọn vùng cần định dạng thành bảng"), 2500);
+        return;
+    }
+    tbl::Table tb;
+    tb.top = t; tb.left = l; tb.bottom = b; tb.right = r;
+    tb.header = true;
+    tb.headerColor = QStringLiteral("#4472C4"); // xanh đậm tiêu đề
+    tb.band1 = QStringLiteral("#FFFFFF");       // hàng chẵn
+    tb.band2 = QStringLiteral("#D9E1F2");       // hàng lẻ (xanh nhạt)
+    m_model->addTable(tb);
+    statusBar()->showMessage(QStringLiteral("Đã định dạng vùng thành bảng"), 2500);
+}
+
 // ---------------------------------------------------------------- in ấn (Spec 24)
 // In lưới hiện hành: mở QPrintDialog rồi vẽ phần bảng đang hiển thị lên trang,
 // thu nhỏ vừa khổ giấy (giữ tỉ lệ, không phóng to). Bản 1: in vùng nhìn thấy.
@@ -1338,6 +1358,8 @@ void MainWindow::buildRibbon()
     m_ribbon->beginTab(QStringLiteral("Chèn"));
     m_ribbon->beginGroup(QStringLiteral("Bảng"));
     m_ribbon->addButton(QStringLiteral("table"), QStringLiteral("Tổng hợp\nnhanh"), [this] { quickPivot(); });
+    m_ribbon->addButton(QStringLiteral("table"), QStringLiteral("Định dạng\nlà bảng"), [this] { formatAsTable(); });
+    m_ribbon->addSmallButton(QStringLiteral("cell_delete"), QStringLiteral("Bỏ định dạng bảng"), [this] { m_model->clearTables(); });
     m_ribbon->beginGroup(QStringLiteral("Sparkline"));
     m_ribbon->addSmallButton(QStringLiteral("chart_line"), QStringLiteral("Đường"), [this] { insertSparkline(int(sparkline::Type::Line)); });
     m_ribbon->addSmallButton(QStringLiteral("chart_column"), QStringLiteral("Cột"), [this] { insertSparkline(int(sparkline::Type::Column)); });
