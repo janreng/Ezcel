@@ -11,6 +11,7 @@
 #include "model/RefCycle.h"
 #include "model/NameValidate.h"
 #include "model/RangeParse.h"
+#include "model/SeriesGen.h"
 #include "model/Filter.h"
 #include "model/PasteOps.h"
 #include "model/GotoSpecial.h"
@@ -535,6 +536,7 @@ void MainWindow::buildMenus()
     edit->addSeparator();
     edit->addAction(i18n::tr("edit_fill_down"), QKeySequence(QStringLiteral("Ctrl+D")), this, &MainWindow::fillDown);
     edit->addAction(i18n::tr("edit_fill_right"), QKeySequence(QStringLiteral("Ctrl+R")), this, &MainWindow::fillRight);
+    edit->addAction(QStringLiteral("Điền chuỗi..."), this, &MainWindow::fillSeries);
     edit->addAction(i18n::tr("edit_merge"), this, &MainWindow::toggleMergeSelection);
     edit->addSeparator();
     edit->addAction(i18n::tr("edit_find"), QKeySequence::Find, this, &MainWindow::showFindReplace);
@@ -1233,6 +1235,47 @@ void MainWindow::fillRight()
     int t, l, b, r;
     if (!selectionBox(t, l, b, r) || r <= l) return;
     for (int row = t; row <= b; ++row) m_model->autofillHorizontal(row, l, l, r);
+}
+
+// Điền chuỗi số (Fill Series, Spec 05): chọn kiểu (cấp số cộng/nhân) + bước nhảy;
+// dùng giá trị ô đầu làm số bắt đầu, điền theo cột (nếu cao) hoặc theo hàng.
+void MainWindow::fillSeries()
+{
+    int t, l, b, r;
+    if (!selectionBox(t, l, b, r) || (t == b && l == r)) {
+        statusBar()->showMessage(QStringLiteral("Hãy chọn vùng (từ 2 ô) để điền chuỗi"), 2500);
+        return;
+    }
+    const bool vertical = (b - t) >= (r - l); // hướng dài hơn
+
+    bool okType = false;
+    const QStringList types{QStringLiteral("Cấp số cộng (+ bước)"), QStringLiteral("Cấp số nhân (× bước)")};
+    const QString pick = QInputDialog::getItem(this, QStringLiteral("Điền chuỗi"),
+        QStringLiteral("Kiểu chuỗi:"), types, 0, false, &okType);
+    if (!okType) return;
+    const auto type = (types.indexOf(pick) == 1) ? seriesgen::Type::Growth : seriesgen::Type::Linear;
+
+    bool okStep = false;
+    const double step = QInputDialog::getDouble(this, QStringLiteral("Điền chuỗi"),
+        QStringLiteral("Giá trị bước nhảy:"), type == seriesgen::Type::Growth ? 2 : 1,
+        -1e12, 1e12, 6, &okStep);
+    if (!okStep) return;
+
+    auto fillLine = [&](int row0, int col0, int count, bool vert) {
+        const QString seed = m_model->data(m_model->index(row0, col0), Qt::EditRole).toString();
+        bool okSeed = false; double start = seed.trimmed().toDouble(&okSeed);
+        if (!okSeed) start = (type == seriesgen::Type::Growth) ? 1.0 : 0.0;
+        const auto vals = seriesgen::generate(start, step, count, type);
+        for (int i = 0; i < vals.size(); ++i) {
+            int rr = vert ? row0 + i : row0;
+            int cc = vert ? col0 : col0 + i;
+            m_model->setData(m_model->index(rr, cc), QString::number(vals[i], 'g', 15), Qt::EditRole);
+        }
+    };
+
+    if (vertical) for (int c = l; c <= r; ++c) fillLine(t, c, b - t + 1, true);
+    else          for (int row = t; row <= b; ++row) fillLine(row, l, r - l + 1, false);
+    statusBar()->showMessage(QStringLiteral("Đã điền chuỗi"), 2500);
 }
 
 void MainWindow::toggleMergeSelection()

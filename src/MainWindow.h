@@ -45,6 +45,7 @@ private slots:
     void clearAllSel();       // xóa cả nội dung + định dạng vùng chọn (Spec 09)
     void fillDown();
     void fillRight();
+    void fillSeries();        // điền chuỗi số có bước nhảy (Spec 05)
     void flashFill();         // tự điền theo mẫu (Spec 05)
     void pickFromList();      // chọn từ danh sách trong cột (Alt+Down, Spec 05)
     void filterByValues();    // lọc theo giá trị chọn trong cột (Spec 15)

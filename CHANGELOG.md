@@ -1,5 +1,11 @@
 # Lịch sử thay đổi
 
+## v1.42.0 — Điền chuỗi số có bước nhảy (Spec 05)
+
+- **Thêm "Điền chuỗi..."** trong menu Sửa: chọn một vùng rồi điền dãy số tự động.
+- Chọn **cấp số cộng** (cộng dồn bước nhảy) hoặc **cấp số nhân** (nhân bước nhảy); lấy ô đầu làm số bắt đầu.
+- Điền theo cột hoặc theo hàng tùy hướng vùng chọn dài hơn.
+
 ## v1.41.0 — Hàm ngày/giờ: DATEVALUE, TIMEVALUE, DAYS360 (Spec 12)
 
 - **DATEVALUE(văn bản)** — đổi chuỗi ngày (ví dụ "2026-06-03") thành giá trị ngày để tính toán.
