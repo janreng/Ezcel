@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v1.83.0 — Sửa ô mượt hơn trên bảng lớn (Spec 12)
+
+- Tối ưu vẽ lại: khi bảng **không dùng mảng động**, mỗi lần sửa ô chỉ vẽ lại vùng thay đổi thay vì cả trang — bảng nhiều dữ liệu thao tác nhẹ và mượt hơn.
+- Khi có công thức mảng động (spill) vẫn vẽ lại đầy đủ để các ô tràn luôn đúng.
+
 ## v1.82.0 — Ghép mảng VSTACK / HSTACK (Spec 12)
 
 - Thêm **`VSTACK(vùng1, vùng2, ...)`** — xếp chồng nhiều vùng theo **chiều dọc** thành một bảng và tự tràn ra ô.

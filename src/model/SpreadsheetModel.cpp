@@ -528,11 +528,23 @@ void SpreadsheetModel::recalculate(int row, int col) {
         if (it != m_dependents.constEnd())
             for (qint64 d : *it) if (!dirty.contains(d)) queue.push_back(d);
     }
-    for (qint64 cell : dirty) m_evalCache.remove(cell);
+    int rMin = INT_MAX, rMax = INT_MIN, cMin = INT_MAX, cMax = INT_MIN;
+    for (qint64 cell : dirty) {
+        m_evalCache.remove(cell);
+        const int r = keyRow(cell), c = keyCol(cell);
+        rMin = qMin(rMin, r); rMax = qMax(rMax, r);
+        cMin = qMin(cMin, c); cMax = qMax(cMax, c);
+    }
+    const bool hadSpill = !m_spillSize.isEmpty();
     rebuildSpills(); // vùng spill có thể đổi (anchor sửa / ô chặn bỏ đi) -> dựng lại
-    // Spill có thể đổi ô ngoài bounding-box các ô dirty -> phát lại toàn lưới cho chắc.
-    if (rowCount() && columnCount())
-        emit dataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1));
+    // Khi có mảng động, spill có thể đổi ô NGOÀI bounding-box -> phát lại toàn lưới cho chắc.
+    // Trường hợp thường (không spill) chỉ phát bounding-box để khỏi vẽ lại cả lưới.
+    if (rowCount() && columnCount()) {
+        if (hadSpill || !m_spillSize.isEmpty())
+            emit dataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1));
+        else
+            emit dataChanged(index(rMin, cMin), index(rMax, cMax), {Qt::DisplayRole});
+    }
     emit contentChanged();
 }
 
