@@ -6,6 +6,7 @@
 #include <QApplication>
 #include <QTableView>
 #include <QToolButton>
+#include <QMenu>
 #include <cstdio>
 
 static int g_pass = 0, g_fail = 0;
@@ -83,6 +84,13 @@ int main(int argc, char **argv) {
         ok(b != nullptr, "addButton tra ve nut");
         if (b) b->click();
         ok(clicked == 1, "click nut chay callback");
+
+        // Nút thả menu giữ đúng QMenu được gắn (dropdown kiểu Excel).
+        QMenu menu;
+        menu.addAction(QStringLiteral("Mục 1"));
+        QToolButton *mb = rb.addMenuButton(QString(), QStringLiteral("Tệp"), &menu);
+        ok(mb != nullptr && mb->menu() == &menu, "addMenuButton gan dung menu");
+        ok(mb && mb->popupMode() == QToolButton::InstantPopup, "menu button instant popup");
     }
 
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);

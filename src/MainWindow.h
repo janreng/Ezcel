@@ -14,6 +14,8 @@ class QSlider;
 class QCheckBox;
 class QDialog;
 class QTabBar;
+class QMenu;
+class QToolButton;
 class QModelIndex;
 class QSplitter;
 class SpreadsheetModel;
@@ -109,6 +111,7 @@ private:
     void buildMenus();
     void buildContextMenus();    // menu chuột phải ô + đầu hàng/cột (Spec 06)
     void buildRibbon();          // dải lệnh kiểu Excel (Trang đầu/Chèn/Công thức/Dữ liệu/Xem)
+    void refreshRibbonDropdowns(); // gắn lại QMenu cho các nút thả menu trên ribbon (sau khi dựng/đổi ngôn ngữ)
     void buildFormulaBar();
     void updateTitle();
     void applyZoom();                          // áp mức thu phóng hiện tại
@@ -131,6 +134,12 @@ private:
     void pickColor(const QString &key);         // "color" (chữ) hoặc "bg" (nền)
 
     RibbonBar *m_ribbon = nullptr;  // dải lệnh trên cùng (kiểu Excel)
+    // Các menu cấp 1 (dựng trong buildMenus) — tái dùng làm nút thả menu trên ribbon.
+    QMenu *m_mFile = nullptr, *m_mEdit = nullptr, *m_mStruct = nullptr, *m_mData = nullptr,
+          *m_mView = nullptr, *m_mSettings = nullptr, *m_mHelp = nullptr;
+    // Nút thả menu tương ứng trên ribbon (giữ để gắn lại menu khi đổi ngôn ngữ).
+    QToolButton *m_dbFile = nullptr, *m_dbEdit = nullptr, *m_dbStruct = nullptr,
+                *m_dbData = nullptr, *m_dbView = nullptr, *m_dbSettings = nullptr, *m_dbHelp = nullptr;
     QTableView *m_view = nullptr;
     SpreadsheetModel *m_model = nullptr;
     QLineEdit *m_formulaBar = nullptr;

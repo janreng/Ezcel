@@ -197,6 +197,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     buildMenus();
     buildRibbon();
+    menuBar()->hide(); // dọn thanh menu cổ điển — mọi lệnh đã có trên ribbon (phím tắt vẫn chạy)
     m_modeLabel = new QLabel(this);
     m_modeLabel->setMinimumWidth(70);
     statusBar()->addWidget(m_modeLabel); // bên trái thanh trạng thái
@@ -641,7 +642,7 @@ void MainWindow::onFormulaBarCommitted()
 void MainWindow::buildMenus()
 {
     menuBar()->clear(); // cho phép dựng lại khi đổi ngôn ngữ
-    QMenu *file = menuBar()->addMenu(i18n::tr("menu_file"));
+    QMenu *file = m_mFile = menuBar()->addMenu(i18n::tr("menu_file"));
     file->addAction(i18n::tr("file_new"), QKeySequence::New, this, &MainWindow::newFile);
     file->addAction(i18n::tr("file_open"), QKeySequence::Open, this, &MainWindow::openFile);
     file->addSeparator();
@@ -650,7 +651,7 @@ void MainWindow::buildMenus()
     file->addSeparator();
     file->addAction(i18n::tr("file_quit"), QKeySequence::Quit, this, &QWidget::close);
 
-    QMenu *edit = menuBar()->addMenu(i18n::tr("menu_edit"));
+    QMenu *edit = m_mEdit = menuBar()->addMenu(i18n::tr("menu_edit"));
     edit->addAction(i18n::tr("edit_undo"), QKeySequence::Undo, this, [this] {
         if (!m_model->undo()) statusBar()->showMessage(QStringLiteral("Không có gì để hoàn tác"), 2000);
     });
@@ -798,7 +799,7 @@ void MainWindow::buildMenus()
     edit->addSeparator();
     edit->addAction(QStringLiteral("Quản lý tên vùng..."), this, &MainWindow::manageNames);
 
-    QMenu *st = menuBar()->addMenu(i18n::tr("menu_struct"));
+    QMenu *st = m_mStruct = menuBar()->addMenu(i18n::tr("menu_struct"));
     st->addAction(i18n::tr("st_ins_row"), this, [this] {
         int t, l, b, r; if (selectionBox(t, l, b, r)) m_model->insertRows(t, b - t + 1);
     });
@@ -843,7 +844,7 @@ void MainWindow::buildMenus()
         else m_view->resizeRowsToContents();
     });
 
-    QMenu *data = menuBar()->addMenu(i18n::tr("menu_data"));
+    QMenu *data = m_mData = menuBar()->addMenu(i18n::tr("menu_data"));
     data->addAction(i18n::tr("data_sort_asc"), this, [this] { sortSelection(true); });
     data->addAction(i18n::tr("data_sort_desc"), this, [this] { sortSelection(false); });
     data->addAction(QStringLiteral("Sắp xếp nhiều cấp..."), this, &MainWindow::sortMultiLevel);
@@ -935,7 +936,7 @@ void MainWindow::buildMenus()
         for (int r = 0; r < m_model->rowCount(); ++r) m_view->setRowHidden(r, false);
     });
 
-    QMenu *view = menuBar()->addMenu(i18n::tr("menu_view"));
+    QMenu *view = m_mView = menuBar()->addMenu(i18n::tr("menu_view"));
     view->addAction(i18n::tr("view_zoom_in"), QKeySequence::ZoomIn, this, [this] { m_zoom += 10; applyZoom(); });
     view->addAction(i18n::tr("view_zoom_out"), QKeySequence::ZoomOut, this, [this] { m_zoom -= 10; applyZoom(); });
     view->addAction(i18n::tr("view_zoom_reset"), QKeySequence(QStringLiteral("Ctrl+0")), this, [this] { m_zoom = 100; applyZoom(); });
@@ -981,12 +982,12 @@ void MainWindow::buildMenus()
     sf->setShortcut(QKeySequence(QStringLiteral("Ctrl+`")));
     connect(sf, &QAction::toggled, this, &MainWindow::toggleShowFormulas);
 
-    QMenu *settings = menuBar()->addMenu(i18n::tr("menu_settings"));
+    QMenu *settings = m_mSettings = menuBar()->addMenu(i18n::tr("menu_settings"));
     QMenu *langMenu = settings->addMenu(i18n::tr("menu_lang"));
     langMenu->addAction(i18n::tr("lang_vi"), this, [this] { i18n::setLang(i18n::Lang::Vi); buildMenus(); });
     langMenu->addAction(i18n::tr("lang_en"), this, [this] { i18n::setLang(i18n::Lang::En); buildMenus(); });
 
-    QMenu *help = menuBar()->addMenu(i18n::tr("menu_help"));
+    QMenu *help = m_mHelp = menuBar()->addMenu(i18n::tr("menu_help"));
     help->addAction(i18n::tr("help_check_update"), this, [this] {
 #ifdef EZCEL_VERSION
         const QString ver = QStringLiteral(EZCEL_VERSION);
@@ -1008,6 +1009,21 @@ void MainWindow::buildMenus()
         QMessageBox::about(this, QStringLiteral("Ezcel"),
             QStringLiteral("Ezcel %1\nBảng tính gọn nhẹ viết bằng C++/Qt6.").arg(ver));
     });
+
+    refreshRibbonDropdowns(); // gắn lại menu cho nút thả trên ribbon (kể cả khi đổi ngôn ngữ)
+}
+
+// Gắn QMenu cấp 1 mới dựng vào các nút thả menu trên ribbon. Gọi cuối buildMenus;
+// an toàn khi ribbon CHƯA dựng (nút còn null) — lần dựng ribbon sẽ tự gắn.
+void MainWindow::refreshRibbonDropdowns()
+{
+    if (m_dbFile) m_dbFile->setMenu(m_mFile);
+    if (m_dbEdit) m_dbEdit->setMenu(m_mEdit);
+    if (m_dbStruct) m_dbStruct->setMenu(m_mStruct);
+    if (m_dbData) m_dbData->setMenu(m_mData);
+    if (m_dbView) m_dbView->setMenu(m_mView);
+    if (m_dbSettings) m_dbSettings->setMenu(m_mSettings);
+    if (m_dbHelp) m_dbHelp->setMenu(m_mHelp);
 }
 
 // Hộp thoại tra cứu phím tắt (Spec 23) — bảng nhóm + phím + mô tả.
@@ -1200,6 +1216,17 @@ void MainWindow::buildRibbon()
     // ============================= TRANG ĐẦU =============================
     m_ribbon->beginTab(QStringLiteral("Trang đầu"));
 
+    m_ribbon->beginGroup(QStringLiteral("Tệp"));
+    m_dbFile = m_ribbon->addMenuButton(QStringLiteral("new"), QStringLiteral("Tệp"), m_mFile);
+    m_ribbon->addButton(QStringLiteral("open"), QStringLiteral("Mở"), [this] { openFile(); });
+    m_ribbon->addButton(QStringLiteral("save"), QStringLiteral("Lưu"), [this] { saveFile(); });
+    m_ribbon->addButton(QStringLiteral("undo"), QStringLiteral("Hoàn tác"), [this] {
+        if (!m_model->undo()) statusBar()->showMessage(QStringLiteral("Không có gì để hoàn tác"), 2000);
+    });
+    m_ribbon->addButton(QStringLiteral("redo"), QStringLiteral("Làm lại"), [this] {
+        if (!m_model->redo()) statusBar()->showMessage(QStringLiteral("Không có gì để làm lại"), 2000);
+    });
+
     m_ribbon->beginGroup(QStringLiteral("Bảng tạm"));
     m_ribbon->addButton(QStringLiteral("paste"), QStringLiteral("Dán"), [this] { pasteClipboard(); });
     m_ribbon->addButton(QStringLiteral("cut"), QStringLiteral("Cắt"), [this] { cutSelection(); });
@@ -1275,6 +1302,10 @@ void MainWindow::buildRibbon()
     m_ribbon->addButton(QString(), QStringLiteral("AutoSum"), [this] { autoSum(); });
     m_ribbon->addButton(QStringLiteral("find"), QStringLiteral("Tìm &\nThay thế"), [this] { showFindReplace(); });
 
+    m_ribbon->beginGroup(QStringLiteral("Lệnh khác"));
+    m_dbEdit = m_ribbon->addMenuButton(QString(), QStringLiteral("Sửa ▾"), m_mEdit);
+    m_dbStruct = m_ribbon->addMenuButton(QString(), QStringLiteral("Hàng/Cột ▾"), m_mStruct);
+
     // ============================= CHÈN =============================
     m_ribbon->beginTab(QStringLiteral("Chèn"));
     m_ribbon->beginGroup(QStringLiteral("Bảng"));
@@ -1313,6 +1344,9 @@ void MainWindow::buildRibbon()
     m_ribbon->addButton(QString(), QStringLiteral("Dò mục\ntiêu"), [this] { goalSeekDialog(); });
     m_ribbon->addButton(QString(), QStringLiteral("Dự báo\nxu hướng"), [this] { forecastSheet(); });
 
+    m_ribbon->beginGroup(QStringLiteral("Bảo vệ & nhóm"));
+    m_dbData = m_ribbon->addMenuButton(QString(), QStringLiteral("Lệnh dữ\nliệu ▾"), m_mData);
+
     // ============================= XEM =============================
     m_ribbon->beginTab(QStringLiteral("Xem"));
     m_ribbon->beginGroup(QStringLiteral("Cửa sổ"));
@@ -1320,6 +1354,11 @@ void MainWindow::buildRibbon()
     m_ribbon->beginGroup(QStringLiteral("Hiển thị"));
     m_ribbon->addButton(QString(), QStringLiteral("Thống kê\nbảng tính"), [this] { showWorkbookStats(); });
     m_ribbon->addButton(QString(), QStringLiteral("Phím\ntắt"), [this] { showShortcuts(); });
+    m_dbView = m_ribbon->addMenuButton(QString(), QStringLiteral("Tùy chọn\nxem ▾"), m_mView);
+
+    m_ribbon->beginGroup(QStringLiteral("Khác"));
+    m_dbSettings = m_ribbon->addMenuButton(QString(), QStringLiteral("Cài đặt ▾"), m_mSettings);
+    m_dbHelp = m_ribbon->addMenuButton(QString(), QStringLiteral("Trợ giúp ▾"), m_mHelp);
 
     m_ribbon->finish();
 

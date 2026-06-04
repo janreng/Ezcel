@@ -7,6 +7,7 @@
 class QWidget;
 class QHBoxLayout;
 class QToolButton;
+class QMenu;
 
 // RibbonBar — dải lệnh kiểu Microsoft Office: thanh tab ngang (Trang đầu, Chèn,
 // Công thức, Dữ liệu, Xem); mỗi tab chứa các NHÓM lệnh có tiêu đề nhỏ bên dưới,
@@ -29,6 +30,8 @@ public:
     // Nút lệnh icon-trên-chữ (kiểu nút lớn Excel). iconName rỗng -> chỉ hiện chữ.
     QToolButton *addButton(const QString &iconName, const QString &text,
                            const std::function<void()> &onClick);
+    // Nút thả menu kiểu Excel: bấm bung QMenu (Tệp/Sửa/…). menu có thể đổi sau qua setMenu.
+    QToolButton *addMenuButton(const QString &iconName, const QString &text, QMenu *menu);
     void addWidget(QWidget *w);            // chèn widget tùy ý (combo phông, cỡ...) vào nhóm
     void addSpacer(int px = 6);            // khoảng đệm nhỏ trong nhóm
     void finish();                         // hoàn tất tab cuối (gọi sau khi dựng xong)

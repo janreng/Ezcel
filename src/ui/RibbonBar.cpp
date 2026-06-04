@@ -7,6 +7,7 @@
 #include <QToolButton>
 #include <QLabel>
 #include <QFrame>
+#include <QMenu>
 #include <QIcon>
 #include <QSize>
 
@@ -96,6 +97,27 @@ QToolButton *RibbonBar::addButton(const QString &iconName, const QString &text,
         btn->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     }
     if (onClick) connect(btn, &QToolButton::clicked, this, onClick);
+    m_groupBtns->addWidget(btn);
+    return btn;
+}
+
+QToolButton *RibbonBar::addMenuButton(const QString &iconName, const QString &text, QMenu *menu)
+{
+    if (!m_groupBtns) return nullptr;
+    auto *btn = new QToolButton(m_tabContent);
+    btn->setText(text);
+    btn->setToolTip(text);
+    btn->setAutoRaise(true);
+    btn->setFocusPolicy(Qt::NoFocus);
+    btn->setPopupMode(QToolButton::InstantPopup);
+    if (iconName.isEmpty()) {
+        btn->setToolButtonStyle(Qt::ToolButtonTextOnly);
+    } else {
+        btn->setIcon(QIcon(QStringLiteral(":/icons/%1.svg").arg(iconName)));
+        btn->setIconSize(QSize(20, 20));
+        btn->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+    }
+    if (menu) btn->setMenu(menu);
     m_groupBtns->addWidget(btn);
     return btn;
 }

@@ -1,5 +1,12 @@
 # Lịch sử thay đổi
 
+## v1.92.0 — Dọn thanh menu cũ, đưa hết lên dải lệnh (Spec 07)
+
+- **Bỏ hẳn thanh menu kiểu cũ** ở trên cùng — giao diện gọn, chỉ còn dải lệnh có thẻ như bộ ứng dụng văn phòng hiện đại.
+- **Đưa nhóm Tệp lên đầu thẻ Trang đầu**: Tệp (Mới/Mở/Lưu/Lưu thành/Thoát) · Mở · Lưu · **Hoàn tác · Làm lại** ngay tầm tay.
+- Mọi lệnh cũ trong thanh menu nay nằm trong dải lệnh: các lệnh ít dùng gom vào **nút thả gọn** (Sửa, Hàng/Cột, Lệnh dữ liệu, Tùy chọn xem, Cài đặt, Trợ giúp) đặt đúng thẻ.
+- **Phím tắt giữ nguyên** (Ctrl+N/O/S, Ctrl+Z/Y, Ctrl+F…), không mất chức năng nào.
+
 ## v1.91.0 — Giao diện dải lệnh (Ribbon) (Spec 50)
 
 - Thay dãy thanh công cụ phẳng bằng **dải lệnh có thẻ (Ribbon)**: các thẻ **Trang đầu, Chèn, Công thức, Dữ liệu, Xem** — bấm thẻ để đổi nhóm lệnh.
