@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v1.63.0 — Sửa trong ô nhấn Enter tự xuống dòng (Spec 03)
+
+- **Sửa lỗi**: khi gõ nội dung NGAY TRONG Ô rồi nhấn Enter, con trỏ nay tự chuyển xuống ô bên dưới (trước đây vẫn đứng yên).
+- Hoàn thiện cùng với bản trước (Enter ở thanh công thức) để thao tác nhập liệu đúng như mong đợi.
+
 ## v1.62.0 — Cố định dòng/cột (Spec 14)
 
 - **Cố định dòng/cột** trong menu Xem: giữ các hàng trên và cột trái luôn hiển thị khi cuộn bảng.

@@ -9,6 +9,7 @@
 #include "view/Outline.h"
 #include "view/CopyVisible.h"
 #include "view/FreezePanes.h"
+#include "view/GridView.h"
 #include "model/RefCycle.h"
 #include "model/NameValidate.h"
 #include "model/RangeParse.h"
@@ -94,7 +95,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_model = m_sheets[0];
     installCrossSheet(m_sheets[0]);
 
-    m_view = new QTableView(this);
+    m_view = new GridView(this); // lưới có Enter-nhảy-xuống khi sửa trong ô (Spec 03)
     m_view->setModel(m_model);
     m_view->horizontalHeader()->setDefaultSectionSize(theme::ColWidth);
     m_view->verticalHeader()->setDefaultSectionSize(theme::RowHeight);
