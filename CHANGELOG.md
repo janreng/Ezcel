@@ -1,5 +1,11 @@
 # Lịch sử thay đổi
 
+## v1.82.0 — Ghép mảng VSTACK / HSTACK (Spec 12)
+
+- Thêm **`VSTACK(vùng1, vùng2, ...)`** — xếp chồng nhiều vùng theo **chiều dọc** thành một bảng và tự tràn ra ô.
+- Thêm **`HSTACK(vùng1, vùng2, ...)`** — ghép nhiều vùng theo **chiều ngang**.
+- Các vùng lệch kích thước được chèn `#N/A` vào ô thiếu; tiện gộp nhiều danh sách/bảng rời thành một.
+
 ## v1.81.0 — Mảng động không đè lên ô đã gộp (Spec 12)
 
 - **Sửa lỗi:** công thức mảng động (ví dụ `=SEQUENCE(...)`) khi tràn trúng vùng có **ô đã gộp** thì trước đây làm hỏng ô gộp; nay báo `#SPILL!` đúng như mong đợi.

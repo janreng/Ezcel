@@ -1191,6 +1191,52 @@ QHash<QString, Fn> &fnMap() {
             return matrixToRange(std::move(out));
         };
 
+        // VSTACK(array1,[array2],...) -> ghép các vùng theo CHIỀU DỌC. Bề rộng = rộng nhất,
+        // ô thiếu chèn #N/A.
+        r["VSTACK"] = [](const Args &a) {
+            if (a.empty()) argErr("VSTACK");
+            std::vector<std::vector<std::vector<Value>>> mats;
+            int w = 0;
+            for (const Value &arg : a) {
+                auto m = toMatrix(arg);
+                for (const auto &row : m) w = qMax(w, int(row.size()));
+                mats.push_back(std::move(m));
+            }
+            const Value na = Value::str(QString::fromLatin1(ERR_NA));
+            std::vector<std::vector<Value>> out;
+            for (auto &m : mats)
+                for (auto &row : m) {
+                    while (int(row.size()) < w) row.push_back(na);
+                    out.push_back(std::move(row));
+                }
+            return matrixToRange(std::move(out));
+        };
+
+        // HSTACK(array1,[array2],...) -> ghép các vùng theo CHIỀU NGANG. Chiều cao = cao nhất,
+        // ô thiếu chèn #N/A.
+        r["HSTACK"] = [](const Args &a) {
+            if (a.empty()) argErr("HSTACK");
+            std::vector<std::vector<std::vector<Value>>> mats;
+            int h = 0;
+            for (const Value &arg : a) {
+                auto m = toMatrix(arg);
+                h = qMax(h, int(m.size()));
+                mats.push_back(std::move(m));
+            }
+            const Value na = Value::str(QString::fromLatin1(ERR_NA));
+            std::vector<std::vector<Value>> out(h);
+            for (const auto &m : mats) {
+                int mw = 0;
+                for (const auto &row : m) mw = qMax(mw, int(row.size()));
+                for (int r = 0; r < h; ++r)
+                    for (int c = 0; c < mw; ++c) {
+                        const bool has = r < int(m.size()) && c < int(m[r].size());
+                        out[r].push_back(has ? m[r][c] : na);
+                    }
+            }
+            return matrixToRange(std::move(out));
+        };
+
         // --- ngày / giờ (serial Excel) ---
         r["TODAY"] = [](const Args &a) { if (!a.empty()) argErr("TODAY"); return Value::number(dateToSerial(QDate::currentDate())); };
         r["NOW"]   = [](const Args &a) { if (!a.empty()) argErr("NOW"); QDateTime n = QDateTime::currentDateTime(); double s = dateToSerial(n.date()); QTime t = n.time(); return Value::number(s + (t.hour()*3600 + t.minute()*60 + t.second())/86400.0); };

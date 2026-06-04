@@ -681,6 +681,24 @@ int main() {
         try { fc = evaluate(QStringLiteral("=FILTER(D1:D3,R1:R3)"), resolver); }
         catch (const formula::FormulaError &e) { fc = e.etype(); }
         okEq(fc.toString() == QStringLiteral("#CALC!"), "FILTER rong khong if_empty -> #CALC!");
+
+        // VSTACK: D1:D3 (1,2,3) chong H1:H3 (1,3,2) -> 6x1.
+        formula::Value vs = formula::evaluateValue(QStringLiteral("=VSTACK(D1:D3,H1:H3)"), resolver);
+        okEq(vs.isRange() && vs.range.height() == 6 && vs.range.width() == 1, "VSTACK -> 6x1");
+        auto vsf = vs.range.flat();
+        okEq(formula::toNumber(vsf[0]) == 1 && formula::toNumber(vsf[2]) == 3
+                 && formula::toNumber(vsf[3]) == 1 && formula::toNumber(vsf[5]) == 2, "VSTACK thu tu dung");
+        // HSTACK: D1:D3 ben canh H1:H3 -> 3x2.
+        formula::Value hs = formula::evaluateValue(QStringLiteral("=HSTACK(D1:D3,H1:H3)"), resolver);
+        okEq(hs.isRange() && hs.range.height() == 3 && hs.range.width() == 2, "HSTACK -> 3x2");
+        auto hsm = *hs.range.rows;
+        okEq(formula::toNumber(hsm[0][0]) == 1 && formula::toNumber(hsm[0][1]) == 1
+                 && formula::toNumber(hsm[2][1]) == 2, "HSTACK ghep cot dung");
+        // VSTACK rong khac kich thuoc -> chen #N/A: D1:E3 (3x2) chong D1:D3 (3x1).
+        formula::Value vp = formula::evaluateValue(QStringLiteral("=VSTACK(D1:E3,D1:D3)"), resolver);
+        okEq(vp.range.width() == 2 && vp.range.height() == 6, "VSTACK pad -> 6x2");
+        auto vpm = *vp.range.rows;
+        okEq(formula::toText(vpm[3][1]) == QStringLiteral("#N/A"), "VSTACK pad o thieu = #N/A");
     }
 
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);
