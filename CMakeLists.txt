@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
-project(Ezcel VERSION 1.59.0 LANGUAGES CXX)
+project(Ezcel VERSION 1.60.0 LANGUAGES CXX)
 
 # Bản port C++ của Ezcel (gốc Python/PySide6). Dùng Qt6 Widgets + MinGW.
 set(CMAKE_CXX_STANDARD 20)
@@ -82,7 +82,8 @@ target_include_directories(ezcel_update PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(ezcel_update PUBLIC Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Network)
 
 # --- App GUI ---
-qt_add_executable(Ezcel WIN32 src/main.cpp src/MainWindow.cpp src/MainWindowFormat.cpp src/MainWindowFind.cpp src/ui/I18n.cpp src/ui/Shortcuts.cpp src/ui/Zoom.cpp src/ui/SheetNav.cpp src/ui/CellMode.cpp src/ui/WorkbookStats.cpp src/MainWindow.h resources.qrc)
+# app_icon.rc nhúng icon vào tệp .exe (hiện trên taskbar/Explorer/cửa sổ — Windows).
+qt_add_executable(Ezcel WIN32 src/main.cpp src/MainWindow.cpp src/MainWindowFormat.cpp src/MainWindowFind.cpp src/ui/I18n.cpp src/ui/Shortcuts.cpp src/ui/Zoom.cpp src/ui/SheetNav.cpp src/ui/CellMode.cpp src/ui/WorkbookStats.cpp src/MainWindow.h resources.qrc app_icon.rc)
 target_include_directories(Ezcel PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_compile_definitions(Ezcel PRIVATE EZCEL_VERSION="${PROJECT_VERSION}")
 target_link_libraries(Ezcel PRIVATE ezcel_model ezcel_io ezcel_view ezcel_update ezcel_formula Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Svg Qt6::Network)

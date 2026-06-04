@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v1.60.0 — Hiện biểu tượng ứng dụng (Spec 50)
+
+- **Sửa lỗi thiếu biểu tượng**: tệp chương trình nay nhúng sẵn biểu tượng, hiển thị đúng trên thanh tác vụ, cửa sổ và trong trình quản lý tệp.
+
 ## v1.59.0 — Kéo nút điền để tự tăng dần (Spec 05)
 
 - **Nút kéo điền (fill handle)**: ô vuông nhỏ ở góc dưới-phải vùng chọn. Kéo xuống hoặc sang phải để tự điền tiếp chuỗi (số tăng dần, ngày, thứ, mẫu lặp...).
