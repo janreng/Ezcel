@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v1.71.0 — Sửa lỗi click ô khi đang gõ công thức báo #VALUE! (Spec 12)
+
+- **Sửa lỗi:** đang gõ công thức dở (ví dụ `=SUM(`) mà bấm sang ô khác thì ô đang sửa bị "chốt" công thức chưa hoàn chỉnh và báo `#VALUE!`.
+- Nay khi bấm sang ô khác lúc đang gõ công thức, ô vẫn mở và địa chỉ ô vừa bấm được chèn vào — đúng như "point mode" mong đợi.
+
 ## v1.70.0 — Click ô để chèn địa chỉ vào công thức đang gõ (Spec 12)
 
 - **Đang gõ công thức trong ô (bắt đầu bằng `=`) mà bấm vào một ô khác, địa chỉ ô đó tự được chèn vào công thức** tại vị trí con trỏ — như "point mode" của bảng tính chuyên nghiệp.

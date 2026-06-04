@@ -5,6 +5,8 @@
 #include <QAbstractItemView>
 #include <QPainter>
 #include <QLineEdit>
+#include <QApplication>
+#include <QFocusEvent>
 
 CellBorderDelegate::CellBorderDelegate(QAbstractItemView *view, QObject *parent)
     : QStyledItemDelegate(parent), m_view(view) {}
@@ -22,6 +24,23 @@ QWidget *CellBorderDelegate::createEditor(QWidget *parent, const QStyleOptionVie
         if (m_activeEditor == o) m_activeEditor = nullptr;
     });
     return editor;
+}
+
+bool CellBorderDelegate::eventFilter(QObject *obj, QEvent *event)
+{
+    // "Point mode": đang sửa công thức (=...) mà bấm vào lưới -> đừng commit dở dang.
+    // Chỉ chặn khi focus mới rơi vào chính bảng (view/viewport); click ra ngoài (thanh
+    // công thức, app khác) vẫn commit như thường.
+    if (event->type() == QEvent::FocusOut) {
+        if (auto *le = qobject_cast<QLineEdit *>(obj)) {
+            if (m_view && le->text().startsWith(QLatin1Char('='))) {
+                const QWidget *fw = QApplication::focusWidget();
+                if (fw == m_view || fw == m_view->viewport())
+                    return true; // nuốt FocusOut -> không commit, giữ editor mở
+            }
+        }
+    }
+    return QStyledItemDelegate::eventFilter(obj, event);
 }
 
 void CellBorderDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,

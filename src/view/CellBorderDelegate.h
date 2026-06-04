@@ -16,6 +16,10 @@ public:
                const QModelIndex &index) const override;
     QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,
                           const QModelIndex &index) const override;
+    // Chặn commit-khi-mất-focus của QStyledItemDelegate khi đang sửa CÔNG THỨC và
+    // focus chuyển sang lưới (người dùng bấm ô khác để "point mode"). Nếu không chặn,
+    // Qt commit công thức dở dang (=SUM() trước khi kịp chèn địa chỉ -> #VALUE!.
+    bool eventFilter(QObject *obj, QEvent *event) override;
     void setFunctionNames(const QStringList &names) { m_fnNames = names; }
     void setFunctionSignatures(const QHash<QString, QString> &sigs) { m_fnSigs = sigs; }
     // Editor (QLineEdit) đang mở, để "point mode" chèn địa chỉ ô vào công thức. null nếu không.
