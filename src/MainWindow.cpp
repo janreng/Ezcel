@@ -9,6 +9,7 @@
 #include "view/Outline.h"
 #include "view/CopyVisible.h"
 #include "model/RefCycle.h"
+#include "model/NameValidate.h"
 #include "model/Filter.h"
 #include "model/PasteOps.h"
 #include "model/GotoSpecial.h"
@@ -438,7 +439,10 @@ void MainWindow::onNameBoxCommitted()
     QPoint a = parseCellRef(first);
     // 2) Không phải địa chỉ ô + bắt đầu bằng chữ -> ĐẶT TÊN cho vùng đang chọn.
     if (a.x() < 0) {
-        if (text[0].isLetter()) {
+        const QString why = namevalidate::reason(text);
+        if (!why.isEmpty()) {
+            statusBar()->showMessage(QStringLiteral("Tên không hợp lệ: %1").arg(why), 4000);
+        } else {
             int t, l, b, r;
             if (selectionBox(t, l, b, r)) {
                 m_model->defineName(text, MergeRange{t, l, b, r});

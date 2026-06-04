@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v1.36.0 — Kiểm tra tên vùng hợp lệ (Spec 04)
+
+- Khi đặt **tên cho vùng** qua ô địa chỉ, ứng dụng kiểm tra tên theo quy tắc chuẩn và báo lý do nếu không hợp lệ.
+- Chặn các tên sai: bắt đầu bằng số, có khoảng trắng, trùng dạng địa chỉ ô (A1, R1C1), ký tự cấm, hay tên dành riêng "C"/"R".
+
 ## v1.35.0 — Phím F4 khóa tham chiếu tuyệt đối (Spec 04)
 
 - **Nhấn F4 trên thanh công thức** để đảo nhanh kiểu khóa của tham chiếu ô tại con trỏ: A1 → $A$1 → A$1 → $A1 → A1.
