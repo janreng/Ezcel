@@ -173,6 +173,51 @@ QHash<QString, Fn> &fnMap() {
         r["STDEVPA"] = [varpaCore](const Args &a) { return Value::number(std::sqrt(varpaCore(a, "STDEVPA"))); };
         // ENCODEURL(text): mã hóa chuỗi theo kiểu URL (phần trăm), ví dụ dấu cách -> %20.
         r["ENCODEURL"] = [need](const Args &a) { need(a,1,"ENCODEURL"); return Value::str(QString::fromLatin1(toText(a[0]).toUtf8().toPercentEncoding())); };
+        // --- Hàm biểu thức chính quy (Regex, Spec 22.2) ---
+        // case_sensitivity: 0 = phân biệt hoa/thường (mặc định), 1 = không phân biệt.
+        auto reOpts = [](const Args &a, int idx) {
+            QRegularExpression::PatternOptions o = QRegularExpression::NoPatternOption;
+            if (int(a.size()) > idx && toInt(a[idx]) == 1) o |= QRegularExpression::CaseInsensitiveOption;
+            return o;
+        };
+        // REGEXTEST(text, pattern, [case]) -> TRUE nếu có khớp.
+        r["REGEXTEST"] = [reOpts](const Args &a) {
+            if (a.size() < 2 || a.size() > 3) argErr("REGEXTEST");
+            QRegularExpression re(toText(a[1]), reOpts(a, 2));
+            if (!re.isValid()) throw FormulaError(QStringLiteral("REGEXTEST: mẫu không hợp lệ"), ERR_VALUE);
+            return Value::boolv(re.match(toText(a[0])).hasMatch());
+        };
+        // REGEXEXTRACT(text, pattern, [return_mode], [case]) -> chuỗi khớp đầu tiên.
+        // return_mode: 0 = toàn bộ khớp (mặc định), 2 = nhóm bắt đầu tiên.
+        r["REGEXEXTRACT"] = [reOpts](const Args &a) {
+            if (a.size() < 2 || a.size() > 4) argErr("REGEXEXTRACT");
+            const int mode = a.size() >= 3 ? toInt(a[2]) : 0;
+            QRegularExpression re(toText(a[1]), reOpts(a, 3));
+            if (!re.isValid()) throw FormulaError(QStringLiteral("REGEXEXTRACT: mẫu không hợp lệ"), ERR_VALUE);
+            QRegularExpressionMatch m = re.match(toText(a[0]));
+            if (!m.hasMatch()) throw FormulaError(QStringLiteral("REGEXEXTRACT: không khớp"), ERR_NA);
+            if (mode == 2 && m.lastCapturedIndex() >= 1) return Value::str(m.captured(1));
+            return Value::str(m.captured(0));
+        };
+        // REGEXREPLACE(text, pattern, replacement, [occurrence], [case]).
+        // occurrence: bỏ qua hoặc -1 = thay tất cả; n>0 = thay lần khớp thứ n.
+        r["REGEXREPLACE"] = [reOpts](const Args &a) {
+            if (a.size() < 3 || a.size() > 5) argErr("REGEXREPLACE");
+            const int occ = a.size() >= 4 ? toInt(a[3]) : -1;
+            QRegularExpression re(toText(a[1]), reOpts(a, 4));
+            if (!re.isValid()) throw FormulaError(QStringLiteral("REGEXREPLACE: mẫu không hợp lệ"), ERR_VALUE);
+            const QString text = toText(a[0]);
+            const QString repl = toText(a[2]);
+            if (occ < 0) { QString s = text; s.replace(re, repl); return Value::str(s); }
+            QRegularExpressionMatchIterator it = re.globalMatch(text);
+            int n = 0;
+            while (it.hasNext()) {
+                QRegularExpressionMatch m = it.next();
+                if (++n == occ)
+                    return Value::str(text.left(m.capturedStart(0)) + repl + text.mid(m.capturedEnd(0)));
+            }
+            return Value::str(text); // không đủ số lần khớp -> giữ nguyên
+        };
         // PERCENTILE/QUARTILE: phân vị theo nội suy tuyến tính (phương pháp INC, gồm cả hai đầu).
         auto percentileInc = [](std::vector<double> v, double k) {
             std::sort(v.begin(), v.end());

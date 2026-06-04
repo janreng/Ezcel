@@ -1,5 +1,12 @@
 # Lịch sử thay đổi
 
+## v1.40.0 — Hàm biểu thức chính quy: REGEXTEST, REGEXEXTRACT, REGEXREPLACE (Spec 22)
+
+- **REGEXTEST(văn bản, mẫu, [phân biệt hoa/thường])** — trả về ĐÚNG/SAI tùy chuỗi có khớp mẫu hay không.
+- **REGEXEXTRACT(văn bản, mẫu, [chế độ], [phân biệt])** — trích phần khớp đầu tiên (hoặc nhóm bắt).
+- **REGEXREPLACE(văn bản, mẫu, thay thế, [lần khớp], [phân biệt])** — thay phần khớp; có thể thay tất cả hoặc chỉ lần thứ n.
+- Hữu ích để kiểm tra định dạng (email, mã số), trích số, hay che bớt dữ liệu.
+
 ## v1.39.0 — Chọn nhiều vùng & cả cột/hàng qua ô địa chỉ (Spec 02)
 
 - Gõ vào **ô địa chỉ** nay nhận nhiều vùng cách nhau bằng dấu phẩy: `A1:B3,D5,F1:F10` để chọn cùng lúc.

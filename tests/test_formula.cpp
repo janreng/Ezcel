@@ -513,6 +513,17 @@ int main() {
     checkNum("=IMREAL(IMSEC(\"i\"))", 0.6480542736638853);     // 1/cosh(1)
     checkNum("=IMAGINARY(IMCOT(\"i\"))", -1.3130352854993312); // -1/tanh(1)
 
+    // --- Regex functions (Spec 22.2) ---
+    checkStr("=REGEXTEST(\"abc123\",\"[0-9]+\")", "true");
+    checkStr("=REGEXTEST(\"abcdef\",\"[0-9]+\")", "false");
+    checkStr("=REGEXTEST(\"ABC\",\"abc\")", "false");        // phan biet hoa/thuong
+    checkStr("=REGEXTEST(\"ABC\",\"abc\",1)", "true");       // khong phan biet
+    checkStr("=REGEXEXTRACT(\"Gia: 1234 dong\",\"[0-9]+\")", "1234");
+    checkStr("=REGEXEXTRACT(\"a1b2c3\",\"[a-z]([0-9])\",2)", "1"); // nhom bat 1
+    checkStr("=REGEXREPLACE(\"a1b2c3\",\"[0-9]\",\"*\")", "a*b*c*"); // thay tat ca
+    checkStr("=REGEXREPLACE(\"a1b2c3\",\"[0-9]\",\"*\",2)", "a1b*c3"); // chi lan thu 2
+    checkStr("=IFERROR(REGEXEXTRACT(\"abc\",\"[0-9]+\"),\"none\")", "none"); // khong khop -> #N/A
+
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);
     return g_fail == 0 ? 0 : 1;
 }
