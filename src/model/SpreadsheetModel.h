@@ -165,6 +165,8 @@ public:
     // Bảng có cấu trúc (Spec 16): tô sọc xen kẽ + hàng tiêu đề cho một vùng; xóa hết.
     void addTable(const tbl::Table &t);
     void clearTables();
+    // Bảng (sau cùng) chứa ô (row,col); true + ghi ra out nếu có.
+    bool tableAt(int row, int col, tbl::Table &out) const;
     // Bảo vệ trang tính (Spec 29): khi bật, ô đang KHÓA không sửa được. Mặc định mọi ô khóa.
     void setSheetProtected(bool on);
     bool isSheetProtected() const { return m_protected; }

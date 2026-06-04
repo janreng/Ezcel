@@ -22,4 +22,11 @@ inline QString tableStripeColor(int rowOffset, const QString &c1, const QString 
 // Màu nền cho ô (row,col) nếu nằm trong bảng t; chuỗi rỗng nếu ngoài vùng.
 QString stripeColorAt(const Table &t, int row, int col);
 
+// Công thức tổng cho 1 cột của bảng: =SUM(<cột><hàngĐầu>:<cột><hàngCuối>)
+// (số hàng là 1-based như hiển thị). Thuần chuỗi để kiểm thử.
+inline QString sumFormula(const QString &colLabel, int top1Based, int bottom1Based)
+{
+    return QStringLiteral("=SUM(%1%2:%1%3)").arg(colLabel).arg(top1Based).arg(bottom1Based);
+}
+
 } // namespace tbl

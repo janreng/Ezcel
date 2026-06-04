@@ -30,6 +30,10 @@ int main() {
     ok(tbl::stripeColorAt(t2, 0, 0) == QLatin1String("X"), "khong header offset0");
     ok(tbl::stripeColorAt(t2, 1, 0) == QLatin1String("Y"), "khong header offset1");
 
+    // Công thức tổng cột.
+    ok(tbl::sumFormula(QStringLiteral("B"), 2, 6) == QLatin1String("=SUM(B2:B6)"), "sum formula");
+    ok(tbl::sumFormula(QStringLiteral("AA"), 1, 100) == QLatin1String("=SUM(AA1:AA100)"), "sum formula cot AA");
+
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);
     return g_fail == 0 ? 0 : 1;
 }

@@ -1,5 +1,11 @@
 # Lịch sử thay đổi
 
+## v1.98.0 — Hàng tổng cho bảng (Spec 16)
+
+- Thêm **Chèn → "Hàng tổng"**: đặt con trỏ trong bảng rồi bấm để chèn **một hàng Tổng ngay dưới bảng**, mỗi cột tự tính **=SUM** vùng dữ liệu của cột đó.
+- Cột đầu của hàng ghi nhãn **"Tổng"**, cả hàng **in đậm** cho dễ nhận.
+- Tổng cập nhật theo dữ liệu (là công thức thật), sửa số trong bảng là tổng đổi theo.
+
 ## v1.97.0 — Hàng tiêu đề bảng chữ trắng in đậm (Spec 16)
 
 - Hàng tiêu đề của bảng giờ hiển thị **chữ trắng in đậm** trên nền xanh đậm — nổi bật và dễ đọc hơn, đúng kiểu bảng chuẩn.

@@ -1232,6 +1232,32 @@ void MainWindow::formatAsTable()
     statusBar()->showMessage(QStringLiteral("Đã định dạng vùng thành bảng"), 2500);
 }
 
+// Thêm hàng "Tổng" ngay dưới bảng chứa ô hiện hành: mỗi cột = SUM vùng dữ liệu,
+// cột đầu ghi nhãn "Tổng", cả hàng in đậm.
+void MainWindow::addTableTotalRow()
+{
+    QModelIndex cur = m_view->currentIndex();
+    tbl::Table t;
+    if (!cur.isValid() || !m_model->tableAt(cur.row(), cur.column(), t)) {
+        statusBar()->showMessage(QStringLiteral("Hãy đặt con trỏ trong một bảng"), 2500);
+        return;
+    }
+    const int totalRow = t.bottom + 1;
+    if (totalRow >= m_model->rowCount())
+        m_model->insertRows(m_model->rowCount(), totalRow - m_model->rowCount() + 1);
+    const int dataTop = t.header ? t.top + 1 : t.top;
+    for (int c = t.left; c <= t.right; ++c) {
+        const QString lbl = SpreadsheetModel::columnLabel(c);
+        m_model->setData(m_model->index(totalRow, c),
+                         tbl::sumFormula(lbl, dataTop + 1, t.bottom + 1), Qt::EditRole); // 1-based
+    }
+    m_model->setData(m_model->index(totalRow, t.left), QStringLiteral("Tổng"), Qt::EditRole);
+    SpreadsheetModel::Format f;
+    f.insert(QStringLiteral("bold"), true);
+    m_model->setFormat(totalRow, t.left, totalRow, t.right, f);
+    statusBar()->showMessage(QStringLiteral("Đã thêm hàng tổng"), 2500);
+}
+
 // ---------------------------------------------------------------- in ấn (Spec 24)
 // In lưới hiện hành: mở QPrintDialog rồi vẽ phần bảng đang hiển thị lên trang,
 // thu nhỏ vừa khổ giấy (giữ tỉ lệ, không phóng to). Bản 1: in vùng nhìn thấy.
@@ -1359,6 +1385,7 @@ void MainWindow::buildRibbon()
     m_ribbon->beginGroup(QStringLiteral("Bảng"));
     m_ribbon->addButton(QStringLiteral("table"), QStringLiteral("Tổng hợp\nnhanh"), [this] { quickPivot(); });
     m_ribbon->addButton(QStringLiteral("table"), QStringLiteral("Định dạng\nlà bảng"), [this] { formatAsTable(); });
+    m_ribbon->addSmallButton(QStringLiteral("sigma"), QStringLiteral("Hàng tổng"), [this] { addTableTotalRow(); });
     m_ribbon->addSmallButton(QStringLiteral("cell_delete"), QStringLiteral("Bỏ định dạng bảng"), [this] { m_model->clearTables(); });
     m_ribbon->beginGroup(QStringLiteral("Sparkline"));
     m_ribbon->addSmallButton(QStringLiteral("chart_line"), QStringLiteral("Đường"), [this] { insertSparkline(int(sparkline::Type::Line)); });

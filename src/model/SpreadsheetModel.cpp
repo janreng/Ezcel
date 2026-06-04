@@ -537,6 +537,13 @@ QString SpreadsheetModel::tableColorAt(int row, int col) const {
     return c;
 }
 
+bool SpreadsheetModel::tableAt(int row, int col, tbl::Table &out) const {
+    bool found = false;
+    for (const tbl::Table &t : m_tables)
+        if (row >= t.top && row <= t.bottom && col >= t.left && col <= t.right) { out = t; found = true; }
+    return found;
+}
+
 bool SpreadsheetModel::isTableHeader(int row, int col) const {
     for (const tbl::Table &t : m_tables)
         if (t.header && row == t.top && col >= t.left && col <= t.right) return true;
