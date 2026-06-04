@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v1.69.0 — Gợi ý công thức kèm mô tả & ví dụ (Spec 12)
+
+- **Tooltip công thức nay đầy đủ hơn**: ngoài cú pháp, còn hiển thị **mô tả hàm**, **ví dụ minh họa** và **giải thích từng tham số** — như ở bảng tính chuyên nghiệp.
+- Phủ các hàm thường dùng (SUM, IF, VLOOKUP, INDEX, MATCH, SUMIF/SUMIFS, TEXT, DATE, DATEDIF...).
+
 ## v1.68.0 — Thêm chèn hàng bên dưới & cột bên phải (Spec 09)
 
 - **Thêm "Chèn hàng bên dưới"** và **"Chèn cột bên phải"** trong menu Cấu trúc và menu chuột phải.

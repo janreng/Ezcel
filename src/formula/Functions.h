@@ -25,4 +25,8 @@ QStringList functionNames();
 // Khóa viết HOA. Hàm không có trong bảng -> không hiện gợi ý tham số.
 QHash<QString, QString> functionSignatures();
 
+// Tooltip HTML đầy đủ cho hàm (cú pháp + mô tả + ví dụ + mô tả từng tham số),
+// dùng cho popup gợi ý khi nhập công thức. Khóa viết HOA.
+QHash<QString, QString> functionTooltips();
+
 } // namespace formula

@@ -1727,4 +1727,78 @@ QHash<QString, QString> functionSignatures() {
     return s;
 }
 
+QHash<QString, QString> functionTooltips() {
+    // {tên, mô tả hàm, ví dụ, "tham số|mô tả\ntham số|mô tả..."}
+    struct Doc { const char *name; const char *about; const char *example; const char *params; };
+    static const Doc docs[] = {
+        {"SUM", "Tính tổng một dãy số hoặc ô.", "SUM(A2:A100; 101)",
+         "số1|Số hoặc vùng đầu tiên cần cộng.\nsố2…|(tùy chọn) Số/vùng cộng thêm."},
+        {"AVERAGE", "Tính trung bình cộng của các số.", "AVERAGE(B2:B20)",
+         "số1|Số hoặc vùng đầu tiên.\nsố2…|(tùy chọn) Thêm số/vùng."},
+        {"COUNT", "Đếm số ô CHỨA SỐ trong vùng.", "COUNT(A1:A50)",
+         "giá_trị1…|Các giá trị/vùng cần đếm số."},
+        {"COUNTA", "Đếm số ô KHÔNG RỖNG.", "COUNTA(A1:A50)",
+         "giá_trị1…|Các giá trị/vùng cần đếm."},
+        {"MAX", "Trả về giá trị lớn nhất.", "MAX(A1:A10)",
+         "số1|Số/vùng đầu tiên.\nsố2…|(tùy chọn) Thêm số/vùng."},
+        {"MIN", "Trả về giá trị nhỏ nhất.", "MIN(A1:A10)",
+         "số1|Số/vùng đầu tiên.\nsố2…|(tùy chọn) Thêm số/vùng."},
+        {"ROUND", "Làm tròn số tới số chữ số thập phân chỉ định.", "ROUND(3.14159; 2)",
+         "số|Số cần làm tròn.\nsố_chữ_số|Số chữ số sau dấu phẩy."},
+        {"IF", "Trả về giá trị này nếu điều kiện ĐÚNG, giá trị khác nếu SAI.", "IF(A1>10; \"Đạt\"; \"Trượt\")",
+         "điều_kiện|Biểu thức logic (đúng/sai).\ngiá_trị_đúng|Trả về khi đúng.\ngiá_trị_sai|(tùy chọn) Trả về khi sai."},
+        {"IFERROR", "Trả về giá trị thay thế nếu công thức bị lỗi.", "IFERROR(A1/B1; 0)",
+         "giá_trị|Công thức cần kiểm tra.\ngiá_trị_nếu_lỗi|Trả về khi bị lỗi."},
+        {"AND", "ĐÚNG nếu TẤT CẢ điều kiện đều đúng.", "AND(A1>0; A1<100)",
+         "logic1…|Các biểu thức logic cần kiểm tra."},
+        {"OR", "ĐÚNG nếu CÓ ÍT NHẤT MỘT điều kiện đúng.", "OR(A1=1; A1=2)",
+         "logic1…|Các biểu thức logic cần kiểm tra."},
+        {"SUMIF", "Tính tổng các ô THỎA điều kiện.", "SUMIF(B:B; \">100\"; C:C)",
+         "vùng|Vùng xét điều kiện.\ntiêu_chí|Điều kiện (vd \">100\").\nvùng_tổng|(tùy chọn) Vùng lấy giá trị tổng."},
+        {"SUMIFS", "Tính tổng với NHIỀU điều kiện.", "SUMIFS(C:C; A:A; \"X\"; B:B; \">5\")",
+         "vùng_tổng|Vùng lấy giá trị tổng.\nvùng_đk1|Vùng xét điều kiện 1.\nđk1|Điều kiện 1.\n…|Thêm cặp vùng/điều kiện."},
+        {"COUNTIF", "Đếm số ô THỎA điều kiện.", "COUNTIF(A:A; \"Đạt\")",
+         "vùng|Vùng cần đếm.\ntiêu_chí|Điều kiện đếm."},
+        {"VLOOKUP", "Dò giá trị ở cột đầu của bảng, trả ô cùng hàng ở cột chỉ định.", "VLOOKUP(\"A01\"; A2:D100; 3; 0)",
+         "giá_trị_dò|Giá trị cần tìm ở cột đầu.\nbảng|Vùng bảng dữ liệu.\ncột|Số thứ tự cột trả về.\ngần_đúng|(tùy chọn) 0 = khớp chính xác."},
+        {"HLOOKUP", "Như VLOOKUP nhưng dò theo HÀNG đầu.", "HLOOKUP(\"Q1\"; A1:F10; 4; 0)",
+         "giá_trị_dò|Giá trị cần tìm ở hàng đầu.\nbảng|Vùng bảng.\nhàng|Số thứ tự hàng trả về.\ngần_đúng|(tùy chọn) 0 = chính xác."},
+        {"INDEX", "Trả về ô tại hàng/cột chỉ định trong vùng.", "INDEX(A1:C10; 5; 2)",
+         "vùng|Vùng dữ liệu.\nsố_hàng|Thứ tự hàng trong vùng.\nsố_cột|(tùy chọn) Thứ tự cột."},
+        {"MATCH", "Trả về VỊ TRÍ của giá trị trong một vùng.", "MATCH(\"X\"; A1:A20; 0)",
+         "giá_trị_dò|Giá trị cần tìm.\nvùng_dò|Vùng 1 hàng/cột để dò.\nkiểu|(tùy chọn) 0 = khớp chính xác."},
+        {"LEFT", "Lấy số ký tự ĐẦU của chuỗi.", "LEFT(\"Hà Nội\"; 2)",
+         "văn_bản|Chuỗi nguồn.\nsố_ký_tự|(tùy chọn) Số ký tự lấy (mặc định 1)."},
+        {"RIGHT", "Lấy số ký tự CUỐI của chuỗi.", "RIGHT(\"2026\"; 2)",
+         "văn_bản|Chuỗi nguồn.\nsố_ký_tự|(tùy chọn) Số ký tự lấy."},
+        {"MID", "Lấy chuỗi con từ vị trí chỉ định.", "MID(\"ABCDEF\"; 2; 3)",
+         "văn_bản|Chuỗi nguồn.\nvị_trí|Vị trí bắt đầu (1 = đầu).\nsố_ký_tự|Số ký tự lấy."},
+        {"LEN", "Đếm số ký tự của chuỗi.", "LEN(\"Hello\")",
+         "văn_bản|Chuỗi cần đếm độ dài."},
+        {"CONCAT", "Nối nhiều chuỗi/ô thành một.", "CONCAT(A1; \" \"; B1)",
+         "văn_bản1…|Các chuỗi/vùng cần nối."},
+        {"TEXT", "Định dạng số/ngày thành chuỗi theo mẫu.", "TEXT(0.25; \"0%\")",
+         "giá_trị|Số/ngày cần định dạng.\nđịnh_dạng|Mẫu (vd \"0.00\", \"dd/mm/yyyy\")."},
+        {"DATE", "Tạo giá trị ngày từ năm/tháng/ngày.", "DATE(2026; 6; 4)",
+         "năm|Năm (vd 2026).\ntháng|Tháng (1-12).\nngày|Ngày (1-31)."},
+        {"DATEDIF", "Tính khoảng cách giữa hai ngày theo đơn vị.", "DATEDIF(A1; B1; \"M\")",
+         "ngày_đầu|Ngày bắt đầu.\nngày_cuối|Ngày kết thúc.\nđơn_vị|\"Y\"/\"M\"/\"D\"/\"YM\"/\"MD\"/\"YD\"."},
+    };
+    QHash<QString, QString> out;
+    for (const Doc &d : docs) {
+        const QString name = QString::fromUtf8(d.name);
+        QString html = QStringLiteral("<b>%1</b>").arg(functionSignatures().value(name).toHtmlEscaped());
+        html += QStringLiteral("<br><i>%1</i>").arg(QString::fromUtf8(d.about).toHtmlEscaped());
+        html += QStringLiteral("<br>Ví dụ: <code>%1</code>").arg(QString::fromUtf8(d.example).toHtmlEscaped());
+        const QStringList ps = QString::fromUtf8(d.params).split(QLatin1Char('\n'), Qt::SkipEmptyParts);
+        for (const QString &p : ps) {
+            const QString pn = p.section(QLatin1Char('|'), 0, 0);
+            const QString pd = p.section(QLatin1Char('|'), 1);
+            html += QStringLiteral("<br>• <b>%1</b>: %2").arg(pn.toHtmlEscaped(), pd.toHtmlEscaped());
+        }
+        out.insert(name, html);
+    }
+    return out;
+}
+
 } // namespace formula

@@ -110,7 +110,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_view->verticalHeader()->setHighlightSections(true);
     auto *cellDelegate = new CellBorderDelegate(m_view, m_view); // viền xanh ô đang chọn
     cellDelegate->setFunctionNames(formula::functionNames());     // popup gợi ý hàm khi gõ '='
-    cellDelegate->setFunctionSignatures(formula::functionSignatures()); // tooltip cú pháp tham số
+    cellDelegate->setFunctionSignatures(formula::functionTooltips()); // tooltip mô tả + tham số (HTML)
     m_view->setItemDelegate(cellDelegate);
     // Gõ phím là vào chế độ sửa ngay (giống Excel); Enter sau đó tự nhảy xuống ô dưới.
     m_view->setEditTriggers(QAbstractItemView::DoubleClicked | QAbstractItemView::EditKeyPressed
@@ -436,7 +436,7 @@ void MainWindow::buildFormulaBar()
     m_formulaBar = new QLineEdit(bar);
     m_formulaBar->setPlaceholderText(QStringLiteral("Nội dung / công thức ô đang chọn"));
     m_formulaBar->installEventFilter(this); // bắt F4 để đảo khóa $ tham chiếu (Spec 04)
-    formulahint::install(m_formulaBar, formula::functionNames(), formula::functionSignatures()); // gợi ý hàm + tham số
+    formulahint::install(m_formulaBar, formula::functionNames(), formula::functionTooltips()); // gợi ý hàm + mô tả tham số
     h->addWidget(m_nameBox);
     h->addWidget(fx);
     h->addWidget(m_formulaBar, 1);

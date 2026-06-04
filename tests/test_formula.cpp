@@ -614,6 +614,12 @@ int main() {
         okEq(sigs.value("SUM").startsWith("SUM("), "chu ky SUM");
         okEq(sigs.value("VLOOKUP").startsWith("VLOOKUP(") && sigs.value("VLOOKUP").contains(QChar(';')), "chu ky VLOOKUP co tham so");
         okEq(sigs.value("KHONGCO").isEmpty(), "ham la -> khong co chu ky");
+        const auto tips = formula::functionTooltips();
+        okEq(tips.value("SUM").contains("<b>") && tips.value("SUM").contains("<i>") && tips.value("SUM").contains("<br>"),
+             "tooltip SUM co HTML (cu phap + mo ta + tham so)");
+        okEq(tips.value("VLOOKUP").contains("VLOOKUP") && tips.value("VLOOKUP").contains("<br>"),
+             "tooltip VLOOKUP co mo ta + xuong dong");
+        okEq(tips.value("KHONGCO").isEmpty(), "ham la -> khong co tooltip");
     }
 
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);
