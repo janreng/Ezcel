@@ -340,6 +340,29 @@ int main(int argc, char **argv) {
         ok(!bg1.isValid(), "cond khong to o <= 50");
         mm.clearCondRules();
         ok(!mm.data(mm.index(0, 0), Qt::BackgroundRole).isValid(), "clear cond -> het mau");
+
+        // --- Data Bar (Spec 08) ---
+        // dataBarFraction thuan
+        ok(cond::dataBarFraction(5, 0, 10) == 0.5, "fraction 5 trong [0,10] = 0.5");
+        ok(cond::dataBarFraction(0, 0, 10) == 0.0, "fraction min = 0");
+        ok(cond::dataBarFraction(10, 0, 10) == 1.0, "fraction max = 1");
+        ok(cond::dataBarFraction(-5, 0, 10) == 0.0, "duoi min -> kep 0");
+        ok(cond::dataBarFraction(7, 5, 5) == 1.0, "max<=min -> 1");
+        // tich hop model: DataBarRole tra t.le + mau
+        SpreadsheetModel db;
+        db.resizeGrid(5, 2);
+        put(db, 0, 0, "0"); put(db, 1, 0, "5"); put(db, 2, 0, "10");
+        db.addDataBar(cond::DataBar{0, 0, 2, 0, "#638EC6"});
+        QVariant r0 = db.data(db.index(0, 0), SpreadsheetModel::DataBarRole);
+        QVariant r1 = db.data(db.index(1, 0), SpreadsheetModel::DataBarRole);
+        ok(r0.typeId() == QMetaType::QVariantList && r0.toList()[0].toDouble() == 0.0, "databar o min = 0");
+        ok(r1.toList()[0].toDouble() == 0.5 && r1.toList()[1].toString() == "#638EC6", "databar giua = 0.5 + mau");
+        ok(!db.data(db.index(3, 0), SpreadsheetModel::DataBarRole).isValid(), "ngoai vung -> khong co thanh");
+        // o khong phai so -> khong co thanh
+        put(db, 0, 0, "abc");
+        ok(!db.data(db.index(0, 0), SpreadsheetModel::DataBarRole).isValid(), "o chu -> khong thanh");
+        db.clearDataBars();
+        ok(!db.data(db.index(1, 0), SpreadsheetModel::DataBarRole).isValid(), "clear databar -> het");
     }
 
     // --- loc du lieu ---

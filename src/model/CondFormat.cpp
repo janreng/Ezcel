@@ -20,4 +20,12 @@ bool match(const QVariant &value, Op op, double v1, double v2, const QString &te
     }
 }
 
+double dataBarFraction(double value, double mn, double mx) {
+    if (mx <= mn) return 1.0;
+    double f = (value - mn) / (mx - mn);
+    if (f < 0.0) return 0.0;
+    if (f > 1.0) return 1.0;
+    return f;
+}
+
 } // namespace cond

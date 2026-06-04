@@ -121,6 +121,11 @@ QVariant SpreadsheetModel::data(const QModelIndex &index, int role) const {
         auto it = m_notes.constFind(key(row, col));
         return it != m_notes.constEnd() ? it.value() : QVariant();
     }
+    case DataBarRole: {
+        double frac = 0; QString barColor;
+        if (!dataBarAt(row, col, frac, barColor)) return {};
+        return QVariantList{ frac, barColor };
+    }
     case SpillEdgesRole: {
         int t, l, b, rg; // bitmask cạnh biên vùng spill: 1=trên,2=trái,4=dưới,8=phải
         if (!spillRangeAt(row, col, t, l, b, rg)) return 0;
@@ -394,6 +399,43 @@ void SpreadsheetModel::clearCondRules() {
     if (rowCount() && columnCount())
         emit dataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1),
                          {Qt::BackgroundRole, Qt::ForegroundRole});
+}
+
+void SpreadsheetModel::addDataBar(const cond::DataBar &bar) {
+    m_dataBars.push_back(bar);
+    emit dataChanged(index(bar.top, bar.left), index(bar.bottom, bar.right));
+}
+
+void SpreadsheetModel::clearDataBars() {
+    if (m_dataBars.isEmpty()) return;
+    m_dataBars.clear();
+    if (rowCount() && columnCount())
+        emit dataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1));
+}
+
+bool SpreadsheetModel::dataBarAt(int row, int col, double &fraction, QString &color) const {
+    // Quy tắc khớp sau cùng thắng (đè quy tắc trước, giống cond rule).
+    const cond::DataBar *hit = nullptr;
+    for (const cond::DataBar &b : m_dataBars)
+        if (b.contains(row, col)) hit = &b;
+    if (!hit) return false;
+    bool ok = false;
+    const double v = evalCell(row, col).toDouble(&ok);
+    if (!ok) return false; // ô không phải số -> không vẽ thanh
+    // min/max trên các ô SỐ của vùng.
+    double mn = 0, mx = 0; bool has = false;
+    for (int r = hit->top; r <= hit->bottom; ++r)
+        for (int c = hit->left; c <= hit->right; ++c) {
+            bool okc = false;
+            double d = evalCell(r, c).toDouble(&okc);
+            if (!okc) continue;
+            if (!has) { mn = mx = d; has = true; }
+            else { mn = qMin(mn, d); mx = qMax(mx, d); }
+        }
+    if (!has) return false;
+    fraction = cond::dataBarFraction(v, mn, mx);
+    color = hit->color;
+    return true;
 }
 
 void SpreadsheetModel::addValidationRule(const validation::Rule &rule) { m_validationRules.push_back(rule); }

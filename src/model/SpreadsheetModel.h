@@ -43,6 +43,10 @@ public:
     // Delegate vẽ viền nét đứt theo các cạnh biên của vùng spill (Spec 12).
     static constexpr int SpillEdgesRole = Qt::UserRole + 1;
 
+    // Role thanh dữ liệu: trả QVariantList{double tỉ_lệ[0..1], QString màu} nếu ô có thanh
+    // dữ liệu (và là số); QVariant rỗng nếu không. Delegate vẽ thanh ngang trong ô.
+    static constexpr int DataBarRole = Qt::UserRole + 2;
+
     explicit SpreadsheetModel(QObject *parent = nullptr);
 
     // QAbstractTableModel
@@ -134,6 +138,11 @@ public:
     void addCondRule(const cond::Rule &rule);
     void clearCondRules();
     int condRuleCount() const { return m_condRules.size(); }
+    // Thanh dữ liệu (Data Bar, Spec 08): thêm cho vùng chọn; xóa hết.
+    void addDataBar(const cond::DataBar &bar);
+    void clearDataBars();
+    // Thông tin thanh dữ liệu của ô (cho delegate vẽ): true + tỉ lệ [0..1] + màu; false nếu không.
+    bool dataBarAt(int row, int col, double &fraction, QString &color) const;
 
     // Kiểm tra dữ liệu (data validation): thêm/xóa quy tắc; setData sẽ từ chối giá trị sai.
     void addValidationRule(const validation::Rule &rule);
@@ -178,6 +187,7 @@ private:
     QHash<qint64, Format> m_fmt;                 // định dạng theo ô
     QVector<MergeRange> m_merges;                // vùng ô gộp
     QVector<cond::Rule> m_condRules;             // định dạng có điều kiện
+    QVector<cond::DataBar> m_dataBars;           // thanh dữ liệu (Data Bar)
     QVector<validation::Rule> m_validationRules; // kiểm tra dữ liệu nhập
     QHash<qint64, QString> m_notes;              // ghi chú theo ô
     QHash<QString, MergeRange> m_names;          // vùng đặt tên

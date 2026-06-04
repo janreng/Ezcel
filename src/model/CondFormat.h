@@ -24,4 +24,18 @@ struct Rule {
 // các phép còn lại so số (ô không phải số -> không khớp).
 bool match(const QVariant &value, Op op, double v1, double v2, const QString &text);
 
+// Thanh dữ liệu (Data Bar): vẽ thanh ngang tỉ lệ theo giá trị ô trong vùng. Áp cho
+// vùng [top,left]..[bottom,right], màu thanh `color`.
+struct DataBar {
+    int top, left, bottom, right;
+    QString color;
+    bool contains(int r, int c) const {
+        return top <= r && r <= bottom && left <= c && c <= right;
+    }
+};
+
+// Tỉ lệ lấp đầy thanh [0..1] cho `value` trong khoảng [mn,mx]; kẹp ngoài biên;
+// mx<=mn -> 1 (mọi giá trị lấp đầy).
+double dataBarFraction(double value, double mn, double mx);
+
 } // namespace cond

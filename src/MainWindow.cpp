@@ -863,6 +863,14 @@ void MainWindow::buildMenus()
     data->addSeparator();
     data->addAction(i18n::tr("data_cond"), this, &MainWindow::showCondFormat);
     data->addAction(i18n::tr("data_clear_cond"), this, [this] { m_model->clearCondRules(); });
+    data->addAction(QStringLiteral("Thanh dữ liệu..."), this, [this] {
+        int t, l, b, r; if (!selectionBox(t, l, b, r)) return;
+        QColor c = QColorDialog::getColor(QColor(QStringLiteral("#638EC6")), this,
+                                          QStringLiteral("Màu thanh dữ liệu"));
+        if (!c.isValid()) return;
+        m_model->addDataBar(cond::DataBar{t, l, b, r, c.name()});
+    });
+    data->addAction(QStringLiteral("Xóa thanh dữ liệu"), this, [this] { m_model->clearDataBars(); });
     data->addSeparator();
     data->addAction(QStringLiteral("Kiểm tra dữ liệu..."), this, &MainWindow::showDataValidation);
     data->addAction(QStringLiteral("Flash Fill (tự điền theo mẫu)"), QKeySequence(QStringLiteral("Ctrl+E")), this, &MainWindow::flashFill);

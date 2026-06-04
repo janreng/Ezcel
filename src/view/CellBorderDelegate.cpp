@@ -47,6 +47,23 @@ bool CellBorderDelegate::eventFilter(QObject *obj, QEvent *event)
 void CellBorderDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
                                const QModelIndex &index) const
 {
+    // Thanh dữ liệu (Data Bar): vẽ TRƯỚC nội dung để chữ nằm trên thanh.
+    const QVariant dbv = index.data(SpreadsheetModel::DataBarRole);
+    if (dbv.typeId() == QMetaType::QVariantList) {
+        const QVariantList db = dbv.toList();
+        if (db.size() == 2) {
+            const double frac = db[0].toDouble();
+            QColor barColor(db[1].toString());
+            if (barColor.isValid() && frac > 0.0) {
+                painter->save();
+                const QRect rc = option.rect.adjusted(1, 1, -1, -1);
+                const int w = int(rc.width() * frac);
+                painter->fillRect(QRect(rc.left(), rc.top(), w, rc.height()), barColor);
+                painter->restore();
+            }
+        }
+    }
+
     QStyledItemDelegate::paint(painter, option, index);
 
     // Dấu tam giác đỏ góc trên-phải nếu ô có ghi chú (note).

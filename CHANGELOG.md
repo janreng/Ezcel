@@ -1,5 +1,11 @@
 # Lịch sử thay đổi
 
+## v1.84.0 — Thanh dữ liệu trong ô (Spec 08)
+
+- Thêm **Dữ liệu → "Thanh dữ liệu..."**: tô một **thanh ngang** trong mỗi ô của vùng chọn, dài ngắn theo giá trị (so với nhỏ nhất – lớn nhất của vùng) — nhìn nhanh ra ô lớn ô nhỏ như báo cáo trực quan.
+- Chọn được màu thanh; **"Xóa thanh dữ liệu"** để gỡ.
+- Ô không phải số thì không vẽ thanh.
+
 ## v1.83.0 — Sửa ô mượt hơn trên bảng lớn (Spec 12)
 
 - Tối ưu vẽ lại: khi bảng **không dùng mảng động**, mỗi lần sửa ô chỉ vẽ lại vùng thay đổi thay vì cả trang — bảng nhiều dữ liệu thao tác nhẹ và mượt hơn.
