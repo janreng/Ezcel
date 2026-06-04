@@ -1342,6 +1342,9 @@ void MainWindow::buildRibbon()
     m_ribbon->addSmallButton(QStringLiteral("fill_color"), QStringLiteral("Màu nền"), [this] { pickColor(QStringLiteral("bg")); });
 
     m_ribbon->beginGroup(QStringLiteral("Căn lề"));
+    m_ribbon->addSmallButton(QStringLiteral("valign_top"), QStringLiteral("Căn trên"), [this] { applyFormatAttr(QStringLiteral("valign"), QStringLiteral("top")); });
+    m_ribbon->addSmallButton(QStringLiteral("valign_middle"), QStringLiteral("Căn giữa dọc"), [this] { applyFormatAttr(QStringLiteral("valign"), QStringLiteral("middle")); });
+    m_ribbon->addSmallButton(QStringLiteral("valign_bottom"), QStringLiteral("Căn dưới"), [this] { applyFormatAttr(QStringLiteral("valign"), QStringLiteral("bottom")); });
     m_ribbon->addSmallButton(QStringLiteral("align_left"), QStringLiteral("Căn trái"), [this] { applyFormatAttr(QStringLiteral("halign"), QStringLiteral("left")); });
     m_ribbon->addSmallButton(QStringLiteral("align_center"), QStringLiteral("Căn giữa"), [this] { applyFormatAttr(QStringLiteral("halign"), QStringLiteral("center")); });
     m_ribbon->addSmallButton(QStringLiteral("align_right"), QStringLiteral("Căn phải"), [this] { applyFormatAttr(QStringLiteral("halign"), QStringLiteral("right")); });

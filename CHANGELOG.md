@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v1.100.0 — Căn dọc trong ô: trên / giữa / dưới (Spec 07)
+
+- Nhóm **Căn lề** thêm 3 nút **Căn trên / Căn giữa dọc / Căn dưới** — đặt vị trí nội dung theo chiều dọc của ô (trước chỉ có căn ngang).
+
 ## v1.99.0 — Bộ sưu tập Kiểu ô hiện ngay trên dải lệnh (Spec 30)
 
 - Nhóm **Kiểu ô** trên thẻ Trang đầu giờ hiện **các mẫu kiểu có màu sẵn** (Bình thường, Tốt, Xấu, Trung tính, Tiêu đề, Tựa đề) — bấm thẳng vào mẫu để áp cho vùng đang chọn, không cần mở danh sách thả xuống.
