@@ -9,6 +9,8 @@
 #include <QMap>
 #include <QPair>
 #include <QStringList>
+#include <utility>
+#include "formula/Formula.h"
 #include <optional>
 #include "model/CondFormat.h"
 #include "model/Validation.h"
@@ -60,6 +62,12 @@ public:
     // Giá trị ĐÃ TÍNH của ô (resolver cho engine; chống vòng tham chiếu).
     QVariant evalCell(int row, int col) const;
     QVariant cellValue(int row, int col) const { return evalCell(row, col); } // public
+
+    // Bộ phân giải tham chiếu chéo sheet (Sheet1!A1): tra giá trị ô của sheet khác theo tên.
+    // MainWindow gắn để 1 sheet đọc được ô của sheet khác. Đổi -> xóa cache để tính lại.
+    void setSheetResolver(formula::SheetResolver r) { m_sheetResolver = std::move(r); m_evalCache.clear(); }
+    // Xóa cache công thức KHÔNG phát tín hiệu (để sheet khác đổi thì sheet này tính lại).
+    void clearEvalCacheOnly() { m_evalCache.clear(); }
 
     // Định dạng: đặt thuộc tính cho vùng [top,left]..[bottom,right]; value null -> xóa key.
     void setFormat(int top, int left, int bottom, int right, const Format &attrs);
@@ -154,6 +162,7 @@ private:
 
     QVector<QVector<QString>> m_data;            // lưới thô (chuỗi/công thức)
     mutable QHash<qint64, QVariant> m_evalCache; // giá trị công thức đã tính
+    formula::SheetResolver m_sheetResolver;      // tra ô sheet khác (Sheet1!A1)
     mutable QSet<qint64> m_evaluating;           // ô đang tính (vòng lặp)
     QHash<qint64, Format> m_fmt;                 // định dạng theo ô
     QVector<MergeRange> m_merges;                // vùng ô gộp

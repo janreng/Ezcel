@@ -91,6 +91,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_sheets.push_back(new SpreadsheetModel(this));
     m_sheets[0]->resizeGrid(200, 50); // lưới khởi tạo, như bản Python
     m_model = m_sheets[0];
+    installCrossSheet(m_sheets[0]);
 
     m_view = new QTableView(this);
     m_view->setModel(m_model);
@@ -218,9 +219,27 @@ void MainWindow::addSheet(const QString &name)
     auto *m = new SpreadsheetModel(this);
     m->resizeGrid(200, 50);
     m_sheets.push_back(m);
+    installCrossSheet(m);
     const QString nm = name.isEmpty() ? QStringLiteral("Trang %1").arg(m_sheets.size()) : name;
     m_sheetTabs->addTab(nm);
     m_sheetTabs->setCurrentIndex(m_sheets.size() - 1); // -> switchToSheet
+}
+
+// Gắn tham chiếu chéo sheet cho một model: 1 sheet đọc được ô của sheet khác theo tên
+// (Sheet1!A1). Khi bất kỳ sheet nào đổi nội dung -> xóa cache các sheet khác để tính lại.
+void MainWindow::installCrossSheet(SpreadsheetModel *m)
+{
+    m->setSheetResolver([this](const QString &name, int r, int c) -> QVariant {
+        for (int j = 0; j < m_sheetTabs->count() && j < m_sheets.size(); ++j)
+            if (m_sheetTabs->tabText(j).compare(name, Qt::CaseInsensitive) == 0)
+                return m_sheets[j]->cellValue(r, c);
+        return {}; // không tìm thấy sheet -> rỗng
+    });
+    connect(m, &SpreadsheetModel::contentChanged, this, [this, m] {
+        for (SpreadsheetModel *other : m_sheets)
+            if (other != m) other->clearEvalCacheOnly();
+        if (m_view) m_view->viewport()->update();
+    });
 }
 
 void MainWindow::switchToSheet(int i)
@@ -1088,6 +1107,7 @@ void MainWindow::openPath(const QString &path)
                 for (const auto &mr : sh.merges) m->mergeCells(mr.top, mr.left, mr.bottom, mr.right);
                 if (!sh.formats.isEmpty()) m->setCellFormats(sh.formats);
                 m_sheets.push_back(m);
+                installCrossSheet(m);
                 m_sheetTabs->addTab(sh.name.isEmpty()
                     ? QStringLiteral("Trang %1").arg(m_sheets.size()) : sh.name);
             }

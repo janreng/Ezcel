@@ -170,7 +170,7 @@ QVariant SpreadsheetModel::evalCell(int row, int col) const {
     m_evaluating.insert(k);
     QVariant result;
     try {
-        result = formula::evaluate(raw, [this](int r, int c) { return evalCell(r, c); });
+        result = formula::evaluate(raw, [this](int r, int c) { return evalCell(r, c); }, m_sheetResolver);
     } catch (const formula::FormulaError &e) {
         result = e.etype();
     }

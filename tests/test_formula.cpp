@@ -574,6 +574,31 @@ int main() {
     checkNum("=DVARP(K1:L5,\"Tien\",N1:N2)", 100);    // /2
     checkNum("=DSTDEVP(K1:L5,\"Tien\",N1:N2)", 10);   // sqrt(100)
 
+    // --- tham chieu cheo sheet (Sheet1!A1, Spec 10/12) ---
+    {
+        auto sheetRes = [](const QString &name, int r, int c) -> QVariant {
+            if (name.compare(QStringLiteral("Sheet2"), Qt::CaseInsensitive) != 0) return QVariant(QString());
+            static const QHash<QString, QString> s2 = {{"0,0", "100"}, {"1,0", "200"}, {"2,0", "50"}};
+            auto it = s2.constFind(QString("%1,%2").arg(r).arg(c));
+            return it == s2.constEnd() ? QVariant(QString()) : QVariant(it.value());
+        };
+        auto evx = [&](const char *f) -> QVariant {
+            try { return evaluate(QString::fromLatin1(f), resolver, sheetRes); }
+            catch (const formula::FormulaError &e) { return e.etype(); }
+        };
+        auto okEq = [&](bool c, const char *n) { if (c) ++g_pass; else { ++g_fail; std::printf("FAIL %s\n", n); } };
+        okEq(evx("=Sheet2!A1").toDouble() == 100, "Sheet2!A1 = 100");
+        okEq(evx("=Sheet2!A1+Sheet2!A2").toDouble() == 300, "Sheet2!A1+A2 = 300");
+        okEq(evx("=SUM(Sheet2!A1:A3)").toDouble() == 350, "SUM(Sheet2!A1:A3) = 350");
+        okEq(evx("=Sheet2!A1+A1").toDouble() == 110, "tron sheet hien tai + sheet khac (100+10)");
+        okEq(evx("=Sheet3!A1").toString().isEmpty(), "sheet khong ton tai -> rong");
+        // Khong co sheetResolver -> bao loi #REF!
+        QVariant noSheet;
+        try { noSheet = evaluate(QStringLiteral("=Sheet2!A1"), resolver); }
+        catch (const formula::FormulaError &e) { noSheet = e.etype(); }
+        okEq(noSheet.toString() == QStringLiteral("#REF!"), "khong co sheetResolver -> #REF!");
+    }
+
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);
     return g_fail == 0 ? 0 : 1;
 }

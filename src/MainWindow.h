@@ -96,6 +96,7 @@ private:
     void applyZoom();                          // áp mức thu phóng hiện tại
     // --- nhiều trang tính (multi-sheet) ---
     void addSheet(const QString &name = QString());
+    void installCrossSheet(SpreadsheetModel *m); // gắn tham chiếu chéo sheet (Sheet1!A1)
     void switchToSheet(int i);
     void gotoSheetRelative(int delta); // Ctrl+PageDown/Up (Spec 10)
     void renameSheet(int i);

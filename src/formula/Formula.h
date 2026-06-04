@@ -34,6 +34,10 @@ private:
 // resolver(row, col) -> giá trị ĐÃ TÍNH của ô (số/chuỗi). Một sheet/file.
 using Resolver = std::function<QVariant(int row, int col)>;
 
+// resolver cho ô của SHEET KHÁC theo tên (tham chiếu chéo sheet, vd Sheet1!A1).
+// Trả QVariant rỗng nếu không tìm thấy sheet. Bỏ trống nếu không hỗ trợ.
+using SheetResolver = std::function<QVariant(const QString &sheet, int row, int col)>;
+
 // --- API công khai (tương đương formula.py) ---
 
 // Công thức là chuỗi bắt đầu '=' và dài > 1.
@@ -41,7 +45,8 @@ bool isFormula(const QString &text);
 
 // Tính một công thức (đã có '='). Trả số/chuỗi/bool dưới dạng QVariant.
 // Ném FormulaError nếu sai (caller hiển thị etype).
-QVariant evaluate(const QString &formula, const Resolver &resolver);
+QVariant evaluate(const QString &formula, const Resolver &resolver,
+                  const SheetResolver &sheetResolver = {});
 
 // Dịch tham chiếu tương đối khi kéo-điền/paste; '$' giữ nguyên.
 QString offsetFormula(const QString &text, int drow, int dcol);

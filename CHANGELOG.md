@@ -1,5 +1,11 @@
 # Lịch sử thay đổi
 
+## v1.61.0 — Tham chiếu chéo trang tính (Spec 10)
+
+- **Công thức nay đọc được ô của trang tính khác**: dùng cú pháp `Tên!Ô`, ví dụ `=Sheet2!A1`, `=SUM(Báocáo!A1:A10)`.
+- Hỗ trợ tên trang có dấu cách (bọc trong nháy đơn, ví dụ `='Bảng giá'!B2`), kết hợp tự do với ô của trang hiện tại.
+- Sửa một trang sẽ tự tính lại các công thức ở trang khác đang tham chiếu tới nó.
+
 ## v1.60.0 — Hiện biểu tượng ứng dụng (Spec 50)
 
 - **Sửa lỗi thiếu biểu tượng**: tệp chương trình nay nhúng sẵn biểu tượng, hiển thị đúng trên thanh tác vụ, cửa sổ và trong trình quản lý tệp.

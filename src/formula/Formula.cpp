@@ -31,6 +31,16 @@ QString colIndexToLetters(int index) {
 
 static const QRegularExpression kCellRe(QStringLiteral("^\\$?([A-Za-z]+)\\$?(\\d+)$"));
 
+// Tách "Sheet1!A1" hoặc "'Tên Sheet'!A1" -> (tên sheet, "A1"). Bỏ dấu nháy đơn bao tên.
+static QPair<QString,QString> splitSheetCell(const QString &tok) {
+    const int bang = tok.lastIndexOf(QLatin1Char('!'));
+    QString sheet = tok.left(bang);
+    const QString cell = tok.mid(bang + 1);
+    if (sheet.size() >= 2 && sheet.startsWith(QLatin1Char('\'')) && sheet.endsWith(QLatin1Char('\'')))
+        sheet = sheet.mid(1, sheet.size() - 2);
+    return {sheet, cell};
+}
+
 // 'B3' -> (row=2, col=1). Ném nếu sai cú pháp.
 static QPair<int,int> parseCellRef(const QString &ref) {
     auto m = kCellRe.match(ref);
@@ -230,8 +240,8 @@ Value compareOp(const Value &left, const QString &op, const Value &right) {
 
 class Parser {
 public:
-    Parser(std::vector<Token> tokens, const Resolver &resolver)
-        : m_tokens(std::move(tokens)), m_resolver(resolver) {}
+    Parser(std::vector<Token> tokens, const Resolver &resolver, const SheetResolver &sheetResolver = {})
+        : m_tokens(std::move(tokens)), m_resolver(resolver), m_sheetResolver(sheetResolver) {}
 
     Value parse() {
         Value v = comparison();
@@ -320,8 +330,12 @@ private:
             auto [row, col] = parseCellRef(t.value);
             return Value::fromCell(m_resolver(row, col));
         }
-        case Tk::SheetCell:
-            throw FormulaError(QStringLiteral("Tham chiếu chéo sheet chưa hỗ trợ"), ERR_REF);
+        case Tk::SheetCell: {
+            if (!m_sheetResolver) throw FormulaError(QStringLiteral("Tham chiếu chéo sheet chưa hỗ trợ"), ERR_REF);
+            auto [sheet, cellref] = splitSheetCell(t.value);
+            auto [row, col] = parseCellRef(cellref);
+            return Value::fromCell(m_sheetResolver(sheet, row, col));
+        }
         case Tk::Ident: {
             // TRUE/FALSE viết trần (không ngoặc) -> literal boolean (kiểu Excel).
             if (!isOp(peek(), QStringLiteral("("))) {
@@ -376,6 +390,16 @@ private:
             out.push_back(expandRange(start, endTok.value));
             return;
         }
+        // Vùng chéo sheet: Sheet1!A1:B3  (token SheetCell, ':', Cell).
+        if (t && t->kind == Tk::SheetCell && isOp(nxt, QStringLiteral(":"))) {
+            if (!m_sheetResolver) throw FormulaError(QStringLiteral("Tham chiếu chéo sheet chưa hỗ trợ"), ERR_REF);
+            auto [sheet, startCell] = splitSheetCell(t->value);
+            m_pos += 2;
+            const Token &endTok = next();
+            if (endTok.kind != Tk::Cell) throw FormulaError(QStringLiteral("Vùng không hợp lệ"));
+            out.push_back(expandRangeSheet(sheet, startCell, endTok.value));
+            return;
+        }
         out.push_back(comparison());
     }
 
@@ -392,6 +416,25 @@ private:
             row.reserve(c2 - c1 + 1);
             for (int c = c1; c <= c2; ++c)
                 row.push_back(Value::fromCell(m_resolver(r, c)));
+            rg.rows->push_back(std::move(row));
+        }
+        return Value::rangev(std::move(rg));
+    }
+
+    // Vùng đọc từ sheet khác (Sheet1!A1:B3).
+    Value expandRangeSheet(const QString &sheet, const QString &start, const QString &end) {
+        auto [r1, c1] = parseCellRef(start);
+        auto [r2, c2] = parseCellRef(end);
+        if (r1 > r2) std::swap(r1, r2);
+        if (c1 > c2) std::swap(c1, c2);
+        Range rg;
+        rg.rows = std::make_shared<std::vector<std::vector<Value>>>();
+        rg.rows->reserve(r2 - r1 + 1);
+        for (int r = r1; r <= r2; ++r) {
+            std::vector<Value> row;
+            row.reserve(c2 - c1 + 1);
+            for (int c = c1; c <= c2; ++c)
+                row.push_back(Value::fromCell(m_sheetResolver(sheet, r, c)));
             rg.rows->push_back(std::move(row));
         }
         return Value::rangev(std::move(rg));
@@ -430,6 +473,7 @@ private:
 
     std::vector<Token> m_tokens;
     Resolver m_resolver;
+    SheetResolver m_sheetResolver;
     int m_pos = 0;
 };
 
@@ -452,11 +496,12 @@ bool isFormula(const QString &text) {
     return text.startsWith(QLatin1Char('=')) && text.size() > 1;
 }
 
-QVariant evaluate(const QString &formula, const Resolver &resolver) {
+QVariant evaluate(const QString &formula, const Resolver &resolver,
+                  const SheetResolver &sheetResolver) {
     QString body = formula.startsWith(QLatin1Char('=')) ? formula.mid(1) : formula;
     std::vector<Token> tokens = tokenize(body);
     if (tokens.empty()) throw FormulaError(QStringLiteral("Công thức rỗng"));
-    Value v = finalize(Parser(std::move(tokens), resolver).parse());
+    Value v = finalize(Parser(std::move(tokens), resolver, sheetResolver).parse());
     return v.toVariant();
 }
 
