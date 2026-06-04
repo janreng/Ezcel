@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v1.59.0 — Kéo nút điền để tự tăng dần (Spec 05)
+
+- **Nút kéo điền (fill handle)**: ô vuông nhỏ ở góc dưới-phải vùng chọn. Kéo xuống hoặc sang phải để tự điền tiếp chuỗi (số tăng dần, ngày, thứ, mẫu lặp...).
+- Tận dụng cùng cơ chế tự điền như khi dùng lệnh Điền; chọn hướng theo chiều kéo dài hơn.
+
 ## v1.58.0 — Gõ xong nhấn Enter tự nhảy xuống ô dưới (Spec 03)
 
 - **Sửa lỗi**: nhập nội dung rồi nhấn Enter nay tự chuyển xuống ô ngay bên dưới như mong đợi.

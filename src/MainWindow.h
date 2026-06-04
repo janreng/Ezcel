@@ -136,6 +136,13 @@ private:
     QCheckBox *m_matchCase = nullptr;
     bool findNext(); // nhảy tới ô khớp kế tiếp; trả false nếu không thấy
 
+    // Nút kéo điền (fill handle) ở góc dưới-phải vùng chọn (Spec 05).
+    QWidget *m_fillHandle = nullptr;
+    bool m_filling = false;
+    int m_fillT = 0, m_fillL = 0, m_fillB = 0, m_fillR = 0; // vùng nguồn khi bắt đầu kéo
+    void positionFillHandle();       // đặt lại vị trí nút theo vùng chọn
+    void doFillDrag(const QPoint &releaseViewportPos); // thực hiện điền khi thả chuột
+
     outline::Outline m_rowOutline;   // nhóm/phác thảo hàng (Spec 09.4)
     void applyRowOutline();          // áp ẩn/hiện hàng theo nhóm đang thu gọn
     outline::Outline m_colOutline;   // nhóm/phác thảo cột (Spec 09.4)

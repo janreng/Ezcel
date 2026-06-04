@@ -35,6 +35,7 @@
 #include <QLineEdit>
 #include <QLabel>
 #include <QWidget>
+#include <QScrollBar>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QMenuBar>
@@ -71,6 +72,7 @@
 #include <QPoint>
 #include <QWheelEvent>
 #include <QKeyEvent>
+#include <QMouseEvent>
 #include <QEvent>
 #include <QDate>
 #include <QTime>
@@ -105,6 +107,15 @@ MainWindow::MainWindow(QWidget *parent)
                             | QAbstractItemView::AnyKeyPressed);
     m_view->setTabKeyNavigation(true); // Tab sang phải, Enter xuống dưới
     m_view->viewport()->installEventFilter(this); // bắt Ctrl+wheel để zoom
+    // Nút kéo điền (fill handle): ô vuông xanh nhỏ ở góc dưới-phải vùng chọn (Spec 05).
+    m_fillHandle = new QWidget(m_view->viewport());
+    m_fillHandle->resize(8, 8);
+    m_fillHandle->setStyleSheet(QStringLiteral("background:#217346;border:1px solid white;"));
+    m_fillHandle->setCursor(Qt::CrossCursor);
+    m_fillHandle->hide();
+    m_fillHandle->installEventFilter(this);
+    connect(m_view->verticalScrollBar(), &QScrollBar::valueChanged, this, [this] { positionFillHandle(); });
+    connect(m_view->horizontalScrollBar(), &QScrollBar::valueChanged, this, [this] { positionFillHandle(); });
     buildContextMenus(); // menu chuột phải: ô + đầu hàng/cột (Spec 06)
 
     buildFormulaBar();
@@ -189,7 +200,7 @@ void MainWindow::bindActiveModel()
     m_modelConns << connect(m_view->selectionModel(), &QItemSelectionModel::currentChanged,
                             this, &MainWindow::onCurrentCellChanged);
     m_modelConns << connect(m_view->selectionModel(), &QItemSelectionModel::selectionChanged,
-                            this, [this] { updateStats(); });
+                            this, [this] { updateStats(); positionFillHandle(); });
     m_modelConns << connect(m_model, &SpreadsheetModel::contentChanged, this, [this] {
         onCurrentCellChanged(m_view->currentIndex(), QModelIndex());
     });
@@ -411,6 +422,43 @@ void MainWindow::onCurrentCellChanged(const QModelIndex &cur, const QModelIndex 
         m_formulaBar->setText(m_model->data(cur, Qt::EditRole).toString());
     else
         m_formulaBar->clear();
+    positionFillHandle();
+}
+
+// Đặt nút kéo điền ở góc dưới-phải ô cuối của vùng chọn (Spec 05).
+void MainWindow::positionFillHandle()
+{
+    if (!m_fillHandle || m_filling) return;
+    int t, l, b, r;
+    if (!selectionBox(t, l, b, r)) { m_fillHandle->hide(); return; }
+    const QModelIndex br = m_model->index(b, r);
+    if (m_view->isRowHidden(b) || m_view->isColumnHidden(r)) { m_fillHandle->hide(); return; }
+    const QRect rect = m_view->visualRect(br);
+    if (!rect.isValid() || rect.isEmpty()) { m_fillHandle->hide(); return; }
+    const int sz = m_fillHandle->width();
+    m_fillHandle->move(rect.right() - sz / 2, rect.bottom() - sz / 2);
+    m_fillHandle->raise();
+    m_fillHandle->show();
+}
+
+// Thực hiện điền khi thả chuột tại vị trí `pos` (toạ độ viewport).
+void MainWindow::doFillDrag(const QPoint &pos)
+{
+    const QModelIndex target = m_view->indexAt(pos);
+    if (!target.isValid()) return;
+    const int tr = target.row(), tc = target.column();
+    const int downDelta = tr - m_fillB, rightDelta = tc - m_fillR;
+    if (downDelta <= 0 && rightDelta <= 0) return; // chỉ hỗ trợ kéo xuống / sang phải
+
+    if (downDelta >= rightDelta && downDelta > 0) {
+        for (int c = m_fillL; c <= m_fillR; ++c) m_model->autofillVertical(c, m_fillT, m_fillB, tr);
+        QItemSelection sel(m_model->index(m_fillT, m_fillL), m_model->index(tr, m_fillR));
+        m_view->selectionModel()->select(sel, QItemSelectionModel::ClearAndSelect);
+    } else {
+        for (int row = m_fillT; row <= m_fillB; ++row) m_model->autofillHorizontal(row, m_fillL, m_fillR, tc);
+        QItemSelection sel(m_model->index(m_fillT, m_fillL), m_model->index(m_fillB, tc));
+        m_view->selectionModel()->select(sel, QItemSelectionModel::ClearAndSelect);
+    }
 }
 
 // "A1" -> (row,col) 0-based; trả {-1,-1} nếu sai. Phần chữ = cột, phần số = dòng.
@@ -2043,6 +2091,21 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *ev)
             m_zoom = zoom::stepped(m_zoom, we->angleDelta().y() > 0 ? zoom::kStep : -zoom::kStep);
             applyZoom();
             return true; // nuốt sự kiện, không cuộn
+        }
+    }
+    // Kéo nút điền (fill handle) để tự điền chuỗi xuống/sang phải (Spec 05).
+    if (obj == m_fillHandle) {
+        if (ev->type() == QEvent::MouseButtonPress) {
+            if (selectionBox(m_fillT, m_fillL, m_fillB, m_fillR)) m_filling = true;
+            return true;
+        }
+        if (ev->type() == QEvent::MouseButtonRelease && m_filling) {
+            auto *me = static_cast<QMouseEvent *>(ev);
+            const QPoint vp = m_view->viewport()->mapFromGlobal(m_fillHandle->mapToGlobal(me->pos()));
+            m_filling = false;
+            doFillDrag(vp);
+            positionFillHandle();
+            return true;
         }
     }
     // F4 trên thanh công thức: đảo trạng thái khóa $ của tham chiếu tại con trỏ (Spec 04).
