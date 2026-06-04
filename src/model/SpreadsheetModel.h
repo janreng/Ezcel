@@ -16,6 +16,7 @@
 #include "model/CondFormat.h"
 #include "model/Validation.h"
 #include "model/CellShift.h"
+#include "model/Sparkline.h"
 
 // Vùng ô gộp [top,left]..[bottom,right] (port tuple (t,l,b,r) của Python).
 struct MergeRange {
@@ -50,6 +51,10 @@ public:
     // Role bộ biểu tượng: trả QString mã màu chấm biểu tượng của ô (theo mức giá trị);
     // QVariant rỗng nếu ô không thuộc bộ biểu tượng (hoặc không là số).
     static constexpr int IconSetRole = Qt::UserRole + 3;
+
+    // Role sparkline: ô đích trả QVariantList{int kiểu(0=đường,1=cột), các giá trị số nguồn...};
+    // QVariant rỗng nếu ô không phải đích sparkline. Delegate vẽ biểu đồ mini.
+    static constexpr int SparkLineRole = Qt::UserRole + 4;
 
     explicit SpreadsheetModel(QObject *parent = nullptr);
 
@@ -153,6 +158,9 @@ public:
     // Bộ biểu tượng (Icon Set, Spec 08): thêm cho vùng chọn; xóa hết.
     void addIconSet(const cond::IconSet &is);
     void clearIconSets();
+    // Sparkline (Spec 19): thêm biểu đồ mini vào ô đích lấy số liệu từ vùng nguồn; xóa hết.
+    void addSparkline(const sparkline::Spark &sp);
+    void clearSparklines();
 
     // Kiểm tra dữ liệu (data validation): thêm/xóa quy tắc; setData sẽ từ chối giá trị sai.
     void addValidationRule(const validation::Rule &rule);
@@ -202,6 +210,7 @@ private:
     QString colorScaleColorAt(int row, int col) const; // màu nền nội suy; rỗng nếu không thuộc
     QVector<cond::IconSet> m_iconSets;           // bộ biểu tượng (Icon Set)
     QString iconColorAt(int row, int col) const; // màu chấm biểu tượng; rỗng nếu không thuộc
+    QVector<sparkline::Spark> m_sparklines;      // sparkline (biểu đồ mini)
     QVector<validation::Rule> m_validationRules; // kiểm tra dữ liệu nhập
     QHash<qint64, QString> m_notes;              // ghi chú theo ô
     QHash<QString, MergeRange> m_names;          // vùng đặt tên

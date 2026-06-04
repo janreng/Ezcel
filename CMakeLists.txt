@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
-project(Ezcel VERSION 1.86.0 LANGUAGES CXX)
+project(Ezcel VERSION 1.87.0 LANGUAGES CXX)
 
 # Bản port C++ của Ezcel (gốc Python/PySide6). Dùng Qt6 Widgets + MinGW.
 set(CMAKE_CXX_STANDARD 20)
@@ -58,7 +58,8 @@ add_library(ezcel_model STATIC src/model/SpreadsheetModel.cpp src/model/Spreadsh
     src/model/TextCase.cpp src/model/TextCase.h
     src/model/CellShift.cpp src/model/CellShift.h
     src/model/Consolidate.cpp src/model/Consolidate.h
-    src/model/Forecast.cpp src/model/Forecast.h)
+    src/model/Forecast.cpp src/model/Forecast.h
+    src/model/Sparkline.cpp src/model/Sparkline.h)
 target_include_directories(ezcel_model PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(ezcel_model PUBLIC ezcel_formula ezcel_sort Qt6::Core Qt6::Gui)
 
@@ -77,7 +78,8 @@ add_library(ezcel_view STATIC src/view/MergeSpans.cpp src/view/MergeSpans.h
     src/view/FreezePanes.cpp src/view/FreezePanes.h
     src/view/FormulaHint.cpp src/view/FormulaHint.h)
 target_include_directories(ezcel_view PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
-target_link_libraries(ezcel_view PUBLIC Qt6::Core Qt6::Gui Qt6::Widgets)
+# Delegate dùng hằng role + hàm thuần của model (sparkline...) -> phụ thuộc ezcel_model.
+target_link_libraries(ezcel_view PUBLIC ezcel_model Qt6::Core Qt6::Gui Qt6::Widgets)
 
 # --- Cập nhật (GitHub Releases) — cần Network + Widgets -> static lib.
 add_library(ezcel_update STATIC
@@ -167,6 +169,10 @@ add_executable(test_forecast tests/test_forecast.cpp src/model/Forecast.cpp)
 target_include_directories(test_forecast PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(test_forecast PRIVATE Qt6::Core)
 
+add_executable(test_sparkline tests/test_sparkline.cpp src/model/Sparkline.cpp)
+target_include_directories(test_sparkline PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_link_libraries(test_sparkline PRIVATE Qt6::Core)
+
 add_executable(test_headermenu tests/test_headermenu.cpp src/view/HeaderMenu.cpp)
 target_include_directories(test_headermenu PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(test_headermenu PRIVATE Qt6::Core)
@@ -226,6 +232,7 @@ add_test(NAME textcase COMMAND test_textcase)
 add_test(NAME cellshift COMMAND test_cellshift)
 add_test(NAME consolidate COMMAND test_consolidate)
 add_test(NAME forecast COMMAND test_forecast)
+add_test(NAME sparkline COMMAND test_sparkline)
 
 # --- Sort (sắp xếp vùng dữ liệu) — module logic thuần (Qt Core) -> static lib + test.
 add_library(ezcel_sort STATIC src/model/Sort.cpp src/model/Sort.h)

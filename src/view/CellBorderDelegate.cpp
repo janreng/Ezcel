@@ -82,6 +82,43 @@ void CellBorderDelegate::paint(QPainter *painter, const QStyleOptionViewItem &op
         painter->restore();
     }
 
+    // Sparkline (biểu đồ mini) trong ô đích.
+    const QVariant spv = index.data(SpreadsheetModel::SparkLineRole);
+    if (spv.typeId() == QMetaType::QVariantList) {
+        const QVariantList l = spv.toList();
+        if (l.size() >= 2) {
+            const int type = l[0].toInt();
+            QVector<double> vals;
+            for (int i = 1; i < l.size(); ++i) vals << l[i].toDouble();
+            painter->save();
+            painter->setRenderHint(QPainter::Antialiasing, true);
+            const QRectF rc = option.rect;
+            const double margin = 2.0;
+            const QColor sparkColor(QStringLiteral("#2C7BE5"));
+            if (type == int(sparkline::Type::Line)) {
+                const auto pts = sparkline::linePoints(vals, rc.width(), rc.height(), margin);
+                QPolygonF poly;
+                for (const QPointF &p : pts) poly << QPointF(rc.left() + p.x(), rc.top() + p.y());
+                QPen pen(sparkColor); pen.setWidthF(1.2);
+                painter->setPen(pen); painter->setBrush(Qt::NoBrush);
+                painter->drawPolyline(poly);
+            } else {
+                const auto hs = sparkline::columnHeights(vals, rc.height(), margin);
+                const int n = hs.size();
+                const double innerW = rc.width() - 2 * margin;
+                const double slot = n > 0 ? innerW / n : 0;
+                const double bw = slot * 0.7;
+                painter->setPen(Qt::NoPen); painter->setBrush(sparkColor);
+                for (int i = 0; i < n; ++i) {
+                    const double x = rc.left() + margin + slot * i + (slot - bw) / 2;
+                    const double y = rc.bottom() - margin - hs[i];
+                    painter->drawRect(QRectF(x, y, bw, hs[i]));
+                }
+            }
+            painter->restore();
+        }
+    }
+
     // Dấu tam giác đỏ góc trên-phải nếu ô có ghi chú (note).
     if (!index.data(Qt::ToolTipRole).toString().isEmpty()) {
         painter->save();

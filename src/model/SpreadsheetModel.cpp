@@ -130,6 +130,21 @@ QVariant SpreadsheetModel::data(const QModelIndex &index, int role) const {
         const QString c = iconColorAt(row, col);
         return c.isEmpty() ? QVariant() : QVariant(c);
     }
+    case SparkLineRole: {
+        const sparkline::Spark *hit = nullptr;
+        for (const sparkline::Spark &sp : m_sparklines)
+            if (sp.isTarget(row, col)) hit = &sp; // cái sau cùng thắng
+        if (!hit) return {};
+        QVariantList out;
+        out << int(hit->type);
+        for (int r = hit->srcTop; r <= hit->srcBottom; ++r)
+            for (int c = hit->srcLeft; c <= hit->srcRight; ++c) {
+                bool okc = false;
+                const double d = evalCell(r, c).toDouble(&okc);
+                if (okc) out << d;
+            }
+        return out.size() > 1 ? QVariant(out) : QVariant(); // cần ít nhất 1 giá trị
+    }
     case SpillEdgesRole: {
         int t, l, b, rg; // bitmask cạnh biên vùng spill: 1=trên,2=trái,4=dưới,8=phải
         if (!spillRangeAt(row, col, t, l, b, rg)) return 0;
@@ -461,6 +476,18 @@ void SpreadsheetModel::addIconSet(const cond::IconSet &is) {
 void SpreadsheetModel::clearIconSets() {
     if (m_iconSets.isEmpty()) return;
     m_iconSets.clear();
+    if (rowCount() && columnCount())
+        emit dataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1));
+}
+
+void SpreadsheetModel::addSparkline(const sparkline::Spark &sp) {
+    m_sparklines.push_back(sp);
+    emit dataChanged(index(sp.targetRow, sp.targetCol), index(sp.targetRow, sp.targetCol));
+}
+
+void SpreadsheetModel::clearSparklines() {
+    if (m_sparklines.isEmpty()) return;
+    m_sparklines.clear();
     if (rowCount() && columnCount())
         emit dataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1));
 }

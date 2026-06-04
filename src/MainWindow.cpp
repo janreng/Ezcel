@@ -894,6 +894,23 @@ void MainWindow::buildMenus()
         m_model->addIconSet(cond::IconSet{t, l, b, r, 3});
     });
     data->addAction(QStringLiteral("Xóa bộ biểu tượng"), this, [this] { m_model->clearIconSets(); });
+    {
+        auto addSpark = [this](sparkline::Type type) {
+            const QModelIndex cur = m_view->currentIndex();
+            if (!cur.isValid()) return;
+            bool ok = false;
+            QString txt = QInputDialog::getText(this, QStringLiteral("Sparkline"),
+                QStringLiteral("Vùng dữ liệu nguồn (ví dụ B2:M2):"), QLineEdit::Normal, QString(), &ok);
+            if (!ok || txt.trimmed().isEmpty()) return;
+            auto box = rangeparse::parseOne(txt.trimmed(), m_model->rowCount(), m_model->columnCount());
+            if (!box) { statusBar()->showMessage(QStringLiteral("Vùng nguồn không hợp lệ"), 2500); return; }
+            m_model->addSparkline(sparkline::Spark{cur.row(), cur.column(),
+                box->top, box->left, box->bottom, box->right, type});
+        };
+        data->addAction(QStringLiteral("Sparkline đường..."), this, [addSpark] { addSpark(sparkline::Type::Line); });
+        data->addAction(QStringLiteral("Sparkline cột..."), this, [addSpark] { addSpark(sparkline::Type::Column); });
+        data->addAction(QStringLiteral("Xóa sparkline"), this, [this] { m_model->clearSparklines(); });
+    }
     data->addSeparator();
     data->addAction(QStringLiteral("Kiểm tra dữ liệu..."), this, &MainWindow::showDataValidation);
     data->addAction(QStringLiteral("Flash Fill (tự điền theo mẫu)"), QKeySequence(QStringLiteral("Ctrl+E")), this, &MainWindow::flashFill);

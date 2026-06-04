@@ -1,5 +1,11 @@
 # Lịch sử thay đổi
 
+## v1.87.0 — Sparkline: biểu đồ mini trong ô (Spec 19)
+
+- Thêm **Dữ liệu → "Sparkline đường..." / "Sparkline cột..."**: chọn ô đích, nhập vùng dữ liệu nguồn (ví dụ `B2:M2`) → ô đó hiển thị một **biểu đồ tí hon** (đường hoặc cột) tóm tắt xu hướng dãy số.
+- Tự co giãn theo nhỏ nhất–lớn nhất của dãy; cập nhật khi dữ liệu nguồn đổi.
+- **"Xóa sparkline"** để gỡ.
+
 ## v1.86.0 — Bộ biểu tượng đèn giao thông (Spec 08)
 
 - Thêm **Dữ liệu → "Bộ biểu tượng"**: gắn một **chấm màu** vào mỗi ô của vùng chọn theo mức giá trị — thấp (đỏ), trung bình (vàng), cao (xanh lá).
