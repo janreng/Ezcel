@@ -143,6 +143,8 @@ QVariant SpreadsheetModel::data(const QModelIndex &index, int role) const {
     case Qt::BackgroundRole: {
         QString cbg = condColorFor(row, col, /*fg*/ false); // định dạng điều kiện đè màu nền
         if (!cbg.isEmpty()) return QColor(cbg);
+        QString csbg = colorScaleColorAt(row, col);          // thang màu (sau cond rule)
+        if (!csbg.isEmpty()) return QColor(csbg);
         const Format &f = m_fmt[key(row, col)];
         auto it = f.constFind(QStringLiteral("bg"));
         return it != f.constEnd() ? QColor(it->toString()) : QVariant();
@@ -411,6 +413,40 @@ void SpreadsheetModel::clearDataBars() {
     m_dataBars.clear();
     if (rowCount() && columnCount())
         emit dataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1));
+}
+
+void SpreadsheetModel::addColorScale(const cond::ColorScale &cs) {
+    m_colorScales.push_back(cs);
+    emit dataChanged(index(cs.top, cs.left), index(cs.bottom, cs.right), {Qt::BackgroundRole});
+}
+
+void SpreadsheetModel::clearColorScales() {
+    if (m_colorScales.isEmpty()) return;
+    m_colorScales.clear();
+    if (rowCount() && columnCount())
+        emit dataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1), {Qt::BackgroundRole});
+}
+
+QString SpreadsheetModel::colorScaleColorAt(int row, int col) const {
+    const cond::ColorScale *hit = nullptr;
+    for (const cond::ColorScale &cs : m_colorScales)
+        if (cs.contains(row, col)) hit = &cs; // quy tắc sau cùng thắng
+    if (!hit) return QString();
+    bool ok = false;
+    const double v = evalCell(row, col).toDouble(&ok);
+    if (!ok) return QString();
+    double mn = 0, mx = 0; bool has = false;
+    for (int r = hit->top; r <= hit->bottom; ++r)
+        for (int c = hit->left; c <= hit->right; ++c) {
+            bool okc = false;
+            double d = evalCell(r, c).toDouble(&okc);
+            if (!okc) continue;
+            if (!has) { mn = mx = d; has = true; }
+            else { mn = qMin(mn, d); mx = qMax(mx, d); }
+        }
+    if (!has) return QString();
+    const double frac = cond::dataBarFraction(v, mn, mx);
+    return cond::colorScale(frac, hit->low, hit->mid, hit->high);
 }
 
 bool SpreadsheetModel::dataBarAt(int row, int col, double &fraction, QString &color) const {

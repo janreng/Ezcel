@@ -871,6 +871,24 @@ void MainWindow::buildMenus()
         m_model->addDataBar(cond::DataBar{t, l, b, r, c.name()});
     });
     data->addAction(QStringLiteral("Xóa thanh dữ liệu"), this, [this] { m_model->clearDataBars(); });
+    data->addAction(QStringLiteral("Thang màu..."), this, [this] {
+        int t, l, b, r; if (!selectionBox(t, l, b, r)) return;
+        struct Preset { QString name, lo, mid, hi; };
+        const QVector<Preset> presets = {
+            { QStringLiteral("Xanh lá → Vàng → Đỏ"), QStringLiteral("#63BE7B"), QStringLiteral("#FFEB84"), QStringLiteral("#F8696B") },
+            { QStringLiteral("Đỏ → Vàng → Xanh lá"), QStringLiteral("#F8696B"), QStringLiteral("#FFEB84"), QStringLiteral("#63BE7B") },
+            { QStringLiteral("Trắng → Xanh dương (2 màu)"), QStringLiteral("#FFFFFF"), QString(), QStringLiteral("#5A8AC6") },
+            { QStringLiteral("Xanh dương → Trắng → Đỏ"), QStringLiteral("#5A8AC6"), QStringLiteral("#FFFFFF"), QStringLiteral("#F8696B") },
+        };
+        QStringList names; for (const auto &p : presets) names << p.name;
+        bool ok = false;
+        QString pick = QInputDialog::getItem(this, QStringLiteral("Thang màu"),
+            QStringLiteral("Kiểu thang màu:"), names, 0, false, &ok);
+        if (!ok) return;
+        const int i = qMax(0, names.indexOf(pick));
+        m_model->addColorScale(cond::ColorScale{t, l, b, r, presets[i].lo, presets[i].mid, presets[i].hi});
+    });
+    data->addAction(QStringLiteral("Xóa thang màu"), this, [this] { m_model->clearColorScales(); });
     data->addSeparator();
     data->addAction(QStringLiteral("Kiểm tra dữ liệu..."), this, &MainWindow::showDataValidation);
     data->addAction(QStringLiteral("Flash Fill (tự điền theo mẫu)"), QKeySequence(QStringLiteral("Ctrl+E")), this, &MainWindow::flashFill);

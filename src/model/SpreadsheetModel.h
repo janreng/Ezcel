@@ -143,6 +143,9 @@ public:
     void clearDataBars();
     // Thông tin thanh dữ liệu của ô (cho delegate vẽ): true + tỉ lệ [0..1] + màu; false nếu không.
     bool dataBarAt(int row, int col, double &fraction, QString &color) const;
+    // Thang màu (Color Scale, Spec 08): thêm cho vùng chọn; xóa hết.
+    void addColorScale(const cond::ColorScale &cs);
+    void clearColorScales();
 
     // Kiểm tra dữ liệu (data validation): thêm/xóa quy tắc; setData sẽ từ chối giá trị sai.
     void addValidationRule(const validation::Rule &rule);
@@ -188,6 +191,8 @@ private:
     QVector<MergeRange> m_merges;                // vùng ô gộp
     QVector<cond::Rule> m_condRules;             // định dạng có điều kiện
     QVector<cond::DataBar> m_dataBars;           // thanh dữ liệu (Data Bar)
+    QVector<cond::ColorScale> m_colorScales;     // thang màu (Color Scale)
+    QString colorScaleColorAt(int row, int col) const; // màu nền nội suy; rỗng nếu không thuộc
     QVector<validation::Rule> m_validationRules; // kiểm tra dữ liệu nhập
     QHash<qint64, QString> m_notes;              // ghi chú theo ô
     QHash<QString, MergeRange> m_names;          // vùng đặt tên

@@ -1,5 +1,11 @@
 # Lịch sử thay đổi
 
+## v1.85.0 — Thang màu (color scale) cho vùng dữ liệu (Spec 08)
+
+- Thêm **Dữ liệu → "Thang màu..."**: tô **nền các ô theo gradient màu** chạy từ giá trị nhỏ nhất tới lớn nhất của vùng — heatmap nhanh gọn.
+- Có sẵn các kiểu phổ biến: Xanh lá→Vàng→Đỏ, Đỏ→Vàng→Xanh lá, Trắng→Xanh dương (2 màu), Xanh dương→Trắng→Đỏ.
+- **"Xóa thang màu"** để gỡ. Định dạng có điều kiện theo điều kiện vẫn được ưu tiên đè lên thang màu.
+
 ## v1.84.0 — Thanh dữ liệu trong ô (Spec 08)
 
 - Thêm **Dữ liệu → "Thanh dữ liệu..."**: tô một **thanh ngang** trong mỗi ô của vùng chọn, dài ngắn theo giá trị (so với nhỏ nhất – lớn nhất của vùng) — nhìn nhanh ra ô lớn ô nhỏ như báo cáo trực quan.

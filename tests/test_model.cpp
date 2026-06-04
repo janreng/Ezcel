@@ -363,6 +363,26 @@ int main(int argc, char **argv) {
         ok(!db.data(db.index(0, 0), SpreadsheetModel::DataBarRole).isValid(), "o chu -> khong thanh");
         db.clearDataBars();
         ok(!db.data(db.index(1, 0), SpreadsheetModel::DataBarRole).isValid(), "clear databar -> het");
+
+        // --- Color Scale (Spec 08) ---
+        // lerpHex + colorScale thuan
+        ok(cond::lerpHex("#000000", "#ffffff", 0.5) == "#808080", "lerp giua den-trang = #808080");
+        ok(cond::lerpHex("#000000", "#ffffff", 0.0) == "#000000", "lerp t=0 = dau");
+        ok(cond::colorScale(0.0, "#ff0000", "", "#00ff00") == "#ff0000", "scale 2 mau t=0 = low");
+        ok(cond::colorScale(1.0, "#ff0000", "", "#00ff00") == "#00ff00", "scale 2 mau t=1 = high");
+        ok(cond::colorScale(0.5, "#000000", "#808080", "#ffffff") == "#808080", "scale 3 mau t=0.5 = mid");
+        // tich hop model: BackgroundRole tra mau noi suy
+        SpreadsheetModel cs;
+        cs.resizeGrid(5, 2);
+        put(cs, 0, 0, "0"); put(cs, 1, 0, "10");
+        cs.addColorScale(cond::ColorScale{0, 0, 1, 0, "#000000", QString(), "#ffffff"});
+        QVariant bgLo = cs.data(cs.index(0, 0), Qt::BackgroundRole); // min -> low #000000
+        QVariant bgHi = cs.data(cs.index(1, 0), Qt::BackgroundRole); // max -> high #ffffff
+        ok(bgLo.value<QColor>() == QColor("#000000"), "color scale min = low");
+        ok(bgHi.value<QColor>() == QColor("#ffffff"), "color scale max = high");
+        ok(!cs.data(cs.index(3, 0), Qt::BackgroundRole).isValid(), "ngoai vung -> khong to");
+        cs.clearColorScales();
+        ok(!cs.data(cs.index(0, 0), Qt::BackgroundRole).isValid(), "clear color scale -> het");
     }
 
     // --- loc du lieu ---

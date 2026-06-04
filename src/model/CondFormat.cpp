@@ -28,4 +28,34 @@ double dataBarFraction(double value, double mn, double mx) {
     return f;
 }
 
+namespace {
+void parseHex(const QString &s, int &r, int &g, int &b) {
+    QString h = s.startsWith(QLatin1Char('#')) ? s.mid(1) : s;
+    if (h.size() >= 6) {
+        r = h.mid(0, 2).toInt(nullptr, 16);
+        g = h.mid(2, 2).toInt(nullptr, 16);
+        b = h.mid(4, 2).toInt(nullptr, 16);
+    } else { r = g = b = 0; }
+}
+} // namespace
+
+QString lerpHex(const QString &a, const QString &b, double t) {
+    if (t < 0.0) t = 0.0; if (t > 1.0) t = 1.0;
+    int r1, g1, b1, r2, g2, b2;
+    parseHex(a, r1, g1, b1);
+    parseHex(b, r2, g2, b2);
+    const int r = int(r1 + (r2 - r1) * t + 0.5);
+    const int g = int(g1 + (g2 - g1) * t + 0.5);
+    const int bb = int(b1 + (b2 - b1) * t + 0.5);
+    return QStringLiteral("#%1%2%3")
+        .arg(r, 2, 16, QLatin1Char('0')).arg(g, 2, 16, QLatin1Char('0')).arg(bb, 2, 16, QLatin1Char('0'));
+}
+
+QString colorScale(double fraction, const QString &low, const QString &mid, const QString &high) {
+    if (fraction < 0.0) fraction = 0.0; if (fraction > 1.0) fraction = 1.0;
+    if (mid.isEmpty()) return lerpHex(low, high, fraction);
+    if (fraction <= 0.5) return lerpHex(low, mid, fraction / 0.5);
+    return lerpHex(mid, high, (fraction - 0.5) / 0.5);
+}
+
 } // namespace cond

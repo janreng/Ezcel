@@ -38,4 +38,20 @@ struct DataBar {
 // mx<=mn -> 1 (mọi giá trị lấp đầy).
 double dataBarFraction(double value, double mn, double mx);
 
+// Thang màu (Color Scale): tô nền ô theo gradient. 2 màu (mid rỗng) hoặc 3 màu.
+struct ColorScale {
+    int top, left, bottom, right;
+    QString low, mid, high; // mã "#RRGGBB"; mid rỗng = thang 2 màu
+    bool contains(int r, int c) const {
+        return top <= r && r <= bottom && left <= c && c <= right;
+    }
+};
+
+// Nội suy tuyến tính 2 màu hex theo t (0..1) -> "#RRGGBB".
+QString lerpHex(const QString &a, const QString &b, double t);
+
+// Màu của thang theo `fraction` (0..1): nếu `mid` rỗng nội suy low->high; ngược lại
+// low->mid (0..0.5) rồi mid->high (0.5..1). Trả "#RRGGBB".
+QString colorScale(double fraction, const QString &low, const QString &mid, const QString &high);
+
 } // namespace cond
