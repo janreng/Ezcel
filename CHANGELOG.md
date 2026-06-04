@@ -1,5 +1,11 @@
 # Lịch sử thay đổi
 
+## v1.93.0 — Thêm biểu tượng cho nút trên dải lệnh (Spec 07)
+
+- **Mọi nút trên dải lệnh nay đều có biểu tượng** rõ ràng (trước nhiều nút chỉ có chữ trông trống trải).
+- Bổ sung ~27 biểu tượng nét mảnh đồng bộ: AutoSum (∑), bảng tổng hợp, sparkline đường/cột, ngày/giờ, tách cột, xóa hàng trùng, kiểm tra dữ liệu, gộp dữ liệu, Flash Fill, dò mục tiêu, dự báo, chia đôi cửa sổ, thống kê, phím tắt, quản lý tên, chèn/xóa ô…
+- Các nút thả gọn (Tệp, Sửa, Hàng/Cột, Lệnh dữ liệu, Tùy chọn xem, Cài đặt, Trợ giúp) cũng có biểu tượng — nhìn cân đối, dễ nhận diện hơn.
+
 ## v1.92.0 — Dọn thanh menu cũ, đưa hết lên dải lệnh (Spec 07)
 
 - **Bỏ hẳn thanh menu kiểu cũ** ở trên cùng — giao diện gọn, chỉ còn dải lệnh có thẻ như bộ ứng dụng văn phòng hiện đại.

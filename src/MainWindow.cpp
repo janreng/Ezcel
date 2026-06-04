@@ -1217,7 +1217,7 @@ void MainWindow::buildRibbon()
     m_ribbon->beginTab(QStringLiteral("Trang đầu"));
 
     m_ribbon->beginGroup(QStringLiteral("Tệp"));
-    m_dbFile = m_ribbon->addMenuButton(QStringLiteral("new"), QStringLiteral("Tệp"), m_mFile);
+    m_dbFile = m_ribbon->addMenuButton(QStringLiteral("file"), QStringLiteral("Tệp"), m_mFile);
     m_ribbon->addButton(QStringLiteral("open"), QStringLiteral("Mở"), [this] { openFile(); });
     m_ribbon->addButton(QStringLiteral("save"), QStringLiteral("Lưu"), [this] { saveFile(); });
     m_ribbon->addButton(QStringLiteral("undo"), QStringLiteral("Hoàn tác"), [this] {
@@ -1295,70 +1295,70 @@ void MainWindow::buildRibbon()
     });
 
     m_ribbon->beginGroup(QStringLiteral("Ô"));
-    m_ribbon->addButton(QString(), QStringLiteral("Chèn ô"), [this] { insertCellsDialog(); });
-    m_ribbon->addButton(QString(), QStringLiteral("Xóa ô"), [this] { deleteCellsDialog(); });
+    m_ribbon->addButton(QStringLiteral("cell_insert"), QStringLiteral("Chèn ô"), [this] { insertCellsDialog(); });
+    m_ribbon->addButton(QStringLiteral("cell_delete"), QStringLiteral("Xóa ô"), [this] { deleteCellsDialog(); });
 
     m_ribbon->beginGroup(QStringLiteral("Chỉnh sửa"));
-    m_ribbon->addButton(QString(), QStringLiteral("AutoSum"), [this] { autoSum(); });
+    m_ribbon->addButton(QStringLiteral("sigma"), QStringLiteral("AutoSum"), [this] { autoSum(); });
     m_ribbon->addButton(QStringLiteral("find"), QStringLiteral("Tìm &\nThay thế"), [this] { showFindReplace(); });
 
     m_ribbon->beginGroup(QStringLiteral("Lệnh khác"));
-    m_dbEdit = m_ribbon->addMenuButton(QString(), QStringLiteral("Sửa ▾"), m_mEdit);
-    m_dbStruct = m_ribbon->addMenuButton(QString(), QStringLiteral("Hàng/Cột ▾"), m_mStruct);
+    m_dbEdit = m_ribbon->addMenuButton(QStringLiteral("pencil"), QStringLiteral("Sửa ▾"), m_mEdit);
+    m_dbStruct = m_ribbon->addMenuButton(QStringLiteral("rows"), QStringLiteral("Hàng/Cột ▾"), m_mStruct);
 
     // ============================= CHÈN =============================
     m_ribbon->beginTab(QStringLiteral("Chèn"));
     m_ribbon->beginGroup(QStringLiteral("Bảng"));
-    m_ribbon->addButton(QString(), QStringLiteral("Tổng hợp\nnhanh"), [this] { quickPivot(); });
+    m_ribbon->addButton(QStringLiteral("table"), QStringLiteral("Tổng hợp\nnhanh"), [this] { quickPivot(); });
     m_ribbon->beginGroup(QStringLiteral("Sparkline"));
-    m_ribbon->addButton(QString(), QStringLiteral("Đường"), [this] { insertSparkline(int(sparkline::Type::Line)); });
-    m_ribbon->addButton(QString(), QStringLiteral("Cột"), [this] { insertSparkline(int(sparkline::Type::Column)); });
+    m_ribbon->addButton(QStringLiteral("chart_line"), QStringLiteral("Đường"), [this] { insertSparkline(int(sparkline::Type::Line)); });
+    m_ribbon->addButton(QStringLiteral("chart_column"), QStringLiteral("Cột"), [this] { insertSparkline(int(sparkline::Type::Column)); });
     m_ribbon->beginGroup(QStringLiteral("Định dạng có điều kiện"));
     m_ribbon->addButton(QStringLiteral("cond_format"), QStringLiteral("Thanh\ndữ liệu"), [this] { addDataBarDialog(); });
     m_ribbon->addButton(QStringLiteral("cond_format"), QStringLiteral("Thang\nmàu"), [this] { addColorScaleDialog(); });
     m_ribbon->beginGroup(QStringLiteral("Văn bản"));
-    m_ribbon->addButton(QString(), QStringLiteral("Ngày\nhôm nay"), [this] { insertToday(); });
-    m_ribbon->addButton(QString(), QStringLiteral("Giờ\nhiện tại"), [this] { insertNow(); });
+    m_ribbon->addButton(QStringLiteral("calendar"), QStringLiteral("Ngày\nhôm nay"), [this] { insertToday(); });
+    m_ribbon->addButton(QStringLiteral("clock"), QStringLiteral("Giờ\nhiện tại"), [this] { insertNow(); });
 
     // ============================= CÔNG THỨC =============================
     m_ribbon->beginTab(QStringLiteral("Công thức"));
     m_ribbon->beginGroup(QStringLiteral("Thư viện hàm"));
-    m_ribbon->addButton(QString(), QStringLiteral("AutoSum"), [this] { autoSum(); });
+    m_ribbon->addButton(QStringLiteral("sigma"), QStringLiteral("AutoSum"), [this] { autoSum(); });
     m_ribbon->beginGroup(QStringLiteral("Tên xác định"));
-    m_ribbon->addButton(QString(), QStringLiteral("Quản lý\ntên"), [this] { manageNames(); });
+    m_ribbon->addButton(QStringLiteral("tag"), QStringLiteral("Quản lý\ntên"), [this] { manageNames(); });
 
     // ============================= DỮ LIỆU =============================
     m_ribbon->beginTab(QStringLiteral("Dữ liệu"));
     m_ribbon->beginGroup(QStringLiteral("Sắp xếp & Lọc"));
     m_ribbon->addButton(QStringLiteral("sort_asc"), QStringLiteral("Sắp xếp\ntăng"), [this] { sortSelection(true); });
     m_ribbon->addButton(QStringLiteral("sort_desc"), QStringLiteral("Sắp xếp\ngiảm"), [this] { sortSelection(false); });
-    m_ribbon->addButton(QString(), QStringLiteral("Sắp nhiều\ncấp"), [this] { sortMultiLevel(); });
+    m_ribbon->addButton(QStringLiteral("sort_multi"), QStringLiteral("Sắp nhiều\ncấp"), [this] { sortMultiLevel(); });
     m_ribbon->addButton(QStringLiteral("filter"), QStringLiteral("Lọc theo\ngiá trị"), [this] { filterByValues(); });
     m_ribbon->beginGroup(QStringLiteral("Công cụ dữ liệu"));
-    m_ribbon->addButton(QString(), QStringLiteral("Tách\ncột"), [this] { textToColumns(); });
-    m_ribbon->addButton(QString(), QStringLiteral("Xóa hàng\ntrùng"), [this] { removeDuplicates(); });
-    m_ribbon->addButton(QString(), QStringLiteral("Kiểm tra\ndữ liệu"), [this] { showDataValidation(); });
-    m_ribbon->addButton(QString(), QStringLiteral("Gộp\ndữ liệu"), [this] { consolidateRanges(); });
-    m_ribbon->addButton(QString(), QStringLiteral("Flash\nFill"), [this] { flashFill(); });
+    m_ribbon->addButton(QStringLiteral("split_columns"), QStringLiteral("Tách\ncột"), [this] { textToColumns(); });
+    m_ribbon->addButton(QStringLiteral("dedupe"), QStringLiteral("Xóa hàng\ntrùng"), [this] { removeDuplicates(); });
+    m_ribbon->addButton(QStringLiteral("shield_check"), QStringLiteral("Kiểm tra\ndữ liệu"), [this] { showDataValidation(); });
+    m_ribbon->addButton(QStringLiteral("combine"), QStringLiteral("Gộp\ndữ liệu"), [this] { consolidateRanges(); });
+    m_ribbon->addButton(QStringLiteral("wand"), QStringLiteral("Flash\nFill"), [this] { flashFill(); });
     m_ribbon->beginGroup(QStringLiteral("Dự báo"));
-    m_ribbon->addButton(QString(), QStringLiteral("Dò mục\ntiêu"), [this] { goalSeekDialog(); });
-    m_ribbon->addButton(QString(), QStringLiteral("Dự báo\nxu hướng"), [this] { forecastSheet(); });
+    m_ribbon->addButton(QStringLiteral("target"), QStringLiteral("Dò mục\ntiêu"), [this] { goalSeekDialog(); });
+    m_ribbon->addButton(QStringLiteral("trending_up"), QStringLiteral("Dự báo\nxu hướng"), [this] { forecastSheet(); });
 
     m_ribbon->beginGroup(QStringLiteral("Bảo vệ & nhóm"));
-    m_dbData = m_ribbon->addMenuButton(QString(), QStringLiteral("Lệnh dữ\nliệu ▾"), m_mData);
+    m_dbData = m_ribbon->addMenuButton(QStringLiteral("database"), QStringLiteral("Lệnh dữ\nliệu ▾"), m_mData);
 
     // ============================= XEM =============================
     m_ribbon->beginTab(QStringLiteral("Xem"));
     m_ribbon->beginGroup(QStringLiteral("Cửa sổ"));
-    m_ribbon->addButton(QString(), QStringLiteral("Chia đôi\ncửa sổ"), [this] { toggleSplitView(); });
+    m_ribbon->addButton(QStringLiteral("split_view"), QStringLiteral("Chia đôi\ncửa sổ"), [this] { toggleSplitView(); });
     m_ribbon->beginGroup(QStringLiteral("Hiển thị"));
-    m_ribbon->addButton(QString(), QStringLiteral("Thống kê\nbảng tính"), [this] { showWorkbookStats(); });
-    m_ribbon->addButton(QString(), QStringLiteral("Phím\ntắt"), [this] { showShortcuts(); });
-    m_dbView = m_ribbon->addMenuButton(QString(), QStringLiteral("Tùy chọn\nxem ▾"), m_mView);
+    m_ribbon->addButton(QStringLiteral("bar_chart"), QStringLiteral("Thống kê\nbảng tính"), [this] { showWorkbookStats(); });
+    m_ribbon->addButton(QStringLiteral("keyboard"), QStringLiteral("Phím\ntắt"), [this] { showShortcuts(); });
+    m_dbView = m_ribbon->addMenuButton(QStringLiteral("eye"), QStringLiteral("Tùy chọn\nxem ▾"), m_mView);
 
     m_ribbon->beginGroup(QStringLiteral("Khác"));
-    m_dbSettings = m_ribbon->addMenuButton(QString(), QStringLiteral("Cài đặt ▾"), m_mSettings);
-    m_dbHelp = m_ribbon->addMenuButton(QString(), QStringLiteral("Trợ giúp ▾"), m_mHelp);
+    m_dbSettings = m_ribbon->addMenuButton(QStringLiteral("settings"), QStringLiteral("Cài đặt ▾"), m_mSettings);
+    m_dbHelp = m_ribbon->addMenuButton(QStringLiteral("help"), QStringLiteral("Trợ giúp ▾"), m_mHelp);
 
     m_ribbon->finish();
 

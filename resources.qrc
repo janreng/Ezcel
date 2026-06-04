@@ -32,5 +32,32 @@
     <file alias="icons/wrap_clip.svg">assets/icons/wrap_clip.svg</file>
     <file alias="icons/wrap_overflow.svg">assets/icons/wrap_overflow.svg</file>
     <file alias="icons/wrap_text.svg">assets/icons/wrap_text.svg</file>
+    <file alias="icons/sigma.svg">assets/icons/sigma.svg</file>
+    <file alias="icons/table.svg">assets/icons/table.svg</file>
+    <file alias="icons/chart_line.svg">assets/icons/chart_line.svg</file>
+    <file alias="icons/chart_column.svg">assets/icons/chart_column.svg</file>
+    <file alias="icons/calendar.svg">assets/icons/calendar.svg</file>
+    <file alias="icons/clock.svg">assets/icons/clock.svg</file>
+    <file alias="icons/dedupe.svg">assets/icons/dedupe.svg</file>
+    <file alias="icons/shield_check.svg">assets/icons/shield_check.svg</file>
+    <file alias="icons/combine.svg">assets/icons/combine.svg</file>
+    <file alias="icons/wand.svg">assets/icons/wand.svg</file>
+    <file alias="icons/target.svg">assets/icons/target.svg</file>
+    <file alias="icons/trending_up.svg">assets/icons/trending_up.svg</file>
+    <file alias="icons/split_view.svg">assets/icons/split_view.svg</file>
+    <file alias="icons/bar_chart.svg">assets/icons/bar_chart.svg</file>
+    <file alias="icons/keyboard.svg">assets/icons/keyboard.svg</file>
+    <file alias="icons/tag.svg">assets/icons/tag.svg</file>
+    <file alias="icons/cell_insert.svg">assets/icons/cell_insert.svg</file>
+    <file alias="icons/cell_delete.svg">assets/icons/cell_delete.svg</file>
+    <file alias="icons/sort_multi.svg">assets/icons/sort_multi.svg</file>
+    <file alias="icons/pencil.svg">assets/icons/pencil.svg</file>
+    <file alias="icons/rows.svg">assets/icons/rows.svg</file>
+    <file alias="icons/database.svg">assets/icons/database.svg</file>
+    <file alias="icons/eye.svg">assets/icons/eye.svg</file>
+    <file alias="icons/settings.svg">assets/icons/settings.svg</file>
+    <file alias="icons/help.svg">assets/icons/help.svg</file>
+    <file alias="icons/file.svg">assets/icons/file.svg</file>
+    <file alias="icons/split_columns.svg">assets/icons/split_columns.svg</file>
   </qresource>
 </RCC>
