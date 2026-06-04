@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v2.2.0 — Khung xem: lưu & chuyển nhanh trạng thái lọc (Spec 56)
+
+- Thẻ **Xem** thêm nhóm **Khung xem**: **"Lưu khung xem"** ghi lại trạng thái lọc hiện tại (các hàng đang ẩn) kèm tên.
+- **"Chọn khung xem"** để áp lại nhanh một khung đã lưu, hoặc về **Mặc định (hiện hết)** — tiện xem nhiều góc nhìn trên cùng dữ liệu.
+
 ## v2.1.0 — Nút lọc trên đầu cột bảng (Spec 16)
 
 - Bảng có cấu trúc giờ hiện **nút lọc ▼ ở mỗi ô tiêu đề** — bấm vào là mở danh sách giá trị của cột để **chọn lọc nhanh** (ẩn các hàng không cần), không phải vào menu Dữ liệu nữa.

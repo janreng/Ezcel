@@ -1224,6 +1224,38 @@ void MainWindow::applyCellStyle(const QString &name)
     m_model->setFormat(t, l, b, r, f);
 }
 
+// ---------------------------------------------------------------- khung xem (Sheet View, Spec 56)
+void MainWindow::saveSheetView()
+{
+    bool ok = false;
+    const QString name = QInputDialog::getText(this, QStringLiteral("Lưu khung xem"),
+        QStringLiteral("Tên khung xem:"), QLineEdit::Normal,
+        QStringLiteral("Khung %1").arg(m_sheetViews.count() + 1), &ok);
+    if (!ok || name.trimmed().isEmpty()) return;
+    QVector<int> hidden;
+    for (int r = 0; r < m_model->rowCount(); ++r)
+        if (m_view->isRowHidden(r)) hidden.push_back(r);
+    m_sheetViews.save(name.trimmed(), hidden);
+    statusBar()->showMessage(QStringLiteral("Đã lưu khung xem \"%1\" (%2 hàng ẩn)")
+        .arg(name.trimmed()).arg(hidden.size()), 3000);
+}
+
+void MainWindow::applySheetView()
+{
+    QStringList opts;
+    opts << QStringLiteral("Mặc định (hiện hết)");
+    opts << m_sheetViews.names();
+    bool ok = false;
+    const QString pick = QInputDialog::getItem(this, QStringLiteral("Chọn khung xem"),
+        QStringLiteral("Khung xem:"), opts, 0, false, &ok);
+    if (!ok) return;
+    for (int r = 0; r < m_model->rowCount(); ++r) m_view->setRowHidden(r, false); // hiện hết trước
+    if (pick != opts.first()) {
+        for (int r : m_sheetViews.hiddenOf(pick)) m_view->setRowHidden(r, true);
+    }
+    statusBar()->showMessage(QStringLiteral("Đã áp khung xem: %1").arg(pick), 2500);
+}
+
 // ---------------------------------------------------------------- bảng có cấu trúc (Spec 16)
 // Định dạng vùng chọn thành "bảng": hàng đầu là tiêu đề tô đậm, các hàng dữ liệu
 // tô sọc xen kẽ hai màu (kiểu bảng xanh dựng sẵn). Bỏ qua nếu chưa chọn vùng.
@@ -1445,6 +1477,10 @@ void MainWindow::buildRibbon()
 
     // ============================= XEM =============================
     m_ribbon->beginTab(QStringLiteral("Xem"));
+    m_ribbon->beginGroup(QStringLiteral("Khung xem"));
+    m_ribbon->addSmallButton(QStringLiteral("eye"), QStringLiteral("Lưu khung xem"), [this] { saveSheetView(); });
+    m_ribbon->addSmallButton(QStringLiteral("eye"), QStringLiteral("Chọn khung xem"), [this] { applySheetView(); });
+
     m_ribbon->beginGroup(QStringLiteral("Cửa sổ"));
     m_ribbon->addSmallButton(QStringLiteral("split_view"), QStringLiteral("Chia đôi cửa sổ"), [this] { toggleSplitView(); });
     m_ribbon->beginGroup(QStringLiteral("Hiển thị"));

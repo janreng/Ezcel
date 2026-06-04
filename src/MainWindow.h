@@ -4,6 +4,7 @@
 
 #include <QVector>
 #include "view/Outline.h"
+#include "model/SheetView.h"
 
 namespace freeze { class FreezePanes; }
 
@@ -81,6 +82,8 @@ private slots:
     void applyCellStyle(const QString &name); // áp kiểu ô dựng sẵn cho vùng chọn (Spec 30)
     void formatAsTable();     // định dạng vùng chọn thành bảng sọc xen kẽ (Spec 16)
     void addTableTotalRow();  // thêm hàng tổng (SUM theo cột) dưới bảng hiện hành (Spec 16)
+    void saveSheetView();     // lưu khung xem hiện tại (trạng thái lọc) (Spec 56)
+    void applySheetView();    // chọn + áp lại một khung xem đã lưu (Spec 56)
     void autoSum();           // AutoSum (∑) ô hiện hành (Alt+=)
     void sortSelection(bool ascending); // sắp xếp vùng theo cột hiện hành
     void insertToday();       // chèn ngày hôm nay vào ô hiện hành (Ctrl+;)
@@ -185,4 +188,5 @@ private:
     void applyRowOutline();          // áp ẩn/hiện hàng theo nhóm đang thu gọn
     outline::Outline m_colOutline;   // nhóm/phác thảo cột (Spec 09.4)
     void applyColOutline();          // áp ẩn/hiện cột theo nhóm đang thu gọn
+    sheetview::Store m_sheetViews;   // các khung xem đã lưu (Spec 56)
 };
