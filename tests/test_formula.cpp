@@ -35,6 +35,9 @@ static QVariant resolver(int row, int col) {
         {"0,14", "Tien"}, {"1,14", ">15"},
         // Tieu chi P1:P2 (Tien=10) -> khop dung 1 ban ghi
         {"0,15", "Tien"}, {"1,15", "10"},
+        // Cot include cho FILTER: Q1:Q3 = {1,0,1}, R1:R3 = {0,0,0}
+        {"0,16", "1"}, {"1,16", "0"}, {"2,16", "1"},
+        {"0,17", "0"}, {"1,17", "0"}, {"2,17", "0"},
     };
     auto it = cells.constFind(QString("%1,%2").arg(row).arg(col));
     return it == cells.constEnd() ? QVariant(QString()) : QVariant(it.value());
@@ -664,6 +667,20 @@ int main() {
         try { ucalc = evaluate(QStringLiteral("=UNIQUE(K2:K5,FALSE,TRUE)"), resolver); }
         catch (const formula::FormulaError &e) { ucalc = e.etype(); }
         okEq(ucalc.toString() == QStringLiteral("#CALC!"), "UNIQUE exactly_once het -> #CALC!");
+
+        // FILTER: data D1:D3={1,2,3}, include Q1:Q3={1,0,1} -> giữ hàng 1,3.
+        formula::Value fl = formula::evaluateValue(QStringLiteral("=FILTER(D1:D3,Q1:Q3)"), resolver);
+        auto flf = fl.range.flat();
+        okEq(fl.isRange() && flf.size() == 2 && formula::toNumber(flf[0]) == 1
+                 && formula::toNumber(flf[1]) == 3, "FILTER giu hang 1,3");
+        // Không khớp gì + if_empty -> trả "trong".
+        formula::Value fe = formula::evaluateValue(QStringLiteral("=FILTER(D1:D3,R1:R3,\"trong\")"), resolver);
+        okEq(formula::toText(fe) == QStringLiteral("trong"), "FILTER rong -> if_empty");
+        // Không khớp + không if_empty -> #CALC!.
+        QVariant fc;
+        try { fc = evaluate(QStringLiteral("=FILTER(D1:D3,R1:R3)"), resolver); }
+        catch (const formula::FormulaError &e) { fc = e.etype(); }
+        okEq(fc.toString() == QStringLiteral("#CALC!"), "FILTER rong khong if_empty -> #CALC!");
     }
 
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);

@@ -1,5 +1,11 @@
 # Lịch sử thay đổi
 
+## v1.77.0 — Hàm FILTER: lọc dữ liệu bằng công thức (Spec 12)
+
+- Thêm hàm **`FILTER(vùng, điều_kiện, [nếu_rỗng])`** — giữ lại các dòng (hoặc cột) thỏa điều kiện rồi tự tràn kết quả ra ô.
+- `=FILTER(A1:B10, C1:C10)` giữ những dòng có ô tương ứng ở cột điều kiện khác 0/TRUE.
+- Nếu không dòng nào khớp: trả giá trị `nếu_rỗng` (nếu có truyền), ngược lại báo `#CALC!`.
+
 ## v1.76.0 — Hàm UNIQUE: lọc giá trị trùng bằng công thức (Spec 12)
 
 - Thêm hàm **`UNIQUE(vùng, [theo_cột], [chỉ_một_lần])`** — lấy ra các dòng (hoặc cột) khác nhau từ một vùng rồi tự tràn kết quả ra ô.

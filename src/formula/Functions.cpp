@@ -1162,6 +1162,35 @@ QHash<QString, Fn> &fnMap() {
             return matrixToRange(std::move(out));
         };
 
+        // FILTER(array,include,[if_empty]) -> giữ hàng (hoặc cột) có include != 0/TRUE.
+        r["FILTER"] = [](const Args &a) {
+            if (a.size() < 2 || a.size() > 3) argErr("FILTER");
+            const auto data = toMatrix(a[0]);
+            const auto inc  = toMatrix(a[1]);
+            const int h = int(data.size());
+            const int w = data.empty() ? 0 : int(data[0].size());
+            std::vector<std::vector<Value>> out;
+            if (int(inc.size()) == h && h > 0) {           // include là cột -> lọc HÀNG
+                for (int i = 0; i < h; ++i)
+                    if (!inc[i].empty() && toBool(inc[i][0])) out.push_back(data[i]);
+            } else if (!inc.empty() && int(inc[0].size()) == w && w > 0) { // include là hàng -> lọc CỘT
+                std::vector<int> keep;
+                for (int c = 0; c < w; ++c) if (toBool(inc[0][c])) keep.push_back(c);
+                for (const auto &row : data) {
+                    std::vector<Value> nr;
+                    for (int c : keep) nr.push_back(row[c]);
+                    if (!nr.empty()) out.push_back(std::move(nr));
+                }
+            } else {
+                throw FormulaError(QStringLiteral("FILTER: kích thước include không khớp"), ERR_VALUE);
+            }
+            if (out.empty()) {
+                if (a.size() == 3) return matrixToRange({{a[2]}}); // if_empty
+                throw FormulaError(QStringLiteral("FILTER: không có dòng khớp"), ERR_CALC);
+            }
+            return matrixToRange(std::move(out));
+        };
+
         // --- ngày / giờ (serial Excel) ---
         r["TODAY"] = [](const Args &a) { if (!a.empty()) argErr("TODAY"); return Value::number(dateToSerial(QDate::currentDate())); };
         r["NOW"]   = [](const Args &a) { if (!a.empty()) argErr("NOW"); QDateTime n = QDateTime::currentDateTime(); double s = dateToSerial(n.date()); QTime t = n.time(); return Value::number(s + (t.hour()*3600 + t.minute()*60 + t.second())/86400.0); };
