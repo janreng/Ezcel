@@ -216,6 +216,13 @@ MainWindow::MainWindow(QWidget *parent)
 
     bindActiveModel();
     updateTitle();
+
+    // Chọn sẵn ô A1 + focus lưới khi mở (như Excel): nếu không, chưa có ô hiện hành
+    // thì các nút trên dải lệnh (định dạng, lọc, bảng…) bấm không ăn vì thiếu vùng chọn.
+    if (m_model->rowCount() > 0 && m_model->columnCount() > 0) {
+        m_view->setCurrentIndex(m_model->index(0, 0));
+        m_view->setFocus();
+    }
 }
 
 MainWindow::~MainWindow() = default;
@@ -1590,6 +1597,7 @@ void MainWindow::newFile()
     m_model->loadGrid(QVector<QVector<QString>>(50, QVector<QString>(26)));
     m_currentPath.clear();
     updateTitle();
+    if (m_model->rowCount() > 0) { m_view->setCurrentIndex(m_model->index(0, 0)); m_view->setFocus(); }
 }
 
 void MainWindow::openFile()
@@ -1641,6 +1649,7 @@ void MainWindow::openPath(const QString &path)
     }
     m_currentPath = path;
     updateTitle();
+    if (m_model->rowCount() > 0) { m_view->setCurrentIndex(m_model->index(0, 0)); m_view->setFocus(); }
     statusBar()->showMessage(QStringLiteral("Đã mở: %1").arg(path), 5000);
 }
 

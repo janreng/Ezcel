@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v2.4.1 — Sửa lỗi: nhiều nút trên dải lệnh bấm không ăn
+
+- Khi mở ứng dụng (hoặc tạo/mở tệp) **chưa có ô nào được chọn sẵn**, nên các nút cần vùng chọn (định dạng, lọc, bảng, AutoSum…) bấm không có tác dụng. Nay **tự chọn sẵn ô A1 và đưa con trỏ vào lưới** khi mở — mọi nút hoạt động ngay.
+
 ## v2.4.0 — Tự xuống dòng trong ô (Spec 07)
 
 - Nhóm **Căn lề** thêm nút **"Xuống dòng"**: bật cho ô/vùng đang chọn để **chữ dài tự ngắt thành nhiều dòng** trong ô, hàng tự cao lên vừa đủ — khỏi bị che chữ.
