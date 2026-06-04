@@ -223,6 +223,9 @@ add_test(NAME namevalidate COMMAND test_namevalidate)
 add_test(NAME rangeparse COMMAND test_rangeparse)
 add_test(NAME seriesgen COMMAND test_seriesgen)
 add_test(NAME textcase COMMAND test_textcase)
+add_test(NAME cellshift COMMAND test_cellshift)
+add_test(NAME consolidate COMMAND test_consolidate)
+add_test(NAME forecast COMMAND test_forecast)
 
 # --- Sort (sắp xếp vùng dữ liệu) — module logic thuần (Qt Core) -> static lib + test.
 add_library(ezcel_sort STATIC src/model/Sort.cpp src/model/Sort.h)
