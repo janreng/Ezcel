@@ -66,6 +66,22 @@ void CellBorderDelegate::paint(QPainter *painter, const QStyleOptionViewItem &op
 
     QStyledItemDelegate::paint(painter, option, index);
 
+    // Chấm bộ biểu tượng (Icon Set) ở mép TRÁI ô — số căn phải nên không đè chữ.
+    const QString iconColor = index.data(SpreadsheetModel::IconSetRole).toString();
+    if (!iconColor.isEmpty()) {
+        painter->save();
+        painter->setRenderHint(QPainter::Antialiasing, true);
+        const int d = qMin(option.rect.height() - 6, 12);
+        if (d > 2) {
+            const int x = option.rect.left() + 3;
+            const int y = option.rect.top() + (option.rect.height() - d) / 2;
+            painter->setPen(Qt::NoPen);
+            painter->setBrush(QColor(iconColor));
+            painter->drawEllipse(QRect(x, y, d, d));
+        }
+        painter->restore();
+    }
+
     // Dấu tam giác đỏ góc trên-phải nếu ô có ghi chú (note).
     if (!index.data(Qt::ToolTipRole).toString().isEmpty()) {
         painter->save();

@@ -1,5 +1,11 @@
 # Lịch sử thay đổi
 
+## v1.86.0 — Bộ biểu tượng đèn giao thông (Spec 08)
+
+- Thêm **Dữ liệu → "Bộ biểu tượng"**: gắn một **chấm màu** vào mỗi ô của vùng chọn theo mức giá trị — thấp (đỏ), trung bình (vàng), cao (xanh lá).
+- Chấm đặt ở mép trái ô nên không che số liệu; **"Xóa bộ biểu tượng"** để gỡ.
+- Hoàn thiện bộ định dạng có điều kiện trực quan: thanh dữ liệu + thang màu + bộ biểu tượng.
+
 ## v1.85.0 — Thang màu (color scale) cho vùng dữ liệu (Spec 08)
 
 - Thêm **Dữ liệu → "Thang màu..."**: tô **nền các ô theo gradient màu** chạy từ giá trị nhỏ nhất tới lớn nhất của vùng — heatmap nhanh gọn.

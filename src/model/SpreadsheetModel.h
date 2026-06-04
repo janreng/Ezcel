@@ -47,6 +47,10 @@ public:
     // dữ liệu (và là số); QVariant rỗng nếu không. Delegate vẽ thanh ngang trong ô.
     static constexpr int DataBarRole = Qt::UserRole + 2;
 
+    // Role bộ biểu tượng: trả QString mã màu chấm biểu tượng của ô (theo mức giá trị);
+    // QVariant rỗng nếu ô không thuộc bộ biểu tượng (hoặc không là số).
+    static constexpr int IconSetRole = Qt::UserRole + 3;
+
     explicit SpreadsheetModel(QObject *parent = nullptr);
 
     // QAbstractTableModel
@@ -146,6 +150,9 @@ public:
     // Thang màu (Color Scale, Spec 08): thêm cho vùng chọn; xóa hết.
     void addColorScale(const cond::ColorScale &cs);
     void clearColorScales();
+    // Bộ biểu tượng (Icon Set, Spec 08): thêm cho vùng chọn; xóa hết.
+    void addIconSet(const cond::IconSet &is);
+    void clearIconSets();
 
     // Kiểm tra dữ liệu (data validation): thêm/xóa quy tắc; setData sẽ từ chối giá trị sai.
     void addValidationRule(const validation::Rule &rule);
@@ -193,6 +200,8 @@ private:
     QVector<cond::DataBar> m_dataBars;           // thanh dữ liệu (Data Bar)
     QVector<cond::ColorScale> m_colorScales;     // thang màu (Color Scale)
     QString colorScaleColorAt(int row, int col) const; // màu nền nội suy; rỗng nếu không thuộc
+    QVector<cond::IconSet> m_iconSets;           // bộ biểu tượng (Icon Set)
+    QString iconColorAt(int row, int col) const; // màu chấm biểu tượng; rỗng nếu không thuộc
     QVector<validation::Rule> m_validationRules; // kiểm tra dữ liệu nhập
     QHash<qint64, QString> m_notes;              // ghi chú theo ô
     QHash<QString, MergeRange> m_names;          // vùng đặt tên

@@ -126,6 +126,10 @@ QVariant SpreadsheetModel::data(const QModelIndex &index, int role) const {
         if (!dataBarAt(row, col, frac, barColor)) return {};
         return QVariantList{ frac, barColor };
     }
+    case IconSetRole: {
+        const QString c = iconColorAt(row, col);
+        return c.isEmpty() ? QVariant() : QVariant(c);
+    }
     case SpillEdgesRole: {
         int t, l, b, rg; // bitmask cạnh biên vùng spill: 1=trên,2=trái,4=dưới,8=phải
         if (!spillRangeAt(row, col, t, l, b, rg)) return 0;
@@ -447,6 +451,43 @@ QString SpreadsheetModel::colorScaleColorAt(int row, int col) const {
     if (!has) return QString();
     const double frac = cond::dataBarFraction(v, mn, mx);
     return cond::colorScale(frac, hit->low, hit->mid, hit->high);
+}
+
+void SpreadsheetModel::addIconSet(const cond::IconSet &is) {
+    m_iconSets.push_back(is);
+    emit dataChanged(index(is.top, is.left), index(is.bottom, is.right));
+}
+
+void SpreadsheetModel::clearIconSets() {
+    if (m_iconSets.isEmpty()) return;
+    m_iconSets.clear();
+    if (rowCount() && columnCount())
+        emit dataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1));
+}
+
+QString SpreadsheetModel::iconColorAt(int row, int col) const {
+    const cond::IconSet *hit = nullptr;
+    for (const cond::IconSet &is : m_iconSets)
+        if (is.contains(row, col)) hit = &is;
+    if (!hit) return QString();
+    bool ok = false;
+    const double v = evalCell(row, col).toDouble(&ok);
+    if (!ok) return QString();
+    double mn = 0, mx = 0; bool has = false;
+    for (int r = hit->top; r <= hit->bottom; ++r)
+        for (int c = hit->left; c <= hit->right; ++c) {
+            bool okc = false;
+            double d = evalCell(r, c).toDouble(&okc);
+            if (!okc) continue;
+            if (!has) { mn = mx = d; has = true; }
+            else { mn = qMin(mn, d); mx = qMax(mx, d); }
+        }
+    if (!has) return QString();
+    const double frac = cond::dataBarFraction(v, mn, mx);
+    const int idx = cond::iconIndex(frac, hit->nIcons);
+    const double t = hit->nIcons > 1 ? double(idx) / (hit->nIcons - 1) : 1.0;
+    // Gradient đèn giao thông: thấp đỏ -> trung bình vàng -> cao xanh lá.
+    return cond::colorScale(t, QStringLiteral("#E74C3C"), QStringLiteral("#F1C40F"), QStringLiteral("#2ECC71"));
 }
 
 bool SpreadsheetModel::dataBarAt(int row, int col, double &fraction, QString &color) const {

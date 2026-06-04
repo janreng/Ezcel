@@ -54,4 +54,17 @@ QString lerpHex(const QString &a, const QString &b, double t);
 // low->mid (0..0.5) rồi mid->high (0.5..1). Trả "#RRGGBB".
 QString colorScale(double fraction, const QString &low, const QString &mid, const QString &high);
 
+// Bộ biểu tượng (Icon Set): gắn 1 chấm màu vào ô theo mức giá trị trong vùng.
+struct IconSet {
+    int top, left, bottom, right;
+    int nIcons = 3;
+    bool contains(int r, int c) const {
+        return top <= r && r <= bottom && left <= c && c <= right;
+    }
+};
+
+// Chỉ số biểu tượng (0..nIcons-1) cho `fraction` (0..1) chia thành nIcons khoảng đều.
+// fraction=1 -> mức cao nhất (nIcons-1). nIcons<=1 -> 0.
+int iconIndex(double fraction, int nIcons);
+
 } // namespace cond

@@ -383,6 +383,25 @@ int main(int argc, char **argv) {
         ok(!cs.data(cs.index(3, 0), Qt::BackgroundRole).isValid(), "ngoai vung -> khong to");
         cs.clearColorScales();
         ok(!cs.data(cs.index(0, 0), Qt::BackgroundRole).isValid(), "clear color scale -> het");
+
+        // --- Icon Set (Spec 08) ---
+        ok(cond::iconIndex(0.0, 3) == 0, "icon frac 0 -> 0");
+        ok(cond::iconIndex(0.5, 3) == 1, "icon frac 0.5 -> 1");
+        ok(cond::iconIndex(1.0, 3) == 2, "icon frac 1 -> 2 (cao nhat)");
+        ok(cond::iconIndex(0.9, 3) == 2, "icon frac 0.9 -> 2");
+        ok(cond::iconIndex(0.2, 3) == 0, "icon frac 0.2 -> 0");
+        // tich hop model: IconSetRole tra mau (do/vang/xanh)
+        SpreadsheetModel is;
+        is.resizeGrid(5, 2);
+        put(is, 0, 0, "0"); put(is, 1, 0, "5"); put(is, 2, 0, "10");
+        is.addIconSet(cond::IconSet{0, 0, 2, 0, 3});
+        ok(is.data(is.index(0, 0), SpreadsheetModel::IconSetRole).toString() == "#e74c3c", "icon min = do");
+        ok(is.data(is.index(2, 0), SpreadsheetModel::IconSetRole).toString() == "#2ecc71", "icon max = xanh");
+        ok(!is.data(is.index(3, 0), SpreadsheetModel::IconSetRole).isValid(), "ngoai vung -> khong icon");
+        put(is, 0, 0, "abc");
+        ok(!is.data(is.index(0, 0), SpreadsheetModel::IconSetRole).isValid(), "o chu -> khong icon");
+        is.clearIconSets();
+        ok(!is.data(is.index(1, 0), SpreadsheetModel::IconSetRole).isValid(), "clear icon set -> het");
     }
 
     // --- loc du lieu ---

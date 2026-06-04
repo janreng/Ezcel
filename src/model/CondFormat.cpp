@@ -58,4 +58,12 @@ QString colorScale(double fraction, const QString &low, const QString &mid, cons
     return lerpHex(mid, high, (fraction - 0.5) / 0.5);
 }
 
+int iconIndex(double fraction, int nIcons) {
+    if (nIcons <= 1) return 0;
+    if (fraction < 0.0) fraction = 0.0; if (fraction > 1.0) fraction = 1.0;
+    int idx = int(fraction * nIcons);
+    if (idx >= nIcons) idx = nIcons - 1; // fraction==1 rơi vào mức cao nhất
+    return idx;
+}
+
 } // namespace cond

@@ -889,6 +889,11 @@ void MainWindow::buildMenus()
         m_model->addColorScale(cond::ColorScale{t, l, b, r, presets[i].lo, presets[i].mid, presets[i].hi});
     });
     data->addAction(QStringLiteral("Xóa thang màu"), this, [this] { m_model->clearColorScales(); });
+    data->addAction(QStringLiteral("Bộ biểu tượng"), this, [this] {
+        int t, l, b, r; if (!selectionBox(t, l, b, r)) return;
+        m_model->addIconSet(cond::IconSet{t, l, b, r, 3});
+    });
+    data->addAction(QStringLiteral("Xóa bộ biểu tượng"), this, [this] { m_model->clearIconSets(); });
     data->addSeparator();
     data->addAction(QStringLiteral("Kiểm tra dữ liệu..."), this, &MainWindow::showDataValidation);
     data->addAction(QStringLiteral("Flash Fill (tự điền theo mẫu)"), QKeySequence(QStringLiteral("Ctrl+E")), this, &MainWindow::flashFill);
