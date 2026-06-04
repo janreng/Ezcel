@@ -1,5 +1,11 @@
 # Lịch sử thay đổi
 
+## v1.90.0 — Bảo vệ trang tính, khóa ô (Spec 29)
+
+- Thêm **Dữ liệu → "Bảo vệ trang tính"**: khi bật, các ô bị **khóa không cho sửa** — tránh lỡ tay đè công thức/dữ liệu quan trọng.
+- **"Mở khóa ô (cho phép sửa khi bảo vệ)"** cho vùng chọn để chừa ô nhập liệu; **"Khóa ô"** để khóa lại.
+- Mặc định mọi ô đều khóa (chỉ có hiệu lực khi bật bảo vệ) — giống cách bảng tính chuyên nghiệp.
+
 ## v1.89.0 — Dò mục tiêu (Goal Seek) (Spec 28)
 
 - Thêm **Dữ liệu → "Dò mục tiêu..."**: chọn ô công thức + giá trị muốn đạt + ô nhập → ứng dụng tự **dò ra giá trị ô nhập** để ô công thức cho ra đúng mục tiêu.

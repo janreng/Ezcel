@@ -378,6 +378,11 @@ bool SpreadsheetModel::setData(const QModelIndex &index, const QVariant &value, 
         emit validationFailed(QStringLiteral("Không sửa được ô trong vùng tràn (spill); hãy sửa ô gốc."));
         return false;
     }
+    // Trang được bảo vệ + ô đang khóa -> chặn sửa (Spec 29).
+    if (m_protected && isCellLocked(row, col)) {
+        emit validationFailed(QStringLiteral("Ô đang bị khóa vì trang tính được bảo vệ. Hãy bỏ bảo vệ hoặc mở khóa ô."));
+        return false;
+    }
     QString nw = value.isNull() ? QString() : value.toString();
     QString old = m_data[row][col];
     if (old == nw) return true;
@@ -510,6 +515,27 @@ void SpreadsheetModel::clearIconSets() {
     m_iconSets.clear();
     if (rowCount() && columnCount())
         emit dataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1));
+}
+
+void SpreadsheetModel::setSheetProtected(bool on) {
+    if (on == m_protected) return;
+    m_protected = on;
+    if (rowCount() && columnCount()) // làm mới khả năng sửa của ô
+        emit dataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1));
+}
+
+void SpreadsheetModel::setCellsLocked(int top, int left, int bottom, int right, bool locked) {
+    for (int r = top; r <= bottom; ++r)
+        for (int c = left; c <= right; ++c) {
+            const qint64 k = key(r, c);
+            if (locked) m_unlocked.remove(k);
+            else        m_unlocked.insert(k);
+        }
+    emit dataChanged(index(top, left), index(bottom, right));
+}
+
+bool SpreadsheetModel::isCellLocked(int row, int col) const {
+    return !m_unlocked.contains(key(row, col));
 }
 
 void SpreadsheetModel::addSparkline(const sparkline::Spark &sp) {
@@ -1240,6 +1266,8 @@ Qt::ItemFlags SpreadsheetModel::flags(const QModelIndex &index) const {
     Qt::ItemFlags f = Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsEditable;
     // Ô TRÀN (spill) không sửa được — chỉ sửa ô gốc (anchor).
     if (m_spillOwner.contains(key(index.row(), index.column()))) f &= ~Qt::ItemIsEditable;
+    // Trang được bảo vệ + ô đang khóa -> không sửa (Spec 29).
+    if (m_protected && isCellLocked(index.row(), index.column())) f &= ~Qt::ItemIsEditable;
     return f;
 }
 

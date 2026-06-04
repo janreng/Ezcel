@@ -402,6 +402,20 @@ int main(int argc, char **argv) {
         ok(!is.data(is.index(0, 0), SpreadsheetModel::IconSetRole).isValid(), "o chu -> khong icon");
         is.clearIconSets();
         ok(!is.data(is.index(1, 0), SpreadsheetModel::IconSetRole).isValid(), "clear icon set -> het");
+
+        // --- Bảo vệ trang tính (Spec 29) ---
+        SpreadsheetModel pr;
+        pr.resizeGrid(4, 3);
+        // Chưa bảo vệ -> ô sửa được
+        ok(pr.flags(pr.index(0, 0)) & Qt::ItemIsEditable, "chua bao ve -> sua duoc");
+        pr.setCellsLocked(1, 0, 1, 0, false); // mở khóa B... (hàng1 cột0)
+        pr.setSheetProtected(true);
+        ok(!(pr.flags(pr.index(0, 0)) & Qt::ItemIsEditable), "bao ve: o khoa -> khong sua");
+        ok(pr.flags(pr.index(1, 0)) & Qt::ItemIsEditable, "bao ve: o da mo khoa -> sua duoc");
+        ok(!pr.setData(pr.index(0, 0), QStringLiteral("x"), Qt::EditRole), "setData o khoa bi chan");
+        ok(pr.setData(pr.index(1, 0), QStringLiteral("ok"), Qt::EditRole), "setData o mo khoa duoc");
+        pr.setSheetProtected(false);
+        ok(pr.flags(pr.index(0, 0)) & Qt::ItemIsEditable, "tat bao ve -> sua lai duoc");
     }
 
     // --- loc du lieu ---

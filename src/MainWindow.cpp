@@ -974,6 +974,24 @@ void MainWindow::buildMenus()
     data->addAction(QStringLiteral("Gộp dữ liệu nhiều vùng..."), this, &MainWindow::consolidateRanges);
     data->addAction(QStringLiteral("Dự báo xu hướng..."), this, &MainWindow::forecastSheet);
     data->addAction(QStringLiteral("Dò mục tiêu..."), this, &MainWindow::goalSeekDialog);
+    data->addSeparator();
+    {
+        QAction *prot = data->addAction(QStringLiteral("Bảo vệ trang tính"));
+        prot->setCheckable(true);
+        connect(prot, &QAction::toggled, this, [this](bool on) {
+            m_model->setSheetProtected(on);
+            statusBar()->showMessage(on ? QStringLiteral("Đã bật bảo vệ trang tính (ô khóa không sửa được)")
+                                        : QStringLiteral("Đã tắt bảo vệ trang tính"), 2800);
+        });
+        data->addAction(QStringLiteral("Mở khóa ô (cho phép sửa khi bảo vệ)"), this, [this] {
+            int t, l, b, r; if (selectionBox(t, l, b, r)) m_model->setCellsLocked(t, l, b, r, false);
+            statusBar()->showMessage(QStringLiteral("Đã mở khóa ô đã chọn"), 2000);
+        });
+        data->addAction(QStringLiteral("Khóa ô"), this, [this] {
+            int t, l, b, r; if (selectionBox(t, l, b, r)) m_model->setCellsLocked(t, l, b, r, true);
+            statusBar()->showMessage(QStringLiteral("Đã khóa ô đã chọn"), 2000);
+        });
+    }
     data->addAction(QStringLiteral("Bảng tổng hợp nhanh..."), this, &MainWindow::quickPivot);
     data->addSeparator();
     {

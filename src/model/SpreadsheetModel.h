@@ -161,6 +161,11 @@ public:
     // Bộ biểu tượng (Icon Set, Spec 08): thêm cho vùng chọn; xóa hết.
     void addIconSet(const cond::IconSet &is);
     void clearIconSets();
+    // Bảo vệ trang tính (Spec 29): khi bật, ô đang KHÓA không sửa được. Mặc định mọi ô khóa.
+    void setSheetProtected(bool on);
+    bool isSheetProtected() const { return m_protected; }
+    void setCellsLocked(int top, int left, int bottom, int right, bool locked); // khóa/mở khóa vùng
+    bool isCellLocked(int row, int col) const; // true nếu ô đang khóa (chưa được mở khóa)
     // Sparkline (Spec 19): thêm biểu đồ mini vào ô đích lấy số liệu từ vùng nguồn; xóa hết.
     void addSparkline(const sparkline::Spark &sp);
     void clearSparklines();
@@ -214,6 +219,8 @@ private:
     QVector<cond::IconSet> m_iconSets;           // bộ biểu tượng (Icon Set)
     QString iconColorAt(int row, int col) const; // màu chấm biểu tượng; rỗng nếu không thuộc
     QVector<sparkline::Spark> m_sparklines;      // sparkline (biểu đồ mini)
+    bool m_protected = false;                    // bảo vệ trang tính (Spec 29)
+    QSet<qint64> m_unlocked;                     // các ô được mở khóa (chỉ tác dụng khi bảo vệ)
     QVector<validation::Rule> m_validationRules; // kiểm tra dữ liệu nhập
     QHash<qint64, QString> m_notes;              // ghi chú theo ô
     QHash<QString, MergeRange> m_names;          // vùng đặt tên
