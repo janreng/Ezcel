@@ -524,6 +524,17 @@ int main() {
     checkStr("=REGEXREPLACE(\"a1b2c3\",\"[0-9]\",\"*\",2)", "a1b*c3"); // chi lan thu 2
     checkStr("=IFERROR(REGEXEXTRACT(\"abc\",\"[0-9]+\"),\"none\")", "none"); // khong khop -> #N/A
 
+    // --- DATEVALUE / TIMEVALUE / DAYS360 (Spec 12) ---
+    checkNum("=YEAR(DATEVALUE(\"2026-06-03\"))", 2026);
+    checkNum("=MONTH(DATEVALUE(\"2026-06-03\"))", 6);
+    checkNum("=DAY(DATEVALUE(\"2026-06-03\"))", 3);
+    checkStr("=DATEVALUE(\"2026-06-03\")=DATE(2026,6,3)", "true"); // bang nhau
+    checkNum("=TIMEVALUE(\"12:00:00\")", 0.5);
+    checkNum("=TIMEVALUE(\"06:00\")", 0.25);
+    checkNum("=DAYS360(DATE(2026,1,1),DATE(2026,2,1))", 30);
+    checkNum("=DAYS360(DATE(2026,1,1),DATE(2026,12,31))", 360);
+    checkNum("=DAYS360(DATE(2026,1,31),DATE(2026,3,31),1)", 60); // European
+
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);
     return g_fail == 0 ? 0 : 1;
 }

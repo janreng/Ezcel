@@ -1,5 +1,11 @@
 # Lịch sử thay đổi
 
+## v1.41.0 — Hàm ngày/giờ: DATEVALUE, TIMEVALUE, DAYS360 (Spec 12)
+
+- **DATEVALUE(văn bản)** — đổi chuỗi ngày (ví dụ "2026-06-03") thành giá trị ngày để tính toán.
+- **TIMEVALUE(văn bản)** — đổi chuỗi giờ (ví dụ "12:00:00") thành phần thập phân của ngày.
+- **DAYS360(ngày đầu, ngày cuối, [kiểu])** — đếm số ngày theo quy ước năm 360 ngày (kiểu Mỹ hoặc châu Âu), thường dùng trong tài chính.
+
 ## v1.40.0 — Hàm biểu thức chính quy: REGEXTEST, REGEXEXTRACT, REGEXREPLACE (Spec 22)
 
 - **REGEXTEST(văn bản, mẫu, [phân biệt hoa/thường])** — trả về ĐÚNG/SAI tùy chuỗi có khớp mẫu hay không.

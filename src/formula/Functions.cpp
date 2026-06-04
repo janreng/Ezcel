@@ -985,6 +985,43 @@ QHash<QString, Fn> &fnMap() {
         r["DAYS"]   = [need](const Args &a) { need(a,2,"DAYS"); return Value::number(serialToDate(toNumber(a[1])).daysTo(serialToDate(toNumber(a[0])))); };
         r["WEEKDAY"] = [](const Args &a) { if (a.size()<1||a.size()>2) argErr("WEEKDAY"); int iso = serialToDate(toNumber(a[0])).dayOfWeek(); int t = a.size()==2 ? toInt(a[1]) : 1; if (t==1) return Value::number(iso % 7 + 1); if (t==2) return Value::number(iso); if (t==3) return Value::number(iso - 1); throw FormulaError(QStringLiteral("WEEKDAY: type không hỗ trợ")); };
         r["DATEDIF"] = [need](const Args &a) { need(a,3,"DATEDIF"); QDate s = serialToDate(toNumber(a[0])), e = serialToDate(toNumber(a[1])); QString u = toText(a[2]).toUpper(); if (u=="D") return Value::number(s.daysTo(e)); if (u=="Y") return Value::number(e.year()-s.year() - ((e.month()<s.month()||(e.month()==s.month()&&e.day()<s.day()))?1:0)); if (u=="M") return Value::number((e.year()-s.year())*12 + (e.month()-s.month()) - (e.day()<s.day()?1:0)); throw FormulaError(QStringLiteral("DATEDIF: unit phải D/M/Y")); };
+        // DATEVALUE(text): đổi chuỗi ngày -> số sê-ri. Thử ISO rồi vài định dạng phổ biến.
+        r["DATEVALUE"] = [need](const Args &a) {
+            need(a,1,"DATEVALUE");
+            const QString s = toText(a[0]).trimmed();
+            QDate d = QDate::fromString(s, Qt::ISODate);
+            for (const char *fmt : {"d/M/yyyy", "M/d/yyyy", "yyyy-MM-dd", "d-M-yyyy", "dd/MM/yyyy"}) {
+                if (d.isValid()) break;
+                d = QDate::fromString(s, QString::fromLatin1(fmt));
+            }
+            if (!d.isValid()) throw FormulaError(QStringLiteral("DATEVALUE: không nhận dạng được ngày"), ERR_VALUE);
+            return Value::number(dateToSerial(d));
+        };
+        // TIMEVALUE(text): đổi chuỗi giờ -> phần thập phân của ngày (0..1).
+        r["TIMEVALUE"] = [need](const Args &a) {
+            need(a,1,"TIMEVALUE");
+            const QString s = toText(a[0]).trimmed();
+            QTime t = QTime::fromString(s, QStringLiteral("h:mm:ss"));
+            if (!t.isValid()) t = QTime::fromString(s, QStringLiteral("h:mm"));
+            if (!t.isValid()) t = QTime::fromString(s, QStringLiteral("h:mm AP"));
+            if (!t.isValid()) throw FormulaError(QStringLiteral("TIMEVALUE: không nhận dạng được giờ"), ERR_VALUE);
+            return Value::number((t.hour()*3600 + t.minute()*60 + t.second()) / 86400.0);
+        };
+        // DAYS360(start, end, [method]): số ngày theo quy ước năm 360 ngày.
+        // method=false (mặc định) -> US (NASD); true -> European.
+        r["DAYS360"] = [](const Args &a) {
+            if (a.size() < 2 || a.size() > 3) argErr("DAYS360");
+            QDate s = serialToDate(toNumber(a[0])), e = serialToDate(toNumber(a[1]));
+            const bool eu = a.size() == 3 && toBool(a[2]);
+            int d1 = s.day(), d2 = e.day();
+            if (eu) { if (d1 == 31) d1 = 30; if (d2 == 31) d2 = 30; }
+            else {
+                if (d1 == 31) d1 = 30;
+                if (d2 == 31) d2 = (d1 == 30) ? 30 : 31;
+                if (d2 == 31 && d1 == 30) d2 = 30;
+            }
+            return Value::number((e.year()-s.year())*360 + (e.month()-s.month())*30 + (d2 - d1));
+        };
         // EDATE(start, months): cộng số tháng, tự dồn ngày cuối tháng (31/1 +1 -> 29/2).
         r["EDATE"] = [need](const Args &a) { need(a,2,"EDATE"); QDate d = serialToDate(toNumber(a[0])).addMonths(toInt(a[1])); return Value::number(dateToSerial(d)); };
         // EOMONTH(start, months): ngày cuối cùng của tháng sau khi cộng months.
