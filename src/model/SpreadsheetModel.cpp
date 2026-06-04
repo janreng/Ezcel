@@ -312,6 +312,17 @@ bool SpreadsheetModel::lookupName(const QString &name, MergeRange &out) const {
     return true;
 }
 
+bool SpreadsheetModel::removeName(const QString &name) {
+    return m_names.remove(name) > 0;
+}
+
+QString SpreadsheetModel::rangeRef(const MergeRange &r) {
+    const QString a = columnLabel(r.left) + QString::number(r.top + 1);
+    if (r.top == r.bottom && r.left == r.right) return a;
+    const QString b = columnLabel(r.right) + QString::number(r.bottom + 1);
+    return a + QLatin1Char(':') + b;
+}
+
 void SpreadsheetModel::setNote(int row, int col, const QString &text) {
     const qint64 k = key(row, col);
     if (text.isEmpty()) m_notes.remove(k);

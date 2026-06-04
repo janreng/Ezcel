@@ -609,6 +609,25 @@ int main(int argc, char **argv) {
         ok(mm.precedents(0, 2, true).isEmpty(), "o trong khong co precedents");
     }
 
+    // --- named range manager: define/remove + rangeRef (Spec 31) ---
+    {
+        SpreadsheetModel mm;
+        mm.resizeGrid(8, 5);
+        mm.defineName("DoanhThu", MergeRange{0, 0, 4, 2}); // A1:C5
+        mm.defineName("Mot", MergeRange{2, 1, 2, 1});      // B3 (1 o)
+        MergeRange out;
+        ok(mm.lookupName("DoanhThu", out), "lookup DoanhThu ok");
+        ok(mm.definedNames().size() == 2, "co 2 ten");
+        // rangeRef
+        ok(SpreadsheetModel::rangeRef(MergeRange{0, 0, 4, 2}) == "A1:C5", "rangeRef vung A1:C5");
+        ok(SpreadsheetModel::rangeRef(MergeRange{2, 1, 2, 1}) == "B3", "rangeRef 1 o -> B3");
+        // remove
+        ok(mm.removeName("Mot"), "remove Mot -> true");
+        ok(!mm.lookupName("Mot", out), "Mot da xoa");
+        ok(mm.definedNames().size() == 1, "con 1 ten");
+        ok(!mm.removeName("KhongCo"), "remove ten khong ton tai -> false");
+    }
+
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);
     return g_fail == 0 ? 0 : 1;
 }

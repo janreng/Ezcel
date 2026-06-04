@@ -79,6 +79,10 @@ public:
     void defineName(const QString &name, const MergeRange &range);
     bool lookupName(const QString &name, MergeRange &out) const;
     QStringList definedNames() const { return m_names.keys(); }
+    bool removeName(const QString &name);                 // xóa vùng đặt tên; true nếu có
+
+    // Chuỗi địa chỉ kiểu A1 cho một vùng: "A1" nếu 1 ô, "A1:C3" nếu vùng. (Spec 31)
+    static QString rangeRef(const MergeRange &r);
     // Toàn bộ định dạng theo (row,col) — để lưu ra file.
     QMap<QPair<int, int>, Format> cellFormats() const;
     // Nạp định dạng từ file (thay toàn bộ, KHÔNG undo — dùng khi mở file).

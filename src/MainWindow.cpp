@@ -44,6 +44,7 @@
 #include <QMessageBox>
 #include <QDialog>
 #include <QListWidget>
+#include <QPushButton>
 #include <QTableWidget>
 #include <QTableWidgetItem>
 #include <QDialogButtonBox>
@@ -632,6 +633,8 @@ void MainWindow::buildMenus()
     };
     edit->addAction(QStringLiteral("Truy vết ô tham chiếu (precedents)"), this, [selectTrace] { selectTrace(true); });
     edit->addAction(QStringLiteral("Truy vết ô phụ thuộc (dependents)"), this, [selectTrace] { selectTrace(false); });
+    edit->addSeparator();
+    edit->addAction(QStringLiteral("Quản lý tên vùng..."), this, &MainWindow::manageNames);
 
     QMenu *st = menuBar()->addMenu(i18n::tr("menu_struct"));
     st->addAction(i18n::tr("st_ins_row"), this, [this] {
@@ -1418,6 +1421,66 @@ void MainWindow::customFilter()
     for (int r : hide) m_view->setRowHidden(r, true);
     statusBar()->showMessage(QStringLiteral("Đã lọc tùy chỉnh cột %1: ẩn %2 hàng")
         .arg(SpreadsheetModel::columnLabel(col)).arg(hide.size()), 3000);
+}
+
+// Quản lý vùng đặt tên (Spec 31): danh sách tên + địa chỉ; Đi tới / Xóa.
+void MainWindow::manageNames()
+{
+    QStringList names = m_model->definedNames();
+    names.sort(Qt::CaseInsensitive);
+    if (names.isEmpty()) { statusBar()->showMessage(QStringLiteral("Chưa có vùng đặt tên nào"), 3000); return; }
+
+    QDialog dlg(this);
+    dlg.setWindowTitle(QStringLiteral("Quản lý tên vùng"));
+    auto *lay = new QVBoxLayout(&dlg);
+    auto *listw = new QListWidget(&dlg);
+    auto refill = [this, listw] {
+        listw->clear();
+        QStringList ns = m_model->definedNames();
+        ns.sort(Qt::CaseInsensitive);
+        for (const QString &n : ns) {
+            MergeRange r;
+            if (m_model->lookupName(n, r))
+                new QListWidgetItem(QStringLiteral("%1  →  %2").arg(n, SpreadsheetModel::rangeRef(r)), listw);
+        }
+    };
+    refill();
+    lay->addWidget(new QLabel(QStringLiteral("Các vùng đã đặt tên:"), &dlg));
+    lay->addWidget(listw);
+
+    auto *btnRow = new QHBoxLayout();
+    auto *goBtn = new QPushButton(QStringLiteral("Đi tới"), &dlg);
+    auto *delBtn = new QPushButton(QStringLiteral("Xóa"), &dlg);
+    btnRow->addWidget(goBtn); btnRow->addWidget(delBtn); btnRow->addStretch();
+    lay->addLayout(btnRow);
+    auto *box = new QDialogButtonBox(QDialogButtonBox::Close, &dlg);
+    connect(box, &QDialogButtonBox::rejected, &dlg, &QDialog::reject);
+    connect(box, &QDialogButtonBox::accepted, &dlg, &QDialog::accept);
+    lay->addWidget(box);
+
+    // Tên ứng với dòng đang chọn.
+    auto currentName = [listw]() -> QString {
+        QListWidgetItem *it = listw->currentItem();
+        return it ? it->text().section(QStringLiteral("  →  "), 0, 0) : QString();
+    };
+    connect(delBtn, &QPushButton::clicked, &dlg, [this, currentName, refill] {
+        const QString n = currentName();
+        if (!n.isEmpty() && m_model->removeName(n)) { refill(); statusBar()->showMessage(QStringLiteral("Đã xóa tên \"%1\"").arg(n), 2500); }
+    });
+    connect(goBtn, &QPushButton::clicked, &dlg, [this, currentName, &dlg] {
+        const QString n = currentName();
+        MergeRange r;
+        if (!n.isEmpty() && m_model->lookupName(n, r)) {
+            QModelIndex a0 = m_model->index(r.top, r.left);
+            QModelIndex b0 = m_model->index(qMin(r.bottom, m_model->rowCount() - 1),
+                                            qMin(r.right, m_model->columnCount() - 1));
+            m_view->setCurrentIndex(a0);
+            m_view->selectionModel()->select(QItemSelection(a0, b0), QItemSelectionModel::ClearAndSelect);
+            m_view->scrollTo(a0);
+            dlg.accept();
+        }
+    });
+    dlg.exec();
 }
 
 // Sắp xếp nhiều cấp (Spec 15): tối đa 3 cấp, mỗi cấp chọn cột + chiều tăng/giảm.

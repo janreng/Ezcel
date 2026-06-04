@@ -1,5 +1,11 @@
 # Lịch sử thay đổi
 
+## v1.37.0 — Quản lý vùng đặt tên (Spec 31)
+
+- **Thêm "Quản lý tên vùng..."** trong menu Sửa: liệt kê tất cả vùng đã đặt tên kèm địa chỉ (ví dụ `DoanhThu → A1:C5`).
+- **Đi tới**: chọn nhanh vùng tương ứng với một tên.
+- **Xóa**: gỡ bỏ vùng đặt tên không còn dùng.
+
 ## v1.36.0 — Kiểm tra tên vùng hợp lệ (Spec 04)
 
 - Khi đặt **tên cho vùng** qua ô địa chỉ, ứng dụng kiểm tra tên theo quy tắc chuẩn và báo lý do nếu không hợp lệ.
