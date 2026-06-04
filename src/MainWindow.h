@@ -43,6 +43,7 @@ private slots:
     void openFile();
     bool saveFile();      // trả false nếu hủy/lỗi
     bool saveFileAs();
+    void printSheet();    // in lưới hiện hành qua QPrinter + QPrintDialog (Ctrl+P, Spec 24)
     void copySelection();
     void cutSelection();
     void pasteClipboard();

@@ -70,6 +70,10 @@
 #include <QSlider>
 #include <QToolButton>
 #include <QFontComboBox>
+#include <QPrinter>
+#include <QPrintDialog>
+#include <QPainter>
+#include "ui/PrintLayout.h"
 #include <QShortcut>
 #include <QColorDialog>
 #include <QInputDialog>
@@ -649,6 +653,8 @@ void MainWindow::buildMenus()
     file->addAction(i18n::tr("file_save"), QKeySequence::Save, this, [this] { saveFile(); });
     file->addAction(i18n::tr("file_saveas"), QKeySequence::SaveAs, this, [this] { saveFileAs(); });
     file->addSeparator();
+    file->addAction(QStringLiteral("In..."), QKeySequence::Print, this, &MainWindow::printSheet);
+    file->addSeparator();
     file->addAction(i18n::tr("file_quit"), QKeySequence::Quit, this, &QWidget::close);
 
     QMenu *edit = m_mEdit = menuBar()->addMenu(i18n::tr("menu_edit"));
@@ -1206,6 +1212,28 @@ void MainWindow::addColorScaleDialog()
     m_model->addColorScale(cond::ColorScale{t, l, b, r, presets[i].lo, presets[i].mid, presets[i].hi});
 }
 
+// ---------------------------------------------------------------- in ấn (Spec 24)
+// In lưới hiện hành: mở QPrintDialog rồi vẽ phần bảng đang hiển thị lên trang,
+// thu nhỏ vừa khổ giấy (giữ tỉ lệ, không phóng to). Bản 1: in vùng nhìn thấy.
+void MainWindow::printSheet()
+{
+    QPrinter printer(QPrinter::HighResolution);
+    QPrintDialog dlg(&printer, this);
+    dlg.setWindowTitle(QStringLiteral("In bảng tính"));
+    if (dlg.exec() != QDialog::Accepted) return;
+
+    QPainter painter(&printer);
+    if (!painter.isActive()) return;
+    const QRectF page = printer.pageRect(QPrinter::DevicePixel);
+    const QSize src = m_view->size();
+    const double s = printlayout::fitScale(src.width(), src.height(), page.width(), page.height());
+    painter.translate(page.topLeft());
+    painter.scale(s, s);
+    m_view->render(&painter); // vẽ lưới + tiêu đề hàng/cột đang hiển thị
+    painter.end();
+    statusBar()->showMessage(QStringLiteral("Đã gửi bản in"), 2500);
+}
+
 // ---------------------------------------------------------------- dải lệnh (Ribbon)
 // Giao diện kiểu Excel: tab Trang đầu / Chèn / Công thức / Dữ liệu / Xem; mỗi tab
 // gom lệnh thành nhóm có tiêu đề. Thay cho dãy thanh công cụ phẳng cũ.
@@ -1226,6 +1254,7 @@ void MainWindow::buildRibbon()
     m_ribbon->addSmallButton(QStringLiteral("redo"), QStringLiteral("Làm lại"), [this] {
         if (!m_model->redo()) statusBar()->showMessage(QStringLiteral("Không có gì để làm lại"), 2000);
     });
+    m_ribbon->addSmallButton(QStringLiteral("printer"), QStringLiteral("In"), [this] { printSheet(); });
 
     m_ribbon->beginGroup(QStringLiteral("Bảng tạm"));
     m_ribbon->addButton(QStringLiteral("paste"), QStringLiteral("Dán"), [this] { pasteClipboard(); });

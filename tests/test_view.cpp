@@ -2,6 +2,7 @@
 #include "view/MergeSpans.h"
 #include "view/Visibility.h"
 #include "ui/RibbonBar.h"
+#include "ui/PrintLayout.h"
 #include "model/SpreadsheetModel.h"
 #include <QApplication>
 #include <QTableView>
@@ -98,6 +99,17 @@ int main(int argc, char **argv) {
         QToolButton *mb = rb.addMenuButton(QString(), QStringLiteral("Tệp"), &menu);
         ok(mb != nullptr && mb->menu() == &menu, "addMenuButton gan dung menu");
         ok(mb && mb->popupMode() == QToolButton::InstantPopup, "menu button instant popup");
+    }
+
+    // --- In ấn: tỉ lệ khít trang (Spec 24) ---
+    {
+        // Nội dung rộng hơn trang -> thu nhỏ theo cạnh chật nhất, giữ tỉ lệ.
+        ok(printlayout::fitScale(1000, 500, 500, 500) == 0.5, "fit theo chieu rong");
+        ok(printlayout::fitScale(500, 1000, 500, 500) == 0.5, "fit theo chieu cao");
+        // Nội dung nhỏ hơn trang -> KHÔNG phóng to (clamp 1.0).
+        ok(printlayout::fitScale(100, 100, 500, 500) == 1.0, "khong phong to");
+        // Kích thước không hợp lệ -> 1.0.
+        ok(printlayout::fitScale(0, 100, 500, 500) == 1.0, "kich thuoc xau -> 1.0");
     }
 
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);

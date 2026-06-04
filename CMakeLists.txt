@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
-project(Ezcel VERSION 1.94.0 LANGUAGES CXX)
+project(Ezcel VERSION 1.95.0 LANGUAGES CXX)
 
 # Bản port C++ của Ezcel (gốc Python/PySide6). Dùng Qt6 Widgets + MinGW.
 set(CMAKE_CXX_STANDARD 20)
@@ -12,7 +12,7 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Svg Network)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Svg Network PrintSupport)
 
 # --- QXlsx (đọc/ghi XLSX) — tải qua FetchContent, ghim tag v1.5.0.
 # Tải về build/_deps (đã gitignore), không nhúng nguồn vào repo.
@@ -95,7 +95,7 @@ target_link_libraries(ezcel_update PUBLIC Qt6::Core Qt6::Gui Qt6::Widgets Qt6::N
 qt_add_executable(Ezcel WIN32 src/main.cpp src/MainWindow.cpp src/MainWindowFormat.cpp src/MainWindowFind.cpp src/ui/I18n.cpp src/ui/Shortcuts.cpp src/ui/Zoom.cpp src/ui/SheetNav.cpp src/ui/CellMode.cpp src/ui/WorkbookStats.cpp src/MainWindow.h resources.qrc app_icon.rc)
 target_include_directories(Ezcel PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_compile_definitions(Ezcel PRIVATE EZCEL_VERSION="${PROJECT_VERSION}")
-target_link_libraries(Ezcel PRIVATE ezcel_model ezcel_io ezcel_view ezcel_update ezcel_formula Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Svg Qt6::Network)
+target_link_libraries(Ezcel PRIVATE ezcel_model ezcel_io ezcel_view ezcel_update ezcel_formula Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Svg Qt6::Network Qt6::PrintSupport)
 
 # --- Tests (console, headless) ---
 add_executable(test_formula tests/test_formula.cpp)

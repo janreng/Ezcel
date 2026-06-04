@@ -59,5 +59,6 @@
     <file alias="icons/help.svg">assets/icons/help.svg</file>
     <file alias="icons/file.svg">assets/icons/file.svg</file>
     <file alias="icons/split_columns.svg">assets/icons/split_columns.svg</file>
+    <file alias="icons/printer.svg">assets/icons/printer.svg</file>
   </qresource>
 </RCC>

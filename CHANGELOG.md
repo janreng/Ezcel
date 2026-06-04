@@ -1,5 +1,11 @@
 # Lịch sử thay đổi
 
+## v1.95.0 — In bảng tính (Spec 24)
+
+- Thêm **Tệp → "In..." (Ctrl+P)** và nút **In** trên dải lệnh: mở hộp thoại in, chọn máy in/khổ giấy rồi in.
+- Bản in **tự thu vừa khổ giấy**, giữ tỉ lệ, không phóng to nội dung nhỏ.
+- Bản đầu in phần bảng đang hiển thị (kèm tiêu đề hàng/cột).
+
 ## v1.94.0 — Bố cục dải lệnh gọn theo lưới 3 hàng (Spec 07)
 
 - **Sắp xếp lại nút theo lưới 3 hàng/cột** như bộ ứng dụng văn phòng: nút phụ thu nhỏ (biểu tượng + chữ nằm cạnh) xếp 3 cái một cột, chỉ vài nút chính để to (Dán, Định dạng có điều kiện, AutoSum, Bảng tổng hợp…).
