@@ -78,6 +78,7 @@ private slots:
     void toggleSplitView();   // bật/tắt chia đôi cửa sổ theo chiều dọc (Spec 14)
     void goalSeekDialog();    // dò mục tiêu: đổi ô nhập để ô công thức đạt giá trị (Spec 28)
     void quickPivot();        // bảng tổng hợp nhanh (pivot, Spec 18)
+    void applyCellStyle(const QString &name); // áp kiểu ô dựng sẵn cho vùng chọn (Spec 30)
     void formatAsTable();     // định dạng vùng chọn thành bảng sọc xen kẽ (Spec 16)
     void addTableTotalRow();  // thêm hàng tổng (SUM theo cột) dưới bảng hiện hành (Spec 16)
     void autoSum();           // AutoSum (∑) ô hiện hành (Alt+=)

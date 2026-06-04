@@ -1212,6 +1212,17 @@ void MainWindow::addColorScaleDialog()
     m_model->addColorScale(cond::ColorScale{t, l, b, r, presets[i].lo, presets[i].mid, presets[i].hi});
 }
 
+// ---------------------------------------------------------------- kiểu ô dựng sẵn (Spec 30)
+void MainWindow::applyCellStyle(const QString &name)
+{
+    int t, l, b, r;
+    if (!selectionBox(t, l, b, r)) return;
+    SpreadsheetModel::Format f;
+    const auto attrs = cellstyles::style(name);
+    for (auto it = attrs.constBegin(); it != attrs.constEnd(); ++it) f.insert(it.key(), it.value());
+    m_model->setFormat(t, l, b, r, f);
+}
+
 // ---------------------------------------------------------------- bảng có cấu trúc (Spec 16)
 // Định dạng vùng chọn thành "bảng": hàng đầu là tiêu đề tô đậm, các hàng dữ liệu
 // tô sọc xen kẽ hai màu (kiểu bảng xanh dựng sẵn). Bỏ qua nếu chưa chọn vùng.
@@ -1353,22 +1364,26 @@ void MainWindow::buildRibbon()
 
     m_ribbon->beginGroup(QStringLiteral("Kiểu"));
     m_ribbon->addButton(QStringLiteral("cond_format"), QStringLiteral("Định dạng\ncó điều kiện"), [this] { showCondFormat(); });
-    auto *styleBox = new QComboBox(m_ribbon);
-    styleBox->addItem(QStringLiteral("Kiểu ô…"));
-    for (const QString &nm : cellstyles::names()) styleBox->addItem(nm);
-    styleBox->setMaximumWidth(120);
-    m_ribbon->addWidget(styleBox);
-    connect(styleBox, QOverload<int>::of(&QComboBox::activated), this, [this, styleBox](int i) {
-        if (i <= 0) return;
-        int t, l, b, r;
-        if (selectionBox(t, l, b, r)) {
-            SpreadsheetModel::Format f;
-            const auto attrs = cellstyles::style(styleBox->itemText(i));
-            for (auto it = attrs.constBegin(); it != attrs.constEnd(); ++it) f.insert(it.key(), it.value());
-            m_model->setFormat(t, l, b, r, f);
-        }
-        styleBox->setCurrentIndex(0);
-    });
+
+    m_ribbon->beginGroup(QStringLiteral("Kiểu ô"));
+    for (const QString &nm : cellstyles::names()) {
+        const auto attrs = cellstyles::style(nm);
+        auto *sw = new QToolButton(m_ribbon);
+        sw->setText(nm);
+        sw->setToolTip(QStringLiteral("Áp kiểu ô: %1").arg(nm));
+        sw->setAutoRaise(false);
+        sw->setFocusPolicy(Qt::NoFocus);
+        const QString bg = attrs.value(QStringLiteral("bg")).toString();
+        const QString fg = attrs.value(QStringLiteral("color")).toString();
+        QString css = QStringLiteral("QToolButton{border:1px solid #C8C6C4;border-radius:2px;padding:2px 8px;");
+        if (!bg.isEmpty()) css += QStringLiteral("background:%1;").arg(bg);
+        if (!fg.isEmpty()) css += QStringLiteral("color:%1;").arg(fg);
+        if (attrs.value(QStringLiteral("bold")).toBool()) css += QStringLiteral("font-weight:600;");
+        css += QStringLiteral("} QToolButton:hover{border:1px solid #107C41;}");
+        sw->setStyleSheet(css);
+        connect(sw, &QToolButton::clicked, this, [this, nm] { applyCellStyle(nm); });
+        m_ribbon->addWidget(sw);
+    }
 
     m_ribbon->beginGroup(QStringLiteral("Ô"));
     m_ribbon->addSmallButton(QStringLiteral("cell_insert"), QStringLiteral("Chèn ô"), [this] { insertCellsDialog(); });

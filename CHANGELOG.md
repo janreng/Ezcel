@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v1.99.0 — Bộ sưu tập Kiểu ô hiện ngay trên dải lệnh (Spec 30)
+
+- Nhóm **Kiểu ô** trên thẻ Trang đầu giờ hiện **các mẫu kiểu có màu sẵn** (Bình thường, Tốt, Xấu, Trung tính, Tiêu đề, Tựa đề) — bấm thẳng vào mẫu để áp cho vùng đang chọn, không cần mở danh sách thả xuống.
+- Mỗi mẫu hiển thị đúng màu nền/chữ của nó nên xem trước được ngay.
+
 ## v1.98.0 — Hàng tổng cho bảng (Spec 16)
 
 - Thêm **Chèn → "Hàng tổng"**: đặt con trỏ trong bảng rồi bấm để chèn **một hàng Tổng ngay dưới bảng**, mỗi cột tự tính **=SUM** vùng dữ liệu của cột đó.
