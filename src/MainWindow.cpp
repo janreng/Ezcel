@@ -1470,6 +1470,10 @@ void MainWindow::buildRibbon()
         QString code = numBox->itemData(i).toString();
         applyFormatAttr(QStringLiteral("number_format"), code.isEmpty() ? QVariant() : code);
     });
+    // Nút định dạng số nhanh (bấm 1 phát áp ngay cho vùng chọn).
+    m_ribbon->addSmallButton(QString(), QStringLiteral("Phần trăm %"), [this] { applyFormatAttr(QStringLiteral("number_format"), QStringLiteral("0.00%")); });
+    m_ribbon->addSmallButton(QString(), QStringLiteral("Tiền tệ $"), [this] { applyFormatAttr(QStringLiteral("number_format"), QStringLiteral("$#,##0.00")); });
+    m_ribbon->addSmallButton(QString(), QStringLiteral("Phân cách nghìn"), [this] { applyFormatAttr(QStringLiteral("number_format"), QStringLiteral("#,##0.00")); });
 
     m_ribbon->beginGroup(QStringLiteral("Kiểu"));
     m_ribbon->addButton(QStringLiteral("cond_format"), QStringLiteral("Định dạng\ncó điều kiện"), [this] { showCondFormat(); });

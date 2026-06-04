@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v2.5.0 — Nút định dạng số nhanh (Spec 08)
+
+- Nhóm **Số** thêm 3 nút bấm-một-phát: **Phần trăm %**, **Tiền tệ $**, **Phân cách nghìn** — áp ngay định dạng cho vùng đang chọn, khỏi mở danh sách.
+
 ## v2.4.1 — Sửa lỗi: nhiều nút trên dải lệnh bấm không ăn
 
 - Khi mở ứng dụng (hoặc tạo/mở tệp) **chưa có ô nào được chọn sẵn**, nên các nút cần vùng chọn (định dạng, lọc, bảng, AutoSum…) bấm không có tác dụng. Nay **tự chọn sẵn ô A1 và đưa con trỏ vào lưới** khi mở — mọi nút hoạt động ngay.
