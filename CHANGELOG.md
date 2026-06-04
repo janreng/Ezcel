@@ -1,5 +1,11 @@
 # Lịch sử thay đổi
 
+## v1.43.0 — Hàm cơ sở dữ liệu: DSUM, DCOUNT, DAVERAGE... (Spec 27)
+
+- Thêm nhóm hàm **CSDL**: **DSUM, DCOUNT, DCOUNTA, DAVERAGE, DMAX, DMIN, DPRODUCT**.
+- Tính toán trên một bảng có tiêu đề, lọc theo **vùng tiêu chí** (hỗ trợ điều kiện như `>15`, `A`, kết hợp nhiều cột/nhiều dòng).
+- Chọn cột cần tính theo **tên tiêu đề** hoặc số thứ tự cột.
+
 ## v1.42.0 — Điền chuỗi số có bước nhảy (Spec 05)
 
 - **Thêm "Điền chuỗi..."** trong menu Sửa: chọn một vùng rồi điền dãy số tự động.

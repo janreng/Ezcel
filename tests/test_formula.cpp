@@ -24,6 +24,12 @@ static QVariant resolver(int row, int col) {
         {"0,7", "1"}, {"1,7", "3"}, {"2,7", "2"},
         // I1:I3 (cot 8) = {2,4,8} = 2^x voi x = D1:D3 {1,2,3} cho test GROWTH (mu)
         {"0,8", "2"}, {"1,8", "4"}, {"2,8", "8"},
+        // CSDL K1:L5 cho D-functions (cot 10=Loai, cot 11=Tien)
+        {"0,10", "Loai"}, {"1,10", "A"}, {"2,10", "B"}, {"3,10", "A"}, {"4,10", "B"},
+        {"0,11", "Tien"}, {"1,11", "10"}, {"2,11", "20"}, {"3,11", "30"}, {"4,11", "40"},
+        // Tieu chi N1:N2 (Loai=A) va O1:O2 (Tien>15)
+        {"0,13", "Loai"}, {"1,13", "A"},
+        {"0,14", "Tien"}, {"1,14", ">15"},
     };
     auto it = cells.constFind(QString("%1,%2").arg(row).arg(col));
     return it == cells.constEnd() ? QVariant(QString()) : QVariant(it.value());
@@ -534,6 +540,15 @@ int main() {
     checkNum("=DAYS360(DATE(2026,1,1),DATE(2026,2,1))", 30);
     checkNum("=DAYS360(DATE(2026,1,1),DATE(2026,12,31))", 360);
     checkNum("=DAYS360(DATE(2026,1,31),DATE(2026,3,31),1)", 60); // European
+
+    // --- D-functions (Spec 27): CSDL K1:L5, tieu chi N1:N2 (Loai=A), O1:O2 (Tien>15) ---
+    checkNum("=DSUM(K1:L5,\"Tien\",N1:N2)", 40);      // Loai=A -> 10+30
+    checkNum("=DCOUNT(K1:L5,\"Tien\",N1:N2)", 2);     // 2 hang Loai=A
+    checkNum("=DAVERAGE(K1:L5,\"Tien\",N1:N2)", 20);  // (10+30)/2
+    checkNum("=DMAX(K1:L5,\"Tien\",N1:N2)", 30);
+    checkNum("=DMIN(K1:L5,\"Tien\",N1:N2)", 10);
+    checkNum("=DSUM(K1:L5,\"Tien\",O1:O2)", 90);      // Tien>15 -> 20+30+40
+    checkNum("=DSUM(K1:L5,2,N1:N2)", 40);             // field theo so cot (2)
 
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);
     return g_fail == 0 ? 0 : 1;

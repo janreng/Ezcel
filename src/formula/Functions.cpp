@@ -121,6 +121,68 @@ std::function<bool(const Value &)> compileCriteria(const Value &criteria) {
     };
 }
 
+// Hàm cơ sở dữ liệu (D-functions): truy vấn giá trị cột `field` của các hàng trong
+// `database` (range có hàng tiêu đề) thỏa `criteria` (range: hàng tiêu đề + các hàng
+// điều kiện). Một hàng dữ liệu khớp nếu khớp BẤT KỲ hàng điều kiện nào (OR), và một
+// hàng điều kiện khớp khi MỌI ô không rỗng của nó thỏa (AND theo cột). Trả các Value.
+std::vector<Value> dQuery(const Args &a, const char *fn) {
+    if (a.size() != 3) argErr(fn);
+    if (!a[0].isRange() || !a[2].isRange())
+        throw FormulaError(QString::fromLatin1(fn) + QStringLiteral(": cần vùng dữ liệu và vùng tiêu chí"), ERR_VALUE);
+    const auto &db = *a[0].range.rows;
+    const auto &cr = *a[2].range.rows;
+    std::vector<Value> out;
+    if (db.size() < 2 || cr.empty()) return out;
+    const auto &dbHeader = db[0];
+
+    auto colByName = [](const std::vector<Value> &header, const QString &name) {
+        for (int c = 0; c < int(header.size()); ++c)
+            if (toText(header[c]).toLower() == name) return c;
+        return -1;
+    };
+
+    int fcol = -1;
+    if (a[1].type == Type::Number) fcol = toInt(a[1]) - 1;
+    else fcol = colByName(dbHeader, toText(a[1]).toLower());
+    if (fcol < 0 || fcol >= int(dbHeader.size()))
+        throw FormulaError(QString::fromLatin1(fn) + QStringLiteral(": không tìm thấy cột"), ERR_VALUE);
+
+    const auto &crHeader = cr[0];
+    for (size_t r = 1; r < db.size(); ++r) {
+        const auto &row = db[r];
+        bool matched = false;
+        for (size_t cri = 1; cri < cr.size() && !matched; ++cri) {
+            bool allCols = true;
+            for (size_t cc = 0; cc < crHeader.size() && cc < cr[cri].size(); ++cc) {
+                const Value &critCell = cr[cri][cc];
+                if (critCell.type == Type::Empty ||
+                    (critCell.type == Type::Text && critCell.text.isEmpty())) continue;
+                int dcol = colByName(dbHeader, toText(crHeader[cc]).toLower());
+                if (dcol < 0) { allCols = false; break; }
+                Value cell = dcol < int(row.size()) ? row[dcol] : Value();
+                if (!compileCriteria(critCell)(cell)) { allCols = false; break; }
+            }
+            if (allCols) matched = true;
+        }
+        if (matched) out.push_back(fcol < int(row.size()) ? row[fcol] : Value());
+    }
+    return out;
+}
+
+// Lọc các Value số -> vector<double>. Chuỗi số (vd "10") cũng được tính (ô từ lưới
+// thường lưu dạng Text). Ô rỗng / text không phải số bị bỏ qua.
+std::vector<double> dNumbers(const std::vector<Value> &vs) {
+    std::vector<double> out;
+    for (const Value &v : vs) {
+        if (v.type == Type::Number) { out.push_back(v.num); continue; }
+        if (v.type == Type::Text) {
+            bool ok = false; double d = v.text.trimmed().toDouble(&ok);
+            if (ok && std::isfinite(d)) out.push_back(d);
+        }
+    }
+    return out;
+}
+
 // ----- registry build -----
 QHash<QString, Fn> &fnMap() {
     static QHash<QString, Fn> m = [] {
@@ -173,6 +235,18 @@ QHash<QString, Fn> &fnMap() {
         r["STDEVPA"] = [varpaCore](const Args &a) { return Value::number(std::sqrt(varpaCore(a, "STDEVPA"))); };
         // ENCODEURL(text): mã hóa chuỗi theo kiểu URL (phần trăm), ví dụ dấu cách -> %20.
         r["ENCODEURL"] = [need](const Args &a) { need(a,1,"ENCODEURL"); return Value::str(QString::fromLatin1(toText(a[0]).toUtf8().toPercentEncoding())); };
+        // --- Hàm cơ sở dữ liệu (D-functions, Spec 27) ---
+        r["DSUM"] = [](const Args &a) { auto n = dNumbers(dQuery(a, "DSUM")); return Value::number(sumv(n)); };
+        r["DCOUNT"] = [](const Args &a) { return Value::number(double(dNumbers(dQuery(a, "DCOUNT")).size())); };
+        r["DCOUNTA"] = [](const Args &a) {
+            auto vs = dQuery(a, "DCOUNTA"); int c = 0;
+            for (const Value &v : vs) if (!(v.type == Type::Empty || (v.type == Type::Text && v.text.isEmpty()))) ++c;
+            return Value::number(double(c));
+        };
+        r["DAVERAGE"] = [](const Args &a) { auto n = dNumbers(dQuery(a, "DAVERAGE")); if (n.empty()) throw FormulaError(QStringLiteral("DAVERAGE: không có số"), ERR_DIV0); return Value::number(sumv(n)/n.size()); };
+        r["DMAX"] = [](const Args &a) { auto n = dNumbers(dQuery(a, "DMAX")); if (n.empty()) return Value::number(0); return Value::number(*std::max_element(n.begin(), n.end())); };
+        r["DMIN"] = [](const Args &a) { auto n = dNumbers(dQuery(a, "DMIN")); if (n.empty()) return Value::number(0); return Value::number(*std::min_element(n.begin(), n.end())); };
+        r["DPRODUCT"] = [](const Args &a) { auto n = dNumbers(dQuery(a, "DPRODUCT")); double p = 1.0; for (double x : n) p *= x; return Value::number(n.empty() ? 0.0 : p); };
         // --- Hàm biểu thức chính quy (Regex, Spec 22.2) ---
         // case_sensitivity: 0 = phân biệt hoa/thường (mặc định), 1 = không phân biệt.
         auto reOpts = [](const Args &a, int idx) {
