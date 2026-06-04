@@ -1,5 +1,25 @@
 # Lịch sử thay đổi
 
+## v2.0.0 — Phiên bản 2.0 🎉 (mốc tổng kết)
+
+Cột mốc lớn: bản dựng lại bằng C++ chạy nhanh, mượt, giao diện hiện đại và đầy đủ tính năng cho công việc bảng tính hằng ngày.
+
+**Giao diện**
+- Dải lệnh có thẻ (Trang đầu, Chèn, Công thức, Dữ liệu, Xem), lệnh gom theo nhóm có tiêu đề, nút có biểu tượng, bố cục lưới gọn gàng.
+- Bộ sưu tập Kiểu ô có màu, thư viện phông/cỡ chữ, thu phóng, thanh trạng thái thống kê.
+
+**Soạn thảo & định dạng**
+- Nhập liệu nhanh (Enter xuống dòng, kéo điền, Flash Fill, gợi ý hàm khi gõ), sao chép/dán đặc biệt, hoàn tác/làm lại.
+- Định dạng phong phú: phông, màu, viền, căn ngang/dọc, gộp ô, định dạng số/ngày/tiền tệ, định dạng có điều kiện (thanh dữ liệu, thang màu, bộ biểu tượng).
+
+**Dữ liệu & công thức**
+- Hơn 270 hàm (toán, thống kê, tài chính, ngày giờ, văn bản, tra cứu, mảng động…), tham chiếu chéo trang tính.
+- Sắp xếp nhiều cấp, lọc, xóa trùng, tách/gộp cột, tổng phụ, gộp dữ liệu, dò mục tiêu, dự báo, bảng tổng hợp nhanh.
+- Bảng có cấu trúc: sọc màu, tiêu đề đậm, hàng tổng.
+
+**Tệp & khác**
+- Mở/lưu CSV và XLSX (giữ định dạng), nhiều trang tính, cố định dòng/cột, chia đôi cửa sổ, bảo vệ trang tính, in ấn (Ctrl+P), tự cập nhật.
+
 ## v1.100.0 — Căn dọc trong ô: trên / giữa / dưới (Spec 07)
 
 - Nhóm **Căn lề** thêm 3 nút **Căn trên / Căn giữa dọc / Căn dưới** — đặt vị trí nội dung theo chiều dọc của ô (trước chỉ có căn ngang).
