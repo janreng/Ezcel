@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v2.6.0 — Tăng / giảm chữ số thập phân (Spec 08)
+
+- Nhóm **Số** thêm 2 nút **Tăng thập phân** / **Giảm thập phân** — chỉnh nhanh số chữ số sau dấu phẩy cho vùng đang chọn, giữ nguyên kiểu tiền tệ/phần trăm/phân cách nghìn.
+
 ## v2.5.0 — Nút định dạng số nhanh (Spec 08)
 
 - Nhóm **Số** thêm 3 nút bấm-một-phát: **Phần trăm %**, **Tiền tệ $**, **Phân cách nghìn** — áp ngay định dạng cho vùng đang chọn, khỏi mở danh sách.

@@ -26,6 +26,7 @@
 #include "update/Updater.h"
 #include "ui/Theme.h"
 #include "model/CellStyles.h"
+#include "model/NumberFormat.h"
 #include "model/Stats.h"
 #include "model/AutoSum.h"
 #include "ui/Shortcuts.h"
@@ -1223,6 +1224,15 @@ void MainWindow::addColorScaleDialog()
     m_model->addColorScale(cond::ColorScale{t, l, b, r, presets[i].lo, presets[i].mid, presets[i].hi});
 }
 
+// ---------------------------------------------------------------- tăng/giảm thập phân (Spec 08)
+void MainWindow::changeDecimals(int delta)
+{
+    int t, l, b, r;
+    if (!selectionBox(t, l, b, r)) return;
+    const QString cur = m_model->formatAt(t, l).value(QStringLiteral("number_format")).toString();
+    applyFormatAttr(QStringLiteral("number_format"), numfmt::adjustDecimals(cur, delta));
+}
+
 // ---------------------------------------------------------------- kiểu ô dựng sẵn (Spec 30)
 void MainWindow::applyCellStyle(const QString &name)
 {
@@ -1474,6 +1484,8 @@ void MainWindow::buildRibbon()
     m_ribbon->addSmallButton(QString(), QStringLiteral("Phần trăm %"), [this] { applyFormatAttr(QStringLiteral("number_format"), QStringLiteral("0.00%")); });
     m_ribbon->addSmallButton(QString(), QStringLiteral("Tiền tệ $"), [this] { applyFormatAttr(QStringLiteral("number_format"), QStringLiteral("$#,##0.00")); });
     m_ribbon->addSmallButton(QString(), QStringLiteral("Phân cách nghìn"), [this] { applyFormatAttr(QStringLiteral("number_format"), QStringLiteral("#,##0.00")); });
+    m_ribbon->addSmallButton(QString(), QStringLiteral("Tăng thập phân"), [this] { changeDecimals(1); });
+    m_ribbon->addSmallButton(QString(), QStringLiteral("Giảm thập phân"), [this] { changeDecimals(-1); });
 
     m_ribbon->beginGroup(QStringLiteral("Kiểu"));
     m_ribbon->addButton(QStringLiteral("cond_format"), QStringLiteral("Định dạng\ncó điều kiện"), [this] { showCondFormat(); });

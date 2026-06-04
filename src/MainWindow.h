@@ -80,6 +80,7 @@ private slots:
     void goalSeekDialog();    // dò mục tiêu: đổi ô nhập để ô công thức đạt giá trị (Spec 28)
     void quickPivot();        // bảng tổng hợp nhanh (pivot, Spec 18)
     void applyCellStyle(const QString &name); // áp kiểu ô dựng sẵn cho vùng chọn (Spec 30)
+    void changeDecimals(int delta);           // tăng/giảm chữ số thập phân vùng chọn (Spec 08)
     void formatAsTable();     // định dạng vùng chọn thành bảng sọc xen kẽ (Spec 16)
     void addTableTotalRow();  // thêm hàng tổng (SUM theo cột) dưới bảng hiện hành (Spec 16)
     void saveSheetView();     // lưu khung xem hiện tại (trạng thái lọc) (Spec 56)

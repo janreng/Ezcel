@@ -9,4 +9,8 @@ namespace numfmt {
 
 QString apply(const QVariant &value, const QString &code);
 
+// Tăng/giảm số chữ số thập phân của mã định dạng (delta = +1/-1). Giữ tiền tố
+// (vd "$#,##0", "#,##0") và hậu tố "%"; rỗng coi như "0". Kẹp 0..10 chữ số. Thuần.
+QString adjustDecimals(const QString &code, int delta);
+
 } // namespace numfmt

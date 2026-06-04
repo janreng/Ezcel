@@ -6,6 +6,21 @@
 
 namespace numfmt {
 
+QString adjustDecimals(const QString &codeIn, int delta) {
+    QString code = codeIn.isEmpty() ? QStringLiteral("0") : codeIn;
+    QString suffix;
+    if (code.endsWith(QLatin1Char('%'))) { suffix = QStringLiteral("%"); code.chop(1); }
+    const int dot = code.indexOf(QLatin1Char('.'));
+    const QString intPart = dot < 0 ? code : code.left(dot);
+    const int curDecimals = dot < 0 ? 0 : code.size() - dot - 1;
+    int n = curDecimals + delta;
+    if (n < 0) n = 0;
+    if (n > 10) n = 10;
+    QString out = intPart;
+    if (n > 0) out += QLatin1Char('.') + QString(n, QLatin1Char('0'));
+    return out + suffix;
+}
+
 static const QHash<QString, QString> &dateCodes() {
     static const QHash<QString, QString> m = {
         {"dd/mm/yyyy", "dd/MM/yyyy"}, {"mm/dd/yyyy", "MM/dd/yyyy"},
