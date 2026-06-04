@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v1.68.0 — Thêm chèn hàng bên dưới & cột bên phải (Spec 09)
+
+- **Thêm "Chèn hàng bên dưới"** và **"Chèn cột bên phải"** trong menu Cấu trúc và menu chuột phải.
+- Đổi tên cho rõ nghĩa: chèn cột nay ghi **"bên trái" / "bên phải"** (thay cho "phía trước / phía sau"), chèn hàng ghi **"bên trên" / "bên dưới"**.
+
 ## v1.67.0 — Gợi ý tham số của hàm khi nhập công thức (Spec 12)
 
 - **Khi gõ tên hàm và mở ngoặc** (ví dụ `=VLOOKUP(`), ứng dụng hiện **gợi ý các tham số cần điền** ngay bên dưới, như ở bảng tính chuyên nghiệp.

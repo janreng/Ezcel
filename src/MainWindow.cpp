@@ -321,8 +321,14 @@ void MainWindow::buildContextMenus()
         menu.addAction(i18n::tr("st_ins_row"), this, [this] {
             int t, l, b, r; if (selectionBox(t, l, b, r)) m_model->insertRows(t, b - t + 1);
         });
+        menu.addAction(i18n::tr("st_ins_row_below"), this, [this] {
+            int t, l, b, r; if (selectionBox(t, l, b, r)) m_model->insertRows(b + 1, b - t + 1);
+        });
         menu.addAction(i18n::tr("st_ins_col"), this, [this] {
             int t, l, b, r; if (selectionBox(t, l, b, r)) m_model->insertColumns(l, r - l + 1);
+        });
+        menu.addAction(i18n::tr("st_ins_col_right"), this, [this] {
+            int t, l, b, r; if (selectionBox(t, l, b, r)) m_model->insertColumns(r + 1, r - l + 1);
         });
         menu.addAction(i18n::tr("st_del_row"), this, [this] {
             int t, l, b, r; if (selectionBox(t, l, b, r)) m_model->removeRows(t, b - t + 1);
@@ -357,6 +363,7 @@ void MainWindow::buildContextMenus()
         if (!selectionBox(t, l, b, r) || sec < t || sec > b) { t = b = sec; }
         QMenu menu(this);
         menu.addAction(i18n::tr("hdr_insert_row"), this, [this, t, b] { m_model->insertRows(t, b - t + 1); });
+        menu.addAction(i18n::tr("hdr_insert_row_below"), this, [this, t, b] { m_model->insertRows(b + 1, b - t + 1); });
         menu.addAction(i18n::tr("hdr_delete_row"), this, [this, t, b] { m_model->removeRows(t, b - t + 1); });
         menu.addAction(i18n::tr("ctx_clear"), this, &MainWindow::clearSelection);
         menu.addSeparator();
@@ -389,6 +396,7 @@ void MainWindow::buildContextMenus()
         if (!selectionBox(t, l, b, r) || sec < l || sec > r) { l = r = sec; }
         QMenu menu(this);
         menu.addAction(i18n::tr("hdr_insert_col"), this, [this, l, r] { m_model->insertColumns(l, r - l + 1); });
+        menu.addAction(i18n::tr("hdr_insert_col_right"), this, [this, l, r] { m_model->insertColumns(r + 1, r - l + 1); });
         menu.addAction(i18n::tr("hdr_delete_col"), this, [this, l, r] { m_model->removeColumns(l, r - l + 1); });
         menu.addAction(i18n::tr("ctx_clear"), this, &MainWindow::clearSelection);
         menu.addSeparator();
@@ -757,8 +765,14 @@ void MainWindow::buildMenus()
     st->addAction(i18n::tr("st_ins_row"), this, [this] {
         int t, l, b, r; if (selectionBox(t, l, b, r)) m_model->insertRows(t, b - t + 1);
     });
+    st->addAction(i18n::tr("st_ins_row_below"), this, [this] {
+        int t, l, b, r; if (selectionBox(t, l, b, r)) m_model->insertRows(b + 1, b - t + 1);
+    });
     st->addAction(i18n::tr("st_ins_col"), this, [this] {
         int t, l, b, r; if (selectionBox(t, l, b, r)) m_model->insertColumns(l, r - l + 1);
+    });
+    st->addAction(i18n::tr("st_ins_col_right"), this, [this] {
+        int t, l, b, r; if (selectionBox(t, l, b, r)) m_model->insertColumns(r + 1, r - l + 1);
     });
     st->addSeparator();
     st->addAction(i18n::tr("st_del_row"), this, [this] {
