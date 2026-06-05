@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v2.24.0 — Kéo chọn cả vùng khi nhập công thức (Spec 12)
+
+- Trong lúc nhập công thức, **kéo chuột để chọn cả một vùng** (ví dụ `A1:B3`) và chèn thẳng vào công thức — không cần gõ tay.
+- Vùng đang kéo cập nhật **viền nét đứt** và địa chỉ trong công thức theo thời gian thực.
+
 ## v2.23.0 — Chọn ô khi nhập công thức (Spec 12)
 
 - Khi đang gõ công thức (bắt đầu bằng `=`) ở **thanh công thức** hoặc **trong ô**, **bấm vào ô khác để chèn địa chỉ ô** đó vào công thức (point mode) — giống Excel.

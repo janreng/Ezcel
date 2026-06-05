@@ -191,6 +191,12 @@ private:
     QWidget *m_fillHandle = nullptr;
     bool m_filling = false;
     int m_fillT = 0, m_fillL = 0, m_fillB = 0, m_fillR = 0; // vùng nguồn khi bắt đầu kéo
+
+    // Point mode kéo chọn vùng: chèn/thay tham chiếu "A1:B3" theo ô bắt đầu -> ô thả (Spec 12).
+    bool m_ptDragging = false;
+    int m_ptAnchorRow = 0, m_ptAnchorCol = 0;  // ô bắt đầu kéo
+    int m_ptInsertStart = 0, m_ptInsertLen = 0; // đoạn ref đã chèn trong editor (để thay khi kéo)
+    QLineEdit *m_ptTarget = nullptr;            // thanh công thức hoặc editor ô đang nhập
     void positionFillHandle();       // đặt lại vị trí nút theo vùng chọn
     void doFillDrag(const QPoint &releaseViewportPos); // thực hiện điền khi thả chuột
 

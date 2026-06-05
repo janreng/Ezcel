@@ -3406,34 +3406,58 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *ev)
             return true; // nuốt sự kiện, không cuộn
         }
     }
-    // "Point mode" (Spec 12): đang sửa CÔNG THỨC trong ô mà bấm vào ô khác -> chèn địa chỉ ô
-    // đó vào công thức tại con trỏ (không commit/di chuyển). Giống Excel/Sheets.
-    if (obj == m_view->viewport() && ev->type() == QEvent::MouseButtonPress && m_cellDelegate) {
-        if (auto *le = qobject_cast<QLineEdit *>(m_cellDelegate->activeEditor())) {
-            if (le->text().startsWith(QLatin1Char('='))) {
-                auto *me = static_cast<QMouseEvent *>(ev);
+    // "Point mode" (Spec 12): đang nhập CÔNG THỨC ("=...") mà bấm/KÉO trên lưới -> chèn/thay
+    // tham chiếu ô đơn "A1" hoặc cả vùng "A1:B3" (ô bắt đầu -> ô thả). Giống Excel/Sheets.
+    if (obj == m_view->viewport()
+        && (ev->type() == QEvent::MouseButtonPress || ev->type() == QEvent::MouseMove
+            || ev->type() == QEvent::MouseButtonRelease)) {
+        auto formulaTarget = [this]() -> QLineEdit * {
+            if (m_cellDelegate)
+                if (auto *le = qobject_cast<QLineEdit *>(m_cellDelegate->activeEditor()))
+                    if (le->text().startsWith(QLatin1Char('='))) return le;
+            if (m_formulaBar && m_formulaBar->hasFocus()
+                && m_formulaBar->text().startsWith(QLatin1Char('='))) return m_formulaBar;
+            return nullptr;
+        };
+        auto *me = static_cast<QMouseEvent *>(ev);
+        if (ev->type() == QEvent::MouseButtonPress) {
+            if (QLineEdit *le = formulaTarget()) {
                 const QModelIndex idx = m_view->indexAt(me->pos());
-                if (idx.isValid() && idx != m_view->currentIndex()) {
-                    le->insert(SpreadsheetModel::columnLabel(idx.column()) + QString::number(idx.row() + 1));
+                if (idx.isValid()) {
+                    m_ptTarget = le;
+                    m_ptAnchorRow = idx.row(); m_ptAnchorCol = idx.column();
+                    m_ptDragging = true;
+                    const QString ref = SpreadsheetModel::columnLabel(idx.column())
+                                        + QString::number(idx.row() + 1);
+                    m_ptInsertStart = le->cursorPosition();
+                    le->insert(ref);
+                    m_ptInsertLen = ref.size();
                     le->setFocus();
-                    updateFormulaRefHighlight(le->text()); // tô lại viền nét đứt
-                    return true; // giữ editor mở, không chọn ô khác
+                    updateFormulaRefHighlight(le->text());
+                    return true;
                 }
             }
-        }
-    }
-    // Point mode từ THANH CÔNG THỨC: đang gõ "=..." mà bấm ô trên lưới -> chèn địa chỉ ô đó.
-    if (obj == m_view->viewport() && ev->type() == QEvent::MouseButtonPress
-        && m_formulaBar && m_formulaBar->hasFocus()
-        && m_formulaBar->text().startsWith(QLatin1Char('='))) {
-        auto *me = static_cast<QMouseEvent *>(ev);
-        const QModelIndex idx = m_view->indexAt(me->pos());
-        if (idx.isValid()) {
-            m_formulaBar->insert(SpreadsheetModel::columnLabel(idx.column())
-                                 + QString::number(idx.row() + 1));
-            m_formulaBar->setFocus();
-            updateFormulaRefHighlight(m_formulaBar->text());
-            return true; // không di chuyển ô, giữ con trỏ trong công thức
+        } else if (ev->type() == QEvent::MouseMove && m_ptDragging && m_ptTarget) {
+            const QModelIndex idx = m_view->indexAt(me->pos());
+            if (idx.isValid()) {
+                const int r1 = qMin(m_ptAnchorRow, idx.row()), r2 = qMax(m_ptAnchorRow, idx.row());
+                const int c1 = qMin(m_ptAnchorCol, idx.column()), c2 = qMax(m_ptAnchorCol, idx.column());
+                QString ref = SpreadsheetModel::columnLabel(c1) + QString::number(r1 + 1);
+                if (r1 != r2 || c1 != c2)
+                    ref += QLatin1Char(':') + SpreadsheetModel::columnLabel(c2) + QString::number(r2 + 1);
+                QString t = m_ptTarget->text();
+                t.replace(m_ptInsertStart, m_ptInsertLen, ref);
+                m_ptInsertLen = ref.size();
+                m_ptTarget->setText(t);
+                m_ptTarget->setCursorPosition(m_ptInsertStart + m_ptInsertLen);
+                m_ptTarget->setFocus();
+                updateFormulaRefHighlight(t);
+            }
+            return true;
+        } else if (ev->type() == QEvent::MouseButtonRelease && m_ptDragging) {
+            m_ptDragging = false;
+            if (m_ptTarget) m_ptTarget->setFocus();
+            return true;
         }
     }
     // Hộp kiểm (Spec 37): bấm vào ô vuông trong ô TRUE/FALSE -> đảo giá trị.
