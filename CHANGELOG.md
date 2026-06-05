@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v2.28.0 — Lấy & Biến đổi dữ liệu (CSV) (Spec 20)
+
+- Thẻ Dữ liệu thêm **Lấy & Biến đổi (CSV)**: chọn tệp CSV → **xem trước** → **chọn cột muốn giữ** và **bỏ dòng trống** → **Nạp** vào bảng từ ô đang chọn.
+
 ## v2.27.0 — Thêm thẻ Bố cục trang & Xem lại
 
 - Thêm 2 thẻ trên dải lệnh cho giống bố cục quen thuộc: **Bố cục trang** (In, cố định hàng/cột, ẩn/hiện đường lưới) và **Xem lại** (kiểm tra trợ năng, phân tích nhanh, tìm & thay thế, chụp vùng chọn).

@@ -34,6 +34,7 @@
 #include "model/Chart.h"
 #include "model/Pivot.h"
 #include "model/FormulaRefs.h"
+#include "model/DataQuery.h"
 #include "view/ChartWidget.h"
 #include <QPlainTextEdit>
 #include "ui/RecentFiles.h"
@@ -1891,6 +1892,85 @@ void MainWindow::printSheet()
     statusBar()->showMessage(QStringLiteral("Đã gửi bản in"), 2500);
 }
 
+// Lấy & Biến đổi dữ liệu (Get & Transform / Power Query, Spec 20): nhập CSV, chọn cột giữ,
+// bỏ dòng trống rồi nạp vào bảng từ ô hiện hành. Lõi biến đổi ở model/DataQuery.h (đã test).
+void MainWindow::dataQueryImport()
+{
+    const QString path = QFileDialog::getOpenFileName(this,
+        QStringLiteral("Lấy dữ liệu từ tệp CSV"), QString(), QStringLiteral("Tệp CSV (*.csv *.txt)"));
+    if (path.isEmpty()) return;
+    bool ok = false;
+    const dquery::Grid g = csvio::loadCsv(path, &ok);
+    if (!ok || g.isEmpty()) {
+        statusBar()->showMessage(QStringLiteral("Không đọc được tệp CSV"), 3000);
+        return;
+    }
+    const int nCols = g[0].size();
+
+    QDialog dlg(this);
+    dlg.setWindowTitle(QStringLiteral("Lấy & Biến đổi dữ liệu"));
+    dlg.resize(640, 460);
+    auto *lay = new QVBoxLayout(&dlg);
+
+    lay->addWidget(new QLabel(QStringLiteral("Chọn cột muốn giữ:"), &dlg));
+    auto *colsBox = new QWidget(&dlg);
+    auto *colsLay = new QHBoxLayout(colsBox);
+    colsLay->setContentsMargins(0, 0, 0, 0);
+    QVector<QCheckBox *> colChecks;
+    for (int c = 0; c < nCols; ++c) {
+        const QString head = g[0].value(c).trimmed();
+        auto *cb = new QCheckBox(head.isEmpty() ? QStringLiteral("Cột %1").arg(c + 1) : head, colsBox);
+        cb->setChecked(true);
+        colChecks << cb;
+        colsLay->addWidget(cb);
+    }
+    colsLay->addStretch();
+    lay->addWidget(colsBox);
+
+    auto *dropEmpty = new QCheckBox(QStringLiteral("Bỏ các dòng trống"), &dlg);
+    dropEmpty->setChecked(true);
+    lay->addWidget(dropEmpty);
+
+    lay->addWidget(new QLabel(QStringLiteral("Xem trước:"), &dlg));
+    auto *preview = new QTableWidget(&dlg);
+    preview->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    const int pvRows = qMin(g.size(), 100);
+    preview->setRowCount(pvRows);
+    preview->setColumnCount(nCols);
+    for (int r = 0; r < pvRows; ++r)
+        for (int c = 0; c < nCols; ++c)
+            preview->setItem(r, c, new QTableWidgetItem(g[r].value(c)));
+    lay->addWidget(preview, 1);
+
+    auto *box = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dlg);
+    box->button(QDialogButtonBox::Ok)->setText(QStringLiteral("Nạp"));
+    box->button(QDialogButtonBox::Cancel)->setText(QStringLiteral("Hủy"));
+    connect(box, &QDialogButtonBox::accepted, &dlg, &QDialog::accept);
+    connect(box, &QDialogButtonBox::rejected, &dlg, &QDialog::reject);
+    lay->addWidget(box);
+    if (dlg.exec() != QDialog::Accepted) return;
+
+    QVector<int> keep;
+    for (int c = 0; c < colChecks.size(); ++c)
+        if (colChecks[c]->isChecked()) keep << c;
+    if (keep.isEmpty()) { statusBar()->showMessage(QStringLiteral("Chưa chọn cột nào để giữ"), 3000); return; }
+
+    const dquery::Grid out = dquery::apply(g, keep, dropEmpty->isChecked());
+    if (out.isEmpty()) return;
+
+    // Nạp vào bảng bắt đầu từ ô hiện hành.
+    const QModelIndex cur = m_view->currentIndex();
+    const int sr = cur.isValid() ? cur.row() : 0, sc = cur.isValid() ? cur.column() : 0;
+    int outCols = 0; for (const auto &row : out) outCols = qMax(outCols, row.size());
+    const int needRows = sr + out.size(), needCols = sc + outCols;
+    if (needRows > m_model->rowCount() || needCols > m_model->columnCount())
+        m_model->resizeGrid(qMax(needRows, m_model->rowCount()), qMax(needCols, m_model->columnCount()));
+    for (int r = 0; r < out.size(); ++r)
+        for (int c = 0; c < out[r].size(); ++c)
+            m_model->setData(m_model->index(sr + r, sc + c), out[r][c], Qt::EditRole);
+    statusBar()->showMessage(QStringLiteral("Đã nạp %1 dòng × %2 cột").arg(out.size()).arg(outCols), 3500);
+}
+
 // ---------------------------------------------------------------- dải lệnh (Ribbon)
 // Giao diện kiểu Excel: tab Trang đầu / Chèn / Công thức / Dữ liệu / Xem; mỗi tab
 // gom lệnh thành nhóm có tiêu đề. Thay cho dãy thanh công cụ phẳng cũ.
@@ -2059,6 +2139,8 @@ void MainWindow::buildRibbon()
 
     // ============================= DỮ LIỆU =============================
     m_ribbon->beginTab(QStringLiteral("Dữ liệu"));
+    m_ribbon->beginGroup(QStringLiteral("Lấy dữ liệu"));
+    m_ribbon->addButton(QStringLiteral("database"), QStringLiteral("Lấy & Biến\nđổi (CSV)"), [this] { dataQueryImport(); });
     m_ribbon->beginGroup(QStringLiteral("Sắp xếp & Lọc"));
     m_ribbon->addSmallButton(QStringLiteral("sort_asc"), QStringLiteral("Sắp xếp tăng"), [this] { sortSelection(true); });
     m_ribbon->addSmallButton(QStringLiteral("sort_desc"), QStringLiteral("Sắp xếp giảm"), [this] { sortSelection(false); });
