@@ -27,6 +27,8 @@
 #include "ui/Theme.h"
 #include "model/CellStyles.h"
 #include "model/NumberFormat.h"
+#include "ui/TellMe.h"
+#include <functional>
 #include "model/Stats.h"
 #include "model/AutoSum.h"
 #include "ui/Shortcuts.h"
@@ -206,6 +208,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     buildMenus();
     buildRibbon();
+    buildTellMe();     // ô tìm lệnh "Bạn muốn làm gì?" ở góc dải lệnh (Spec 55)
     menuBar()->hide(); // dọn thanh menu cổ điển — mọi lệnh đã có trên ribbon (phím tắt vẫn chạy)
     m_modeLabel = new QLabel(this);
     m_modeLabel->setMinimumWidth(70);
@@ -1029,6 +1032,70 @@ void MainWindow::buildMenus()
     });
 
     refreshRibbonDropdowns(); // gắn lại menu cho nút thả trên ribbon (kể cả khi đổi ngôn ngữ)
+}
+
+// ---------------------------------------------------------------- "Bạn muốn làm gì?" (Spec 55)
+void MainWindow::buildTellMe()
+{
+    auto *le = new QLineEdit(m_ribbon);
+    le->setPlaceholderText(QStringLiteral("Bạn muốn làm gì?"));
+    le->setClearButtonEnabled(true);
+    le->setFixedWidth(190);
+    m_ribbon->setCornerWidget(le, Qt::TopRightCorner);
+
+    auto *popup = new QListWidget(le);
+    popup->setWindowFlags(Qt::Popup);
+    popup->setFocusPolicy(Qt::NoFocus);
+    popup->setMaximumHeight(260);
+
+    // Gom toàn bộ lệnh (QAction) từ các menu cấp 1, đệ quy submenu. Gom mỗi lần gõ
+    // vì menu được dựng lại khi đổi ngôn ngữ.
+    auto collect = [this]() {
+        QHash<QString, QAction *> map;
+        QStringList names;
+        std::function<void(QMenu *)> walk = [&](QMenu *m) {
+            if (!m) return;
+            for (QAction *a : m->actions()) {
+                if (a->isSeparator()) continue;
+                if (a->menu()) { walk(a->menu()); continue; }
+                const QString t = a->text().remove(QLatin1Char('&')).trimmed();
+                if (t.isEmpty() || map.contains(t)) continue;
+                map.insert(t, a);
+                names << t;
+            }
+        };
+        for (QMenu *m : {m_mFile, m_mEdit, m_mStruct, m_mData, m_mView, m_mSettings, m_mHelp}) walk(m);
+        return std::make_pair(names, map);
+    };
+
+    auto *mapHolder = new QHash<QString, QAction *>(); // map hiện hành theo kết quả lọc
+
+    auto runItem = [this, le, popup, mapHolder](QListWidgetItem *it) {
+        if (!it) return;
+        QAction *a = mapHolder->value(it->text());
+        popup->hide();
+        le->clear();
+        if (a) a->trigger();
+        m_view->setFocus();
+    };
+
+    connect(le, &QLineEdit::textChanged, this, [le, popup, collect, mapHolder](const QString &q) {
+        if (q.trimmed().isEmpty()) { popup->hide(); return; }
+        auto pr = collect();
+        *mapHolder = pr.second;
+        const QStringList matched = tellme::rank(q.trimmed(), pr.first);
+        popup->clear();
+        for (const QString &nm : matched) popup->addItem(nm);
+        if (matched.isEmpty()) { popup->hide(); return; }
+        popup->move(le->mapToGlobal(QPoint(0, le->height())));
+        popup->setFixedWidth(le->width());
+        popup->setCurrentRow(0);
+        popup->show();
+    });
+    connect(popup, &QListWidget::itemClicked, this, [runItem](QListWidgetItem *it) { runItem(it); });
+    connect(le, &QLineEdit::returnPressed, this, [popup, runItem] {
+        if (popup->count() > 0) runItem(popup->currentItem() ? popup->currentItem() : popup->item(0));
+    });
 }
 
 // Gắn QMenu cấp 1 mới dựng vào các nút thả menu trên ribbon. Gọi cuối buildMenus;

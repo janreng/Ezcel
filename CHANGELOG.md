@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v2.7.0 — Ô "Bạn muốn làm gì?" tìm nhanh lệnh (Spec 55)
+
+- Thêm ô **"Bạn muốn làm gì?"** ở góc phải dải lệnh: gõ từ khóa là hiện danh sách lệnh khớp, bấm (hoặc Enter) để **chạy lệnh ngay** — khỏi đi tìm trong các thẻ.
+- Tìm thông minh: gõ thiếu/không liền chữ vẫn ra (ví dụ gõ "sxt" ra "Sắp xếp tăng").
+
 ## v2.6.0 — Tăng / giảm chữ số thập phân (Spec 08)
 
 - Nhóm **Số** thêm 2 nút **Tăng thập phân** / **Giảm thập phân** — chỉnh nhanh số chữ số sau dấu phẩy cho vùng đang chọn, giữ nguyên kiểu tiền tệ/phần trăm/phân cách nghìn.

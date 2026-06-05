@@ -121,6 +121,7 @@ private:
     void buildContextMenus();    // menu chuột phải ô + đầu hàng/cột (Spec 06)
     void buildRibbon();          // dải lệnh kiểu Excel (Trang đầu/Chèn/Công thức/Dữ liệu/Xem)
     void refreshRibbonDropdowns(); // gắn lại QMenu cho các nút thả menu trên ribbon (sau khi dựng/đổi ngôn ngữ)
+    void buildTellMe();          // ô "Bạn muốn làm gì?" tìm & chạy lệnh (Spec 55)
     void buildFormulaBar();
     void updateTitle();
     void applyZoom();                          // áp mức thu phóng hiện tại
