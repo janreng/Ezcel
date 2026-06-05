@@ -1870,6 +1870,17 @@ void MainWindow::buildRibbon()
     m_ribbon->addSmallButton(QStringLiteral("underline"), QStringLiteral("Gạch chân"), [this] { toggleFormatAttr(QStringLiteral("underline")); });
     m_ribbon->addSmallButton(QStringLiteral("font_color"), QStringLiteral("Màu chữ"), [this] { pickColor(QStringLiteral("color")); });
     m_ribbon->addSmallButton(QStringLiteral("fill_color"), QStringLiteral("Màu nền"), [this] { pickColor(QStringLiteral("bg")); });
+    auto *borderMenu = new QMenu(this);
+    borderMenu->addAction(QStringLiteral("Viền tất cả"), this, [this] { applyBorder(QStringLiteral("all")); });
+    borderMenu->addAction(QStringLiteral("Viền ngoài"), this, [this] { applyBorder(QStringLiteral("outline")); });
+    borderMenu->addSeparator();
+    borderMenu->addAction(QStringLiteral("Viền trên"), this, [this] { applyBorder(QStringLiteral("top")); });
+    borderMenu->addAction(QStringLiteral("Viền dưới"), this, [this] { applyBorder(QStringLiteral("bottom")); });
+    borderMenu->addAction(QStringLiteral("Viền trái"), this, [this] { applyBorder(QStringLiteral("left")); });
+    borderMenu->addAction(QStringLiteral("Viền phải"), this, [this] { applyBorder(QStringLiteral("right")); });
+    borderMenu->addSeparator();
+    borderMenu->addAction(QStringLiteral("Bỏ viền"), this, [this] { applyBorder(QStringLiteral("none")); });
+    m_ribbon->addMenuButton(QStringLiteral("borders"), QStringLiteral("Viền"), borderMenu);
 
     m_ribbon->beginGroup(QStringLiteral("Căn lề"));
     m_ribbon->addSmallButton(QStringLiteral("valign_top"), QStringLiteral("Căn trên"), [this] { applyFormatAttr(QStringLiteral("valign"), QStringLiteral("top")); });

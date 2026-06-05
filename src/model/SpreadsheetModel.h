@@ -63,6 +63,10 @@ public:
     // Role: true nếu ô bật "tự xuống dòng" (wrap) -> delegate vẽ chữ nhiều dòng (Spec 07).
     static constexpr int WrapRole = Qt::UserRole + 6;
 
+    // Role viền ô: trả bitmask cạnh viền của ô — 1=trên,2=trái,4=dưới,8=phải (Spec 06).
+    // Delegate vẽ nét liền theo các cạnh có trong bitmask. 0 = không viền.
+    static constexpr int BorderRole = Qt::UserRole + 7;
+
     explicit SpreadsheetModel(QObject *parent = nullptr);
 
     // QAbstractTableModel

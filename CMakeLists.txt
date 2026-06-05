@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
-project(Ezcel VERSION 2.20.0 LANGUAGES CXX)
+project(Ezcel VERSION 2.21.0 LANGUAGES CXX)
 
 # Bản port C++ của Ezcel (gốc Python/PySide6). Dùng Qt6 Widgets + MinGW.
 set(CMAKE_CXX_STANDARD 20)
@@ -205,6 +205,14 @@ add_executable(test_pivot tests/test_pivot.cpp)
 target_include_directories(test_pivot PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(test_pivot PRIVATE Qt6::Core)
 
+add_executable(test_dataquery tests/test_dataquery.cpp)
+target_include_directories(test_dataquery PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_link_libraries(test_dataquery PRIVATE Qt6::Core)
+
+add_executable(test_borderops tests/test_borderops.cpp)
+target_include_directories(test_borderops PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_link_libraries(test_borderops PRIVATE Qt6::Core)
+
 add_executable(test_formcontrol tests/test_formcontrol.cpp)
 target_include_directories(test_formcontrol PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(test_formcontrol PRIVATE Qt6::Core)
@@ -284,6 +292,8 @@ add_test(NAME tellme COMMAND test_tellme)
 add_test(NAME accessibility COMMAND test_accessibility)
 add_test(NAME quickanalysis COMMAND test_quickanalysis)
 add_test(NAME pivot COMMAND test_pivot)
+add_test(NAME dataquery COMMAND test_dataquery)
+add_test(NAME borderops COMMAND test_borderops)
 add_test(NAME formcontrol COMMAND test_formcontrol)
 add_test(NAME recentfiles COMMAND test_recentfiles)
 add_test(NAME chart COMMAND test_chart)

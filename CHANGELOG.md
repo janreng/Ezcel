@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v2.21.0 — Kẻ viền ô (Spec 06)
+
+- Thêm nút **Viền** ở thẻ Trang đầu: **Viền tất cả**, **Viền ngoài**, viền **trên/dưới/trái/phải**, và **Bỏ viền**.
+- Viền hiển thị ngay trên lưới và được lưu theo từng ô.
+
 ## v2.20.0 — Bảng tổng hợp: lọc nhãn (Spec 41)
 
 - Thêm ô **Lọc nhãn hàng**: gõ từ khóa để chỉ hiện các nhóm có nhãn chứa từ khóa đó (không phân biệt hoa thường).

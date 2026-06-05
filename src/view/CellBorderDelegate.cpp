@@ -198,6 +198,21 @@ void CellBorderDelegate::paint(QPainter *painter, const QStyleOptionViewItem &op
         painter->restore();
     }
 
+    // Viền ô do người dùng kẻ (Spec 06) — nét liền theo bitmask: 1=trên,2=trái,4=dưới,8=phải.
+    const int cellBorder = index.data(SpreadsheetModel::BorderRole).toInt();
+    if (cellBorder) {
+        painter->save();
+        QPen bp(QColor("#3C3C3C"));
+        bp.setWidth(1);
+        painter->setPen(bp);
+        const QRect rc = option.rect.adjusted(0, 0, -1, -1);
+        if (cellBorder & 1) painter->drawLine(rc.topLeft(), rc.topRight());       // trên
+        if (cellBorder & 2) painter->drawLine(rc.topLeft(), rc.bottomLeft());     // trái
+        if (cellBorder & 4) painter->drawLine(rc.bottomLeft(), rc.bottomRight()); // dưới
+        if (cellBorder & 8) painter->drawLine(rc.topRight(), rc.bottomRight());   // phải
+        painter->restore();
+    }
+
     // Nút lọc ▼ ở mép phải ô tiêu đề bảng (chữ trắng trên nền đậm -> dùng mũi tên trắng).
     if (index.data(SpreadsheetModel::TableHeaderRole).toBool()) {
         painter->save();
