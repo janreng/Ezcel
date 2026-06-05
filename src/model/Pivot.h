@@ -55,12 +55,20 @@ inline double bucketValue(const Bucket &g, Agg a) {
     return 0.0;
 }
 
+// Nhãn có khớp từ khóa lọc không (từ khóa rỗng -> luôn khớp; không phân biệt hoa thường).
+inline bool matchesFilter(const QString &label, const QString &keyword)
+{
+    return keyword.isEmpty() || label.contains(keyword.trimmed(), Qt::CaseInsensitive);
+}
+
 // Gom nhóm vùng [t..b]×[l..r] của grid: HÀNG ĐẦU là tiêu đề.
 // rowCol = cột nhãn (gom nhóm), valCol = cột giá trị. Cả hai theo chỉ số cột tuyệt đối.
 // Nhãn rỗng -> "(trống)". Ô không phải số bị bỏ qua khi tính Tổng/TB/Max/Min (vẫn đếm cho Đếm).
 // Nhãn được sắp xếp tăng dần (số thì theo số, còn lại theo chuỗi).
+// rowFilter: chỉ giữ nhãn hàng chứa chuỗi này (rỗng = giữ hết). Tổng cộng tính theo nhãn còn lại.
 inline Result aggregate(const QVector<QVector<QString>> &grid,
-                        int t, int l, int b, int r, int rowCol, int valCol, Agg agg)
+                        int t, int l, int b, int r, int rowCol, int valCol, Agg agg,
+                        const QString &rowFilter = QString())
 {
     Result res;
     res.agg = agg;
@@ -82,6 +90,7 @@ inline Result aggregate(const QVector<QVector<QString>> &grid,
     for (int row = t + 1; row <= b && row < grid.size(); ++row) {
         QString key = cell(row, rowCol);
         if (key.isEmpty()) key = QStringLiteral("(trống)");
+        if (!matchesFilter(key, rowFilter)) continue;
         if (!acc.contains(key)) { order << key; }
         bool ok = false;
         const double v = cell(row, valCol).toDouble(&ok);
@@ -162,7 +171,8 @@ struct CrossResult {
 // bucket của cả hàng/cả cột (đúng ngữ nghĩa TB/Max/Min, không phải cộng dồn các ô).
 inline CrossResult crosstab(const QVector<QVector<QString>> &grid,
                             int t, int l, int b, int r,
-                            int rowCol, int colCol, int valCol, Agg agg)
+                            int rowCol, int colCol, int valCol, Agg agg,
+                            const QString &rowFilter = QString())
 {
     CrossResult res;
     res.agg = agg;
@@ -184,6 +194,7 @@ inline CrossResult crosstab(const QVector<QVector<QString>> &grid,
     QStringList rowOrder, colOrder;
     for (int row = t + 1; row <= b && row < grid.size(); ++row) {
         QString rk = cell(row, rowCol); if (rk.isEmpty()) rk = QStringLiteral("(trống)");
+        if (!matchesFilter(rk, rowFilter)) continue;
         QString ck = cell(row, colCol); if (ck.isEmpty()) ck = QStringLiteral("(trống)");
         if (!rowB.contains(rk)) rowOrder << rk;
         if (!colB.contains(ck)) colOrder << ck;

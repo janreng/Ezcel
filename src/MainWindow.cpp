@@ -1338,6 +1338,10 @@ void MainWindow::pivotTable()
     pick->addWidget(cbVal, 2, 1);
     pick->addWidget(new QLabel(QStringLiteral("Hàm tổng hợp:")), 3, 0);
     pick->addWidget(cbAgg, 3, 1);
+    auto *edFilter = new QLineEdit(&dlg);
+    edFilter->setPlaceholderText(QStringLiteral("Để trống = hiện tất cả"));
+    pick->addWidget(new QLabel(QStringLiteral("Lọc nhãn hàng (chứa):")), 4, 0);
+    pick->addWidget(edFilter, 4, 1);
     lay->addLayout(pick);
 
     auto *table = new QTableWidget(&dlg);
@@ -1357,9 +1361,10 @@ void MainWindow::pivotTable()
         const int colCol = cbCol->currentData().toInt();
         const int valCol = cbVal->currentData().toInt();
         const auto agg = pivot::Agg(cbAgg->currentData().toInt());
+        const QString flt = edFilter->text();
 
         if (colCol < 0) { // bảng 1 chiều
-            const pivot::Result res = pivot::aggregate(grid, t, l, b, r, rowCol, valCol, agg);
+            const pivot::Result res = pivot::aggregate(grid, t, l, b, r, rowCol, valCol, agg, flt);
             table->setColumnCount(2);
             table->setHorizontalHeaderLabels({ res.rowField.isEmpty() ? QStringLiteral("Nhãn") : res.rowField,
                                                QStringLiteral("%1 %2").arg(pivot::aggName(agg), res.valueField) });
@@ -1377,7 +1382,7 @@ void MainWindow::pivotTable()
         }
 
         // bảng chéo 2 chiều
-        const pivot::CrossResult cr = pivot::crosstab(grid, t, l, b, r, rowCol, colCol, valCol, agg);
+        const pivot::CrossResult cr = pivot::crosstab(grid, t, l, b, r, rowCol, colCol, valCol, agg, flt);
         if (!cr.valid) { table->setRowCount(0); table->setColumnCount(2); return; }
         const int nr = cr.rowLabels.size(), nc = cr.colLabels.size();
         table->setColumnCount(nc + 2); // nhãn hàng + các cột + Tổng hàng
@@ -1401,6 +1406,7 @@ void MainWindow::pivotTable()
     connect(cbCol, QOverload<int>::of(&QComboBox::currentIndexChanged), &dlg, [=](int){ recompute(); });
     connect(cbVal, QOverload<int>::of(&QComboBox::currentIndexChanged), &dlg, [=](int){ recompute(); });
     connect(cbAgg, QOverload<int>::of(&QComboBox::currentIndexChanged), &dlg, [=](int){ recompute(); });
+    connect(edFilter, &QLineEdit::textChanged, &dlg, [=](const QString&){ recompute(); });
     recompute();
 
     auto *box = new QDialogButtonBox(&dlg);

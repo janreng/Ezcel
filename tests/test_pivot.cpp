@@ -126,6 +126,21 @@ int main() {
     pivot::CrossResult crb = pivot::crosstab(gx, 0, 0, 4, 2, 9, 1, 2, pivot::Agg::Sum);
     ok(!crb.valid, "crosstab rowCol sai -> invalid");
 
+    // ----- Lọc nhãn hàng (bản 4) -----
+    ok(pivot::matchesFilter(QStringLiteral("Bắc"), QString()), "loc rong -> khop");
+    ok(pivot::matchesFilter(QStringLiteral("Bắc"), QStringLiteral("bắc")), "loc khong phan biet hoa thuong");
+    ok(!pivot::matchesFilter(QStringLiteral("Nam"), QStringLiteral("Bắc")), "khong chua -> khong khop");
+
+    // g: Bắc{130}, Nam{70}, Trung{10}; lọc "a" -> Nam(chứa a), Trung(chứa..) -> kiểm bằng cụ thể "Nam"
+    pivot::Result fr = pivot::aggregate(g, 0, 0, 5, 1, 0, 1, pivot::Agg::Sum, QStringLiteral("Nam"));
+    ok(fr.rowLabels.size() == 1 && fr.rowLabels[0] == QStringLiteral("Nam"), "loc chi con Nam");
+    ok(eq(fr.grandTotal, 70), "tong sau loc = 70 (chi Nam)");
+
+    // Crosstab lọc hàng "Bắc" -> chỉ 1 hàng
+    pivot::CrossResult fc = pivot::crosstab(gx, 0, 0, 4, 2, 0, 1, 2, pivot::Agg::Sum, QStringLiteral("Bắc"));
+    ok(fc.valid && fc.rowLabels.size() == 1, "crosstab loc con 1 hang Bac");
+    ok(eq(fc.grandTotal, 150), "crosstab loc grand = 150 (Bac)");
+
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);
     return g_fail == 0 ? 0 : 1;
 }

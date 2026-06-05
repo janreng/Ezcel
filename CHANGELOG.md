@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v2.20.0 — Bảng tổng hợp: lọc nhãn (Spec 41)
+
+- Thêm ô **Lọc nhãn hàng**: gõ từ khóa để chỉ hiện các nhóm có nhãn chứa từ khóa đó (không phân biệt hoa thường).
+- Các tổng (theo hàng, theo cột, tổng cộng) **tính lại** theo phần nhãn đang hiển thị. Để trống ô lọc là hiện tất cả.
+
 ## v2.19.0 — Bảng tổng hợp: bảng chéo 2 chiều (Spec 41)
 
 - Bảng tổng hợp giờ chọn thêm **trường cột** để tạo **bảng chéo** hai chiều (ví dụ hàng = Vùng, cột = Quý, ô = tổng doanh thu).
