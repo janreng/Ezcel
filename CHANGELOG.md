@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v2.18.0 — Bảng tổng hợp: thêm hàm tổng hợp (Spec 41)
+
+- Bảng tổng hợp giờ chọn được **hàm tổng hợp**: Tổng, **Đếm**, **Trung bình**, **Lớn nhất**, **Nhỏ nhất** (trước chỉ có Tổng).
+- Đếm tính cả ô chữ; Trung bình/Lớn nhất/Nhỏ nhất chỉ xét ô số. Kết quả và dòng Tổng cộng cập nhật ngay khi đổi hàm.
+
 ## v2.17.0 — Bảng tổng hợp (Spec 41)
 
 - **Chèn → "Bảng tổng hợp"** (hoặc menu Dữ liệu): chọn vùng có dòng tiêu đề → gom nhóm theo **một trường (hàng)** và tính **tổng** một trường số.

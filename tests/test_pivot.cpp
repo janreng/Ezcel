@@ -60,6 +60,36 @@ int main() {
     pivot::Result rb = pivot::sum(g, 0, 0, 5, 1, 5, 1);
     ok(!rb.valid, "rowCol ngoai vung -> invalid");
 
+    // ----- Các hàm tổng hợp (bản 2) -----
+    // Dùng lại g: Bắc{100,30}, Nam{50,20}, Trung{10}
+    pivot::Result ac = pivot::aggregate(g, 0, 0, 5, 1, 0, 1, pivot::Agg::Count);
+    ok(eq(ac.values[0], 2), "Dem Bac = 2");
+    ok(eq(ac.values[2], 1), "Dem Trung = 1");
+    ok(eq(ac.grandTotal, 5), "Dem tong = 5 ban ghi");
+
+    pivot::Result av = pivot::aggregate(g, 0, 0, 5, 1, 0, 1, pivot::Agg::Average);
+    ok(eq(av.values[0], 65), "TB Bac = 65");
+    ok(eq(av.values[1], 35), "TB Nam = 35");
+    ok(eq(av.grandTotal, 42), "TB tong = 210/5 = 42");
+
+    pivot::Result amax = pivot::aggregate(g, 0, 0, 5, 1, 0, 1, pivot::Agg::Max);
+    ok(eq(amax.values[0], 100), "Max Bac = 100");
+    ok(eq(amax.grandTotal, 100), "Max tong = 100");
+
+    pivot::Result amin = pivot::aggregate(g, 0, 0, 5, 1, 0, 1, pivot::Agg::Min);
+    ok(eq(amin.values[0], 30), "Min Bac = 30");
+    ok(eq(amin.values[1], 20), "Min Nam = 20");
+    ok(eq(amin.grandTotal, 10), "Min tong = 10");
+
+    // Đếm tính cả ô không phải số; TB/Max/Min bỏ qua ô không phải số.
+    // g2: x{abc, 5} -> Count=2, Average=5/1=5, Max=5, Min=5
+    pivot::Result c2 = pivot::aggregate(g2, 0, 0, 2, 1, 0, 1, pivot::Agg::Count);
+    ok(eq(c2.values[0], 2), "Dem ke ca abc = 2");
+    pivot::Result v2 = pivot::aggregate(g2, 0, 0, 2, 1, 0, 1, pivot::Agg::Average);
+    ok(eq(v2.values[0], 5), "TB bo qua abc = 5");
+
+    ok(pivot::aggName(pivot::Agg::Average) == QStringLiteral("Trung bình"), "ten ham TB");
+
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);
     return g_fail == 0 ? 0 : 1;
 }

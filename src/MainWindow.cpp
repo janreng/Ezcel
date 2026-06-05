@@ -1324,10 +1324,16 @@ void MainWindow::pivotTable()
     for (int c = l; c <= r; ++c) { cbRow->addItem(header(c), c); cbVal->addItem(header(c), c); }
     cbRow->setCurrentIndex(0);
     cbVal->setCurrentIndex(cbVal->count() > 1 ? 1 : 0);
+    auto *cbAgg = new QComboBox(&dlg);
+    for (pivot::Agg a : { pivot::Agg::Sum, pivot::Agg::Count, pivot::Agg::Average,
+                          pivot::Agg::Max, pivot::Agg::Min })
+        cbAgg->addItem(pivot::aggName(a), int(a));
     pick->addWidget(new QLabel(QStringLiteral("Trường hàng (gom nhóm):")), 0, 0);
     pick->addWidget(cbRow, 0, 1);
-    pick->addWidget(new QLabel(QStringLiteral("Trường giá trị (tính tổng):")), 1, 0);
+    pick->addWidget(new QLabel(QStringLiteral("Trường giá trị:")), 1, 0);
     pick->addWidget(cbVal, 1, 1);
+    pick->addWidget(new QLabel(QStringLiteral("Hàm tổng hợp:")), 2, 0);
+    pick->addWidget(cbAgg, 2, 1);
     lay->addLayout(pick);
 
     auto *table = new QTableWidget(&dlg);
@@ -1339,9 +1345,10 @@ void MainWindow::pivotTable()
     auto recompute = [=]() {
         const int rowCol = cbRow->currentData().toInt();
         const int valCol = cbVal->currentData().toInt();
-        const pivot::Result res = pivot::sum(grid, t, l, b, r, rowCol, valCol);
+        const auto agg = pivot::Agg(cbAgg->currentData().toInt());
+        const pivot::Result res = pivot::aggregate(grid, t, l, b, r, rowCol, valCol, agg);
         table->setHorizontalHeaderLabels({ res.rowField.isEmpty() ? QStringLiteral("Nhãn") : res.rowField,
-                                           QStringLiteral("Tổng %1").arg(res.valueField) });
+                                           QStringLiteral("%1 %2").arg(pivot::aggName(agg), res.valueField) });
         const int n = res.rowLabels.size();
         table->setRowCount(res.valid ? n + 1 : 0);
         for (int i = 0; i < n; ++i) {
@@ -1359,6 +1366,7 @@ void MainWindow::pivotTable()
     };
     connect(cbRow, QOverload<int>::of(&QComboBox::currentIndexChanged), &dlg, [=](int){ recompute(); });
     connect(cbVal, QOverload<int>::of(&QComboBox::currentIndexChanged), &dlg, [=](int){ recompute(); });
+    connect(cbAgg, QOverload<int>::of(&QComboBox::currentIndexChanged), &dlg, [=](int){ recompute(); });
     recompute();
 
     auto *box = new QDialogButtonBox(&dlg);
