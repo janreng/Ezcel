@@ -156,6 +156,8 @@ public:
                     int srcAnchorRow = -1, int srcAnchorCol = -1);
     void autofillVertical(int col, int srcTop, int srcBottom, int dstBottom);
     void autofillHorizontal(int row, int srcLeft, int srcRight, int dstRight);
+    void autofillVerticalUp(int col, int srcTop, int srcBottom, int dstTop);
+    void autofillHorizontalLeft(int row, int srcLeft, int srcRight, int dstLeft);
 
     // Định dạng có điều kiện: thêm quy tắc cho vùng đang chọn; xóa hết.
     void addCondRule(const cond::Rule &rule);

@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v2.22.0 — Thống kê 1 ô & kéo điền 4 hướng
+
+- Thanh trạng thái hiển thị **Tổng/Trung bình/Đếm/Nhỏ nhất/Lớn nhất ngay cả khi chỉ chọn 1 ô** (trước phải chọn từ 2 ô).
+- **Núm kéo điền** giờ kéo được **cả 4 hướng** (lên/xuống/trái/phải), ngoại suy chuỗi số khi kéo ngược.
+
 ## v2.21.0 — Kẻ viền ô (Spec 06)
 
 - Thêm nút **Viền** ở thẻ Trang đầu: **Viền tất cả**, **Viền ngoài**, viền **trên/dưới/trái/phải**, và **Bỏ viền**.

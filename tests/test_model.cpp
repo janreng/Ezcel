@@ -102,6 +102,18 @@ int main(int argc, char **argv) {
     m.autofillVertical(4, 5, 5, 6);
     ok(disp(m, 6, 4) == "Tue", "autofill Mon->Tue");
 
+    // --- autofill keo LEN (ngoai suy chuoi so giam) ---
+    put(m, 6, 3, "10"); // D7
+    put(m, 7, 3, "12"); // D8 -> buoc 2
+    m.autofillVerticalUp(3, 6, 7, 4); // dien D5,D6 len tren
+    ok(disp(m, 5, 3) == "8" && disp(m, 4, 3) == "6", "autofill len D6=8 D5=6");
+
+    // --- autofill keo SANG TRAI ---
+    put(m, 9, 3, "20"); // D10
+    put(m, 9, 4, "25"); // E10 -> buoc 5
+    m.autofillHorizontalLeft(9, 3, 4, 1); // dien C10,B10 sang trai
+    ok(disp(m, 9, 2) == "15" && disp(m, 9, 1) == "10", "autofill trai C10=15 B10=10");
+
     // --- paste block voi offset cong thuc ---
     QVector<QVector<QString>> block = {{"=A1+A2"}};
     m.pasteBlock(5, 1, block, 2, 0); // anchor (2,0) -> (5,1): drow=3 dcol=1

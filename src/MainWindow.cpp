@@ -557,17 +557,31 @@ void MainWindow::doFillDrag(const QPoint &pos)
     const QModelIndex target = m_view->indexAt(pos);
     if (!target.isValid()) return;
     const int tr = target.row(), tc = target.column();
-    const int downDelta = tr - m_fillB, rightDelta = tc - m_fillR;
-    if (downDelta <= 0 && rightDelta <= 0) return; // chỉ hỗ trợ kéo xuống / sang phải
+    const int downDelta = tr - m_fillB, upDelta = m_fillT - tr;
+    const int rightDelta = tc - m_fillR, leftDelta = m_fillL - tc;
+    const int vMax = qMax(downDelta, upDelta), hMax = qMax(rightDelta, leftDelta);
+    if (vMax <= 0 && hMax <= 0) return; // con trỏ còn trong vùng nguồn
 
-    if (downDelta >= rightDelta && downDelta > 0) {
-        for (int c = m_fillL; c <= m_fillR; ++c) m_model->autofillVertical(c, m_fillT, m_fillB, tr);
-        QItemSelection sel(m_model->index(m_fillT, m_fillL), m_model->index(tr, m_fillR));
-        m_view->selectionModel()->select(sel, QItemSelectionModel::ClearAndSelect);
-    } else {
-        for (int row = m_fillT; row <= m_fillB; ++row) m_model->autofillHorizontal(row, m_fillL, m_fillR, tc);
-        QItemSelection sel(m_model->index(m_fillT, m_fillL), m_model->index(m_fillB, tc));
-        m_view->selectionModel()->select(sel, QItemSelectionModel::ClearAndSelect);
+    if (vMax >= hMax) { // điền theo chiều dọc (xuống hoặc lên)
+        if (downDelta > 0) {
+            for (int c = m_fillL; c <= m_fillR; ++c) m_model->autofillVertical(c, m_fillT, m_fillB, tr);
+            QItemSelection sel(m_model->index(m_fillT, m_fillL), m_model->index(tr, m_fillR));
+            m_view->selectionModel()->select(sel, QItemSelectionModel::ClearAndSelect);
+        } else {
+            for (int c = m_fillL; c <= m_fillR; ++c) m_model->autofillVerticalUp(c, m_fillT, m_fillB, tr);
+            QItemSelection sel(m_model->index(tr, m_fillL), m_model->index(m_fillB, m_fillR));
+            m_view->selectionModel()->select(sel, QItemSelectionModel::ClearAndSelect);
+        }
+    } else { // điền theo chiều ngang (phải hoặc trái)
+        if (rightDelta > 0) {
+            for (int row = m_fillT; row <= m_fillB; ++row) m_model->autofillHorizontal(row, m_fillL, m_fillR, tc);
+            QItemSelection sel(m_model->index(m_fillT, m_fillL), m_model->index(m_fillB, tc));
+            m_view->selectionModel()->select(sel, QItemSelectionModel::ClearAndSelect);
+        } else {
+            for (int row = m_fillT; row <= m_fillB; ++row) m_model->autofillHorizontalLeft(row, m_fillL, m_fillR, tc);
+            QItemSelection sel(m_model->index(m_fillT, tc), m_model->index(m_fillB, m_fillR));
+            m_view->selectionModel()->select(sel, QItemSelectionModel::ClearAndSelect);
+        }
     }
 }
 
@@ -3467,7 +3481,7 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *ev)
 void MainWindow::updateStats()
 {
     auto idxs = m_view->selectionModel()->selectedIndexes();
-    if (idxs.size() < 2) { m_statsLabel->clear(); return; } // 1 ô thì khỏi hiện
+    if (idxs.isEmpty()) { m_statsLabel->clear(); return; } // như Excel: hiện cả khi chọn 1 ô
     QVector<QString> vals;
     vals.reserve(idxs.size());
     for (const QModelIndex &i : idxs)

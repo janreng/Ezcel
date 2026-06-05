@@ -1050,6 +1050,50 @@ void SpreadsheetModel::autofillHorizontal(int row, int srcLeft, int srcRight, in
     applyCellChanges(std::move(changes));
 }
 
+// Kéo điền LÊN (dstTop < srcTop): ngoại suy chuỗi số tuyến tính; còn lại lặp/sao chép.
+void SpreadsheetModel::autofillVerticalUp(int col, int srcTop, int srcBottom, int dstTop) {
+    int srcLen = srcBottom - srcTop + 1;
+    if (srcLen <= 0 || dstTop >= srcTop || col < 0 || col >= columnCount()) return;
+    QStringList src;
+    for (int r = srcTop; r <= srcBottom; ++r) src << m_data[r][col];
+    auto series = asSeries(src);
+    QVector<CellChange> changes;
+    for (int r = qMax(0, dstTop); r < srcTop; ++r) {
+        QString val;
+        if (series) {
+            val = numToText(series->first + series->second * (r - srcTop));
+        } else {
+            int idx = ((r - srcTop) % srcLen + srcLen) % srcLen;
+            QString base = src[idx];
+            val = formula::isFormula(base) ? formula::offsetFormula(base, r - (srcTop + idx), 0) : base;
+        }
+        changes.push_back({r, col, m_data[r][col], val});
+    }
+    applyCellChanges(std::move(changes));
+}
+
+// Kéo điền SANG TRÁI (dstLeft < srcLeft): tương tự theo chiều ngang.
+void SpreadsheetModel::autofillHorizontalLeft(int row, int srcLeft, int srcRight, int dstLeft) {
+    int srcLen = srcRight - srcLeft + 1;
+    if (srcLen <= 0 || dstLeft >= srcLeft || row < 0 || row >= rowCount()) return;
+    QStringList src;
+    for (int c = srcLeft; c <= srcRight; ++c) src << m_data[row][c];
+    auto series = asSeries(src);
+    QVector<CellChange> changes;
+    for (int c = qMax(0, dstLeft); c < srcLeft; ++c) {
+        QString val;
+        if (series) {
+            val = numToText(series->first + series->second * (c - srcLeft));
+        } else {
+            int idx = ((c - srcLeft) % srcLen + srcLen) % srcLen;
+            QString base = src[idx];
+            val = formula::isFormula(base) ? formula::offsetFormula(base, 0, c - (srcLeft + idx)) : base;
+        }
+        changes.push_back({row, c, m_data[row][c], val});
+    }
+    applyCellChanges(std::move(changes));
+}
+
 // ---------------------------------------------------------------- gộp ô (merge)
 namespace {
 bool boxesOverlap(const MergeRange &a, const MergeRange &b) {
