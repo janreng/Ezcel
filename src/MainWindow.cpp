@@ -30,6 +30,7 @@
 #include "ui/TellMe.h"
 #include "model/Accessibility.h"
 #include "model/QuickAnalysis.h"
+#include "model/FormControl.h"
 #include <functional>
 #include <QCursor>
 #include "model/Stats.h"
@@ -846,6 +847,7 @@ void MainWindow::buildMenus()
     st->addSeparator();
     st->addAction(QStringLiteral("Chèn ô..."), this, &MainWindow::insertCellsDialog);
     st->addAction(QStringLiteral("Xóa ô..."), this, &MainWindow::deleteCellsDialog);
+    st->addAction(QStringLiteral("Chèn hộp kiểm"), this, &MainWindow::insertCheckbox);
     st->addSeparator();
     st->addAction(i18n::tr("st_hide_row"), this, [this] {
         int t, l, b, r; if (selectionBox(t, l, b, r)) viewutil::hideRows(m_view, t, b);
@@ -1158,6 +1160,16 @@ void MainWindow::showShortcuts()
     lay->addWidget(box);
 
     dlg.exec();
+}
+
+// Chèn hộp kiểm (Spec 37): đặt ô hiện hành = FALSE (hiện ô vuông trống, bấm để tích).
+void MainWindow::insertCheckbox()
+{
+    QModelIndex idx = m_view->currentIndex();
+    if (idx.isValid()) {
+        m_model->setData(idx, QStringLiteral("FALSE"), Qt::EditRole);
+        statusBar()->showMessage(QStringLiteral("Đã chèn hộp kiểm — bấm vào ô vuông để tích"), 2800);
+    }
 }
 
 // Phân tích nhanh (Spec 40): gợi ý thao tác cho vùng chọn rồi áp khi người dùng chọn.
@@ -1660,6 +1672,8 @@ void MainWindow::buildRibbon()
     m_ribbon->beginGroup(QStringLiteral("Văn bản"));
     m_ribbon->addSmallButton(QStringLiteral("calendar"), QStringLiteral("Ngày hôm nay"), [this] { insertToday(); });
     m_ribbon->addSmallButton(QStringLiteral("clock"), QStringLiteral("Giờ hiện tại"), [this] { insertNow(); });
+    m_ribbon->beginGroup(QStringLiteral("Điều khiển"));
+    m_ribbon->addSmallButton(QStringLiteral("shield_check"), QStringLiteral("Hộp kiểm"), [this] { insertCheckbox(); });
 
     // ============================= CÔNG THỨC =============================
     m_ribbon->beginTab(QStringLiteral("Công thức"));
@@ -3066,6 +3080,23 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *ev)
                     le->insert(SpreadsheetModel::columnLabel(idx.column()) + QString::number(idx.row() + 1));
                     le->setFocus();
                     return true; // giữ editor mở, không chọn ô khác
+                }
+            }
+        }
+    }
+    // Hộp kiểm (Spec 37): bấm vào ô vuông trong ô TRUE/FALSE -> đảo giá trị.
+    if (obj == m_view->viewport() && ev->type() == QEvent::MouseButtonPress) {
+        auto *me = static_cast<QMouseEvent *>(ev);
+        const QModelIndex idx = m_view->indexAt(me->pos());
+        if (idx.isValid()) {
+            const QString disp = m_model->data(idx, Qt::DisplayRole).toString();
+            if (formctl::isBool(disp)) {
+                const QRect rc = m_view->visualRect(idx);
+                const int sz = qMin(rc.height() - 6, 15);
+                const QRect bx(rc.center().x() - sz / 2, rc.center().y() - sz / 2, sz, sz);
+                if (bx.contains(me->pos())) {
+                    m_model->setData(idx, formctl::toggle(disp), Qt::EditRole);
+                    return true;
                 }
             }
         }

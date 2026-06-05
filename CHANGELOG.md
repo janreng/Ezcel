@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v2.10.0 — Hộp kiểm trong ô (Spec 37)
+
+- Thêm **Chèn → "Hộp kiểm"**: đặt vào ô một **ô vuông tích ☑/☐**; **bấm vào ô vuông để đảo** Bật/Tắt (giá trị TRUE/FALSE) — tiện làm danh sách việc, đánh dấu hoàn thành.
+- Mọi ô có giá trị TRUE/FALSE đều hiển thị dạng hộp kiểm; giá trị dùng được trong công thức.
+
 ## v2.9.0 — Phân tích nhanh (Spec 40)
 
 - Thêm **Phân tích nhanh** (nút ở thẻ Trang đầu + menu Dữ liệu): chọn vùng rồi bấm, hiện menu gợi ý áp ngay — **Tổng cuối vùng**, **Thanh dữ liệu**, **Thang màu**, **Định dạng là bảng**.

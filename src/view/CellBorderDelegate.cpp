@@ -1,6 +1,7 @@
 #include "view/CellBorderDelegate.h"
 #include "view/FormulaHint.h"
 #include "view/TableFilter.h"
+#include "model/FormControl.h"
 #include "ui/Theme.h"
 #include "model/SpreadsheetModel.h" // chỉ dùng hằng SpillEdgesRole
 
@@ -8,6 +9,7 @@
 #include <QTableView>
 #include <QPainter>
 #include <QFontMetrics>
+#include <QStyle>
 #include <QLineEdit>
 #include <QApplication>
 #include <QFocusEvent>
@@ -50,6 +52,46 @@ bool CellBorderDelegate::eventFilter(QObject *obj, QEvent *event)
 void CellBorderDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
                                const QModelIndex &index) const
 {
+    // Hộp kiểm (Form control, Spec 37): ô TRUE/FALSE vẽ ô vuông tích thay cho chữ.
+    {
+        const QString disp = index.data(Qt::DisplayRole).toString();
+        if (formctl::isBool(disp)) {
+            painter->save();
+            // Nền (tôn trọng vùng chọn / màu nền ô).
+            if (option.state & QStyle::State_Selected) {
+                painter->fillRect(option.rect, QColor(theme::SelectionFill));
+            } else {
+                const QVariant bg = index.data(Qt::BackgroundRole);
+                if (bg.canConvert<QColor>()) painter->fillRect(option.rect, bg.value<QColor>());
+            }
+            const bool on = formctl::isTrue(disp);
+            const int sz = qMin(option.rect.height() - 6, 15);
+            QRect bx(option.rect.center().x() - sz / 2, option.rect.center().y() - sz / 2, sz, sz);
+            painter->setRenderHint(QPainter::Antialiasing, true);
+            painter->setPen(QPen(QColor(on ? theme::ExcelGreen : theme::Divider), 1.5));
+            painter->setBrush(on ? QColor(theme::ExcelGreen) : QColor(Qt::white));
+            painter->drawRoundedRect(bx, 3, 3);
+            if (on) {
+                QPen ck(Qt::white); ck.setWidthF(2.0); ck.setCapStyle(Qt::RoundCap);
+                painter->setPen(ck);
+                painter->drawLine(QPointF(bx.left() + 3, bx.center().y() + 1),
+                                  QPointF(bx.center().x() - 1, bx.bottom() - 3));
+                painter->drawLine(QPointF(bx.center().x() - 1, bx.bottom() - 3),
+                                  QPointF(bx.right() - 2.5, bx.top() + 3));
+            }
+            painter->restore();
+            // Viền ô đang chọn (giữ dấu hiệu Excel).
+            if (m_view && index == m_view->currentIndex()) {
+                painter->save();
+                QPen pen(QColor(theme::SelectionBorder)); pen.setWidth(2); pen.setJoinStyle(Qt::MiterJoin);
+                painter->setPen(pen); painter->setBrush(Qt::NoBrush);
+                painter->drawRect(option.rect.adjusted(1, 1, -1, -1));
+                painter->restore();
+            }
+            return;
+        }
+    }
+
     // Thanh dữ liệu (Data Bar): vẽ TRƯỚC nội dung để chữ nằm trên thanh.
     const QVariant dbv = index.data(SpreadsheetModel::DataBarRole);
     if (dbv.typeId() == QMetaType::QVariantList) {
