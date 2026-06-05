@@ -28,6 +28,7 @@
 #include "model/CellStyles.h"
 #include "model/NumberFormat.h"
 #include "ui/TellMe.h"
+#include "model/Accessibility.h"
 #include <functional>
 #include "model/Stats.h"
 #include "model/AutoSum.h"
@@ -1021,6 +1022,7 @@ void MainWindow::buildMenus()
     QAction *shAct = help->addAction(i18n::tr("help_shortcuts"), this, [this] { showShortcuts(); });
     shAct->setShortcut(QKeySequence(Qt::Key_F1));
     help->addAction(i18n::tr("help_stats"), this, [this] { showWorkbookStats(); });
+    help->addAction(QStringLiteral("Kiểm tra trợ năng"), this, &MainWindow::checkAccessibility);
     help->addAction(i18n::tr("help_about"), this, [this] {
 #ifdef EZCEL_VERSION
         const QString ver = QStringLiteral(EZCEL_VERSION);
@@ -1153,6 +1155,23 @@ void MainWindow::showShortcuts()
     lay->addWidget(box);
 
     dlg.exec();
+}
+
+// Kiểm tra trợ năng (Spec 41): quét lưới + ô gộp, liệt kê vấn đề cho người dùng.
+void MainWindow::checkAccessibility()
+{
+    QStringList issues = a11y::check(m_model->grid());
+    if (!m_model->merges().isEmpty())
+        issues << QStringLiteral("Có %1 vùng ô gộp — trình đọc màn hình khó theo dõi")
+                      .arg(m_model->merges().size());
+    if (issues.isEmpty()) {
+        QMessageBox::information(this, QStringLiteral("Kiểm tra trợ năng"),
+                                QStringLiteral("Không phát hiện vấn đề trợ năng."));
+    } else {
+        QMessageBox::warning(this, QStringLiteral("Kiểm tra trợ năng"),
+            QStringLiteral("Phát hiện %1 vấn đề:\n\n• %2")
+                .arg(issues.size()).arg(issues.join(QStringLiteral("\n• "))));
+    }
 }
 
 // Hộp thoại thống kê bảng tính (Spec 57.1): đếm ô/dữ liệu/công thức/từ cho trang hiện tại + cả workbook.
@@ -1643,6 +1662,7 @@ void MainWindow::buildRibbon()
     m_ribbon->addSmallButton(QStringLiteral("split_view"), QStringLiteral("Chia đôi cửa sổ"), [this] { toggleSplitView(); });
     m_ribbon->beginGroup(QStringLiteral("Hiển thị"));
     m_ribbon->addSmallButton(QStringLiteral("bar_chart"), QStringLiteral("Thống kê bảng tính"), [this] { showWorkbookStats(); });
+    m_ribbon->addSmallButton(QStringLiteral("shield_check"), QStringLiteral("Kiểm tra trợ năng"), [this] { checkAccessibility(); });
     m_ribbon->addSmallButton(QStringLiteral("keyboard"), QStringLiteral("Phím tắt"), [this] { showShortcuts(); });
     m_dbView = m_ribbon->addMenuButton(QStringLiteral("eye"), QStringLiteral("Tùy chọn\nxem ▾"), m_mView);
 

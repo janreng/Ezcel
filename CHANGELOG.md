@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v2.8.0 — Kiểm tra trợ năng (Spec 41)
+
+- Thêm **Trợ giúp → "Kiểm tra trợ năng"** (và nút ở thẻ Xem): quét bảng tính và liệt kê các vấn đề gây khó cho người khiếm thị / trình đọc màn hình.
+- Phát hiện: **cột thiếu tiêu đề** ở hàng đầu, **hàng/cột trống xen giữa** vùng dữ liệu, và **ô gộp** (gây khó theo dõi).
+
 ## v2.7.0 — Ô "Bạn muốn làm gì?" tìm nhanh lệnh (Spec 55)
 
 - Thêm ô **"Bạn muốn làm gì?"** ở góc phải dải lệnh: gõ từ khóa là hiện danh sách lệnh khớp, bấm (hoặc Enter) để **chạy lệnh ngay** — khỏi đi tìm trong các thẻ.
