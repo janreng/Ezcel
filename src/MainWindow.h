@@ -111,6 +111,7 @@ private slots:
     void cameraSnapshot();    // chụp vùng chọn thành ảnh vào clipboard (Camera, Spec 47)
     void showBackstage();     // trang Tệp toàn cửa sổ: New/Open/Save/Gần đây/Giới thiệu (Spec 51)
     void insertColumnChart(); // vẽ biểu đồ cột cho vùng chọn (Spec 19)
+    void insertLineChart();   // vẽ biểu đồ đường cho vùng chọn (Spec 19)
     void showFindReplace();   // định nghĩa ở MainWindowFind.cpp
     void showCondFormat();    // định dạng có điều kiện (MainWindowFind.cpp)
     void showDataValidation();// kiểm tra dữ liệu (MainWindowFind.cpp)
@@ -128,6 +129,7 @@ private:
     void buildRibbon();          // dải lệnh kiểu Excel (Trang đầu/Chèn/Công thức/Dữ liệu/Xem)
     void refreshRibbonDropdowns(); // gắn lại QMenu cho các nút thả menu trên ribbon (sau khi dựng/đổi ngôn ngữ)
     void buildTellMe();          // ô "Bạn muốn làm gì?" tìm & chạy lệnh (Spec 55)
+    void openChart(int type, const QString &title); // dựng dialog biểu đồ (ChartWidget::Type)
     void buildFormulaBar();
     void updateTitle();
     void applyZoom();                          // áp mức thu phóng hiện tại

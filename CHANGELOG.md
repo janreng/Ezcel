@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v2.14.0 — Biểu đồ đường (Spec 19)
+
+- Thêm **Chèn → "Biểu đồ đường"** (và menu Dữ liệu): vẽ **đường nối các điểm** kèm chấm tròn, trục và vạch lưới — hợp để xem xu hướng theo thời gian.
+- Dùng chung khung trục/lưới với biểu đồ cột; chọn vùng giống nhau.
+
 ## v2.13.0 — Biểu đồ cột (Spec 19)
 
 - Thêm **Chèn → "Biểu đồ cột"** (và menu Dữ liệu): chọn vùng (cột nhãn + cột số) rồi vẽ ra **biểu đồ cột** có trục, vạch lưới, giá trị trên đầu cột và nhãn dưới.

@@ -959,6 +959,7 @@ void MainWindow::buildMenus()
     data->addAction(QStringLiteral("Bảng tổng hợp nhanh..."), this, &MainWindow::quickPivot);
     data->addAction(QStringLiteral("Phân tích nhanh..."), this, &MainWindow::quickAnalysis);
     data->addAction(QStringLiteral("Biểu đồ cột..."), this, &MainWindow::insertColumnChart);
+    data->addAction(QStringLiteral("Biểu đồ đường..."), this, &MainWindow::insertLineChart);
     data->addSeparator();
     {
         QAction *aGroup = data->addAction(QStringLiteral("Gom nhóm hàng"), this, &MainWindow::groupRows);
@@ -1234,8 +1235,8 @@ void MainWindow::showBackstage()
     dlg.exec();
 }
 
-// Biểu đồ cột (Spec 19): rút chuỗi từ vùng chọn rồi vẽ trong cửa sổ (tự vẽ QPainter).
-void MainWindow::insertColumnChart()
+// Biểu đồ (Spec 19): rút chuỗi từ vùng chọn rồi vẽ trong cửa sổ (tự vẽ QPainter).
+void MainWindow::openChart(int type, const QString &title)
 {
     int t, l, b, r;
     if (!selectionBox(t, l, b, r)) {
@@ -1246,17 +1247,20 @@ void MainWindow::insertColumnChart()
     if (s.values.isEmpty()) { statusBar()->showMessage(QStringLiteral("Vùng chọn rỗng"), 2000); return; }
 
     QDialog dlg(this);
-    dlg.setWindowTitle(QStringLiteral("Biểu đồ cột"));
-    dlg.resize(580, 430);
+    dlg.setWindowTitle(title);
+    dlg.resize(600, 430);
     auto *lay = new QVBoxLayout(&dlg);
     auto *cw = new ChartWidget(&dlg);
-    cw->setData(s, QStringLiteral("Biểu đồ cột"));
+    cw->setData(s, title, ChartWidget::Type(type));
     lay->addWidget(cw, 1);
     auto *box = new QDialogButtonBox(QDialogButtonBox::Close, &dlg);
     connect(box, &QDialogButtonBox::rejected, &dlg, &QDialog::reject);
     lay->addWidget(box);
     dlg.exec();
 }
+
+void MainWindow::insertColumnChart() { openChart(int(ChartWidget::Type::Column), QStringLiteral("Biểu đồ cột")); }
+void MainWindow::insertLineChart() { openChart(int(ChartWidget::Type::Line), QStringLiteral("Biểu đồ đường")); }
 
 // Chụp vùng chọn (Camera, Spec 47): render các ô đang chọn ra ảnh vào clipboard.
 void MainWindow::cameraSnapshot()
@@ -1775,6 +1779,7 @@ void MainWindow::buildRibbon()
     m_ribbon->beginTab(QStringLiteral("Chèn"));
     m_ribbon->beginGroup(QStringLiteral("Biểu đồ"));
     m_ribbon->addButton(QStringLiteral("chart_column"), QStringLiteral("Biểu đồ\ncột"), [this] { insertColumnChart(); });
+    m_ribbon->addButton(QStringLiteral("chart_line"), QStringLiteral("Biểu đồ\nđường"), [this] { insertLineChart(); });
     m_ribbon->beginGroup(QStringLiteral("Bảng"));
     m_ribbon->addButton(QStringLiteral("table"), QStringLiteral("Tổng hợp\nnhanh"), [this] { quickPivot(); });
     m_ribbon->addButton(QStringLiteral("table"), QStringLiteral("Định dạng\nlà bảng"), [this] { formatAsTable(); });
