@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v2.25.0 — Mở rộng thanh công thức
+
+- Thêm nút **mở rộng** ở cuối thanh công thức: mở cửa sổ soạn công thức **nhiều dòng** cho dễ đọc các công thức dài, bấm **Áp dụng** để ghi vào ô.
+
 ## v2.24.0 — Kéo chọn cả vùng khi nhập công thức (Spec 12)
 
 - Trong lúc nhập công thức, **kéo chuột để chọn cả một vùng** (ví dụ `A1:B3`) và chèn thẳng vào công thức — không cần gõ tay.

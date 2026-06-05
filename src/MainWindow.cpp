@@ -35,6 +35,7 @@
 #include "model/Pivot.h"
 #include "model/FormulaRefs.h"
 #include "view/ChartWidget.h"
+#include <QPlainTextEdit>
 #include "ui/RecentFiles.h"
 #include <functional>
 #include <QCursor>
@@ -513,6 +514,13 @@ void MainWindow::buildFormulaBar()
     h->addWidget(m_nameBox);
     h->addWidget(fx);
     h->addWidget(m_formulaBar, 1);
+    // Nút mở rộng thanh công thức (soạn công thức dài nhiều dòng) — giống Excel.
+    auto *expandBtn = new QToolButton(bar);
+    expandBtn->setText(QStringLiteral("⌄"));
+    expandBtn->setToolTip(QStringLiteral("Mở rộng thanh công thức (soạn nhiều dòng)"));
+    expandBtn->setFocusPolicy(Qt::NoFocus);
+    h->addWidget(expandBtn);
+    connect(expandBtn, &QToolButton::clicked, this, &MainWindow::openFormulaEditor);
     connect(m_formulaBar, &QLineEdit::returnPressed, this, &MainWindow::onFormulaBarCommitted);
     connect(m_nameBox, &QLineEdit::returnPressed, this, &MainWindow::onNameBoxCommitted);
     // Chế độ ô: gõ vào thanh công thức -> "Nhập"; xong/đổi ô -> "Sẵn sàng".
@@ -537,6 +545,32 @@ void MainWindow::updateFormulaRefHighlight(const QString &text)
 void MainWindow::setCellMode(int mode)
 {
     if (m_modeLabel) m_modeLabel->setText(cellmode::label(cellmode::Mode(mode)));
+}
+
+// Mở rộng thanh công thức: soạn công thức dài trong ô nhiều dòng (Spec 12, như Excel).
+void MainWindow::openFormulaEditor()
+{
+    QDialog dlg(this);
+    dlg.setWindowTitle(QStringLiteral("Soạn công thức"));
+    dlg.resize(520, 240);
+    auto *lay = new QVBoxLayout(&dlg);
+    auto *edit = new QPlainTextEdit(&dlg);
+    edit->setPlainText(m_formulaBar->text());
+    edit->setPlaceholderText(QStringLiteral("Nhập nội dung / công thức (có thể nhiều dòng cho dễ đọc)"));
+    lay->addWidget(edit, 1);
+    auto *box = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dlg);
+    box->button(QDialogButtonBox::Ok)->setText(QStringLiteral("Áp dụng"));
+    box->button(QDialogButtonBox::Cancel)->setText(QStringLiteral("Hủy"));
+    connect(box, &QDialogButtonBox::accepted, &dlg, &QDialog::accept);
+    connect(box, &QDialogButtonBox::rejected, &dlg, &QDialog::reject);
+    lay->addWidget(box);
+    if (dlg.exec() != QDialog::Accepted) return;
+    // Gộp về 1 dòng (ô lưu chuỗi đơn dòng); bỏ xuống dòng thừa.
+    QString text = edit->toPlainText();
+    text.replace(QLatin1Char('\n'), QLatin1Char(' '));
+    text = text.trimmed();
+    m_formulaBar->setText(text);
+    onFormulaBarCommitted(); // áp vào ô đang chọn như nhấn Enter
 }
 
 void MainWindow::onCurrentCellChanged(const QModelIndex &cur, const QModelIndex &)
