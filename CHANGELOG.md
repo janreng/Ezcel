@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v2.11.0 — Chụp vùng chọn thành ảnh (Spec 47)
+
+- Thêm **Chèn → "Chụp vùng chọn"** (và menu Xem): chụp các ô đang chọn thành **ảnh** đưa vào clipboard — dán thẳng (Ctrl+V) vào tài liệu, chat, slide.
+
 ## v2.10.0 — Hộp kiểm trong ô (Spec 37)
 
 - Thêm **Chèn → "Hộp kiểm"**: đặt vào ô một **ô vuông tích ☑/☐**; **bấm vào ô vuông để đảo** Bật/Tắt (giá trị TRUE/FALSE) — tiện làm danh sách việc, đánh dấu hoàn thành.

@@ -33,6 +33,7 @@
 #include "model/FormControl.h"
 #include <functional>
 #include <QCursor>
+#include <QPixmap>
 #include "model/Stats.h"
 #include "model/AutoSum.h"
 #include "ui/Shortcuts.h"
@@ -987,6 +988,7 @@ void MainWindow::buildMenus()
         });
     }
     view->addAction(QStringLiteral("Chia đôi cửa sổ"), this, &MainWindow::toggleSplitView);
+    view->addAction(QStringLiteral("Chụp vùng chọn (ảnh)"), this, &MainWindow::cameraSnapshot);
     view->addSeparator();
     QAction *gl = view->addAction(QStringLiteral("Hiện đường lưới"));
     gl->setCheckable(true);
@@ -1160,6 +1162,26 @@ void MainWindow::showShortcuts()
     lay->addWidget(box);
 
     dlg.exec();
+}
+
+// Chụp vùng chọn (Camera, Spec 47): render các ô đang chọn ra ảnh vào clipboard.
+void MainWindow::cameraSnapshot()
+{
+    int t, l, b, r;
+    if (!selectionBox(t, l, b, r)) {
+        statusBar()->showMessage(QStringLiteral("Hãy chọn vùng để chụp"), 2500);
+        return;
+    }
+    const QRect region = m_view->visualRect(m_model->index(t, l))
+                             .united(m_view->visualRect(m_model->index(b, r)))
+                             .intersected(m_view->viewport()->rect());
+    if (!region.isValid() || region.isEmpty()) {
+        statusBar()->showMessage(QStringLiteral("Vùng chọn không nằm trong màn hình — cuộn tới rồi chụp lại"), 3500);
+        return;
+    }
+    const QPixmap pm = m_view->viewport()->grab(region);
+    QApplication::clipboard()->setPixmap(pm);
+    statusBar()->showMessage(QStringLiteral("Đã chụp vùng chọn vào clipboard (Ctrl+V để dán)"), 3500);
 }
 
 // Chèn hộp kiểm (Spec 37): đặt ô hiện hành = FALSE (hiện ô vuông trống, bấm để tích).
@@ -1674,6 +1696,7 @@ void MainWindow::buildRibbon()
     m_ribbon->addSmallButton(QStringLiteral("clock"), QStringLiteral("Giờ hiện tại"), [this] { insertNow(); });
     m_ribbon->beginGroup(QStringLiteral("Điều khiển"));
     m_ribbon->addSmallButton(QStringLiteral("shield_check"), QStringLiteral("Hộp kiểm"), [this] { insertCheckbox(); });
+    m_ribbon->addSmallButton(QStringLiteral("table"), QStringLiteral("Chụp vùng chọn"), [this] { cameraSnapshot(); });
 
     // ============================= CÔNG THỨC =============================
     m_ribbon->beginTab(QStringLiteral("Công thức"));

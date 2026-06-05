@@ -108,6 +108,7 @@ private slots:
     void checkAccessibility();// kiểm tra trợ năng: quét vấn đề trình đọc màn hình (Spec 41)
     void quickAnalysis();     // phân tích nhanh: gợi ý thao tác cho vùng chọn (Spec 40)
     void insertCheckbox();    // chèn hộp kiểm (TRUE/FALSE) vào ô hiện hành (Spec 37)
+    void cameraSnapshot();    // chụp vùng chọn thành ảnh vào clipboard (Camera, Spec 47)
     void showFindReplace();   // định nghĩa ở MainWindowFind.cpp
     void showCondFormat();    // định dạng có điều kiện (MainWindowFind.cpp)
     void showDataValidation();// kiểm tra dữ liệu (MainWindowFind.cpp)
