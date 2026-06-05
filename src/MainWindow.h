@@ -109,6 +109,7 @@ private slots:
     void quickAnalysis();     // phân tích nhanh: gợi ý thao tác cho vùng chọn (Spec 40)
     void insertCheckbox();    // chèn hộp kiểm (TRUE/FALSE) vào ô hiện hành (Spec 37)
     void cameraSnapshot();    // chụp vùng chọn thành ảnh vào clipboard (Camera, Spec 47)
+    void showBackstage();     // trang Tệp toàn cửa sổ: New/Open/Save/Gần đây/Giới thiệu (Spec 51)
     void showFindReplace();   // định nghĩa ở MainWindowFind.cpp
     void showCondFormat();    // định dạng có điều kiện (MainWindowFind.cpp)
     void showDataValidation();// kiểm tra dữ liệu (MainWindowFind.cpp)
@@ -196,4 +197,6 @@ private:
     outline::Outline m_colOutline;   // nhóm/phác thảo cột (Spec 09.4)
     void applyColOutline();          // áp ẩn/hiện cột theo nhóm đang thu gọn
     sheetview::Store m_sheetViews;   // các khung xem đã lưu (Spec 56)
+    QStringList m_recentFiles;       // tệp mở/lưu gần đây (Spec 51)
+    void pushRecent(const QString &path); // thêm tệp vào danh sách gần đây + lưu cấu hình
 };

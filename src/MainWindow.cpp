@@ -31,9 +31,12 @@
 #include "model/Accessibility.h"
 #include "model/QuickAnalysis.h"
 #include "model/FormControl.h"
+#include "ui/RecentFiles.h"
 #include <functional>
 #include <QCursor>
 #include <QPixmap>
+#include <QSettings>
+#include <QPushButton>
 #include "model/Stats.h"
 #include "model/AutoSum.h"
 #include "ui/Shortcuts.h"
@@ -225,6 +228,9 @@ MainWindow::MainWindow(QWidget *parent)
 
     bindActiveModel();
     updateTitle();
+
+    m_recentFiles = QSettings(QStringLiteral("EZG"), QStringLiteral("Ezcel"))
+                        .value(QStringLiteral("recentFiles")).toStringList(); // tệp gần đây (Spec 51)
 
     // Chọn sẵn ô A1 + focus lưới khi mở (như Excel): nếu không, chưa có ô hiện hành
     // thì các nút trên dải lệnh (định dạng, lọc, bảng…) bấm không ăn vì thiếu vùng chọn.
@@ -667,6 +673,8 @@ void MainWindow::buildMenus()
 {
     menuBar()->clear(); // cho phép dựng lại khi đổi ngôn ngữ
     QMenu *file = m_mFile = menuBar()->addMenu(i18n::tr("menu_file"));
+    file->addAction(QStringLiteral("Trang Tệp..."), this, &MainWindow::showBackstage);
+    file->addSeparator();
     file->addAction(i18n::tr("file_new"), QKeySequence::New, this, &MainWindow::newFile);
     file->addAction(i18n::tr("file_open"), QKeySequence::Open, this, &MainWindow::openFile);
     file->addSeparator();
@@ -1164,6 +1172,65 @@ void MainWindow::showShortcuts()
     dlg.exec();
 }
 
+// Thêm tệp vào danh sách gần đây + lưu cấu hình (Spec 51).
+void MainWindow::pushRecent(const QString &path)
+{
+    m_recentFiles = recentfiles::add(m_recentFiles, path);
+    QSettings(QStringLiteral("EZG"), QStringLiteral("Ezcel"))
+        .setValue(QStringLiteral("recentFiles"), m_recentFiles);
+}
+
+// Trang Tệp (Backstage, Spec 51): cửa sổ lớn với New/Open/Save/Save As/In + tệp gần đây + giới thiệu.
+void MainWindow::showBackstage()
+{
+    QDialog dlg(this);
+    dlg.setWindowTitle(QStringLiteral("Tệp"));
+    dlg.resize(qMax(660, width() - 80), qMax(440, height() - 80));
+    auto *h = new QHBoxLayout(&dlg);
+
+    auto *navW = new QWidget(&dlg);
+    navW->setFixedWidth(170);
+    navW->setStyleSheet(QStringLiteral("background:%1;").arg(theme::RibbonBg));
+    auto *nav = new QVBoxLayout(navW);
+    auto addBtn = [&](const QString &t, std::function<void()> cb) {
+        auto *btn = new QPushButton(t, navW);
+        btn->setMinimumHeight(38);
+        btn->setStyleSheet(QStringLiteral("QPushButton{text-align:left;padding:6px 12px;border:none;}"
+                                          "QPushButton:hover{background:%1;}").arg(theme::HoverBg));
+        QObject::connect(btn, &QPushButton::clicked, &dlg, [&dlg, cb] { dlg.accept(); cb(); });
+        nav->addWidget(btn);
+    };
+    addBtn(QStringLiteral("Mới"), [this] { newFile(); });
+    addBtn(QStringLiteral("Mở..."), [this] { openFile(); });
+    addBtn(QStringLiteral("Lưu"), [this] { saveFile(); });
+    addBtn(QStringLiteral("Lưu thành..."), [this] { saveFileAs(); });
+    addBtn(QStringLiteral("In..."), [this] { printSheet(); });
+    nav->addStretch();
+    addBtn(QStringLiteral("Thoát"), [this] { close(); });
+    h->addWidget(navW);
+
+    auto *rightW = new QWidget(&dlg);
+    auto *right = new QVBoxLayout(rightW);
+    right->addWidget(new QLabel(QStringLiteral("<h3>Gần đây</h3>"), rightW));
+    auto *list = new QListWidget(rightW);
+    if (m_recentFiles.isEmpty()) list->addItem(QStringLiteral("(chưa có tệp gần đây)"));
+    else for (const QString &p : m_recentFiles) list->addItem(p);
+    QObject::connect(list, &QListWidget::itemDoubleClicked, &dlg, [this, &dlg](QListWidgetItem *it) {
+        const QString p = it->text();
+        if (QFileInfo::exists(p)) { dlg.accept(); openPath(p); }
+    });
+    right->addWidget(list, 1);
+#ifdef EZCEL_VERSION
+    const QString ver = QStringLiteral(EZCEL_VERSION);
+#else
+    const QString ver = QStringLiteral("?");
+#endif
+    right->addWidget(new QLabel(QStringLiteral("Ezcel %1 — bảng tính gọn nhẹ C++/Qt6").arg(ver), rightW));
+    h->addWidget(rightW, 1);
+
+    dlg.exec();
+}
+
 // Chụp vùng chọn (Camera, Spec 47): render các ô đang chọn ra ảnh vào clipboard.
 void MainWindow::cameraSnapshot()
 {
@@ -1568,7 +1635,8 @@ void MainWindow::buildRibbon()
     m_ribbon->beginTab(QStringLiteral("Trang đầu"));
 
     m_ribbon->beginGroup(QStringLiteral("Tệp"));
-    m_dbFile = m_ribbon->addMenuButton(QStringLiteral("file"), QStringLiteral("Tệp"), m_mFile);
+    m_ribbon->addButton(QStringLiteral("file"), QStringLiteral("Trang\nTệp"), [this] { showBackstage(); });
+    m_dbFile = m_ribbon->addMenuButton(QStringLiteral("file"), QStringLiteral("Menu Tệp"), m_mFile);
     m_ribbon->addSmallButton(QStringLiteral("open"), QStringLiteral("Mở"), [this] { openFile(); });
     m_ribbon->addSmallButton(QStringLiteral("save"), QStringLiteral("Lưu"), [this] { saveFile(); });
     m_ribbon->addSmallButton(QStringLiteral("undo"), QStringLiteral("Hoàn tác"), [this] {
@@ -1824,6 +1892,7 @@ void MainWindow::openPath(const QString &path)
         return;
     }
     m_currentPath = path;
+    pushRecent(path);
     updateTitle();
     if (m_model->rowCount() > 0) { m_view->setCurrentIndex(m_model->index(0, 0)); m_view->setFocus(); }
     statusBar()->showMessage(QStringLiteral("Đã mở: %1").arg(path), 5000);
@@ -1843,6 +1912,7 @@ bool MainWindow::saveFileAs()
     if (QFileInfo(path).suffix().isEmpty()) path += ".csv";
     if (!saveTo(path)) return false;
     m_currentPath = path;
+    pushRecent(path);
     updateTitle();
     return true;
 }

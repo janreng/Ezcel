@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
-project(Ezcel VERSION 2.11.0 LANGUAGES CXX)
+project(Ezcel VERSION 2.12.0 LANGUAGES CXX)
 
 # Bản port C++ của Ezcel (gốc Python/PySide6). Dùng Qt6 Widgets + MinGW.
 set(CMAKE_CXX_STANDARD 20)
@@ -204,6 +204,10 @@ add_executable(test_formcontrol tests/test_formcontrol.cpp)
 target_include_directories(test_formcontrol PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(test_formcontrol PRIVATE Qt6::Core)
 
+add_executable(test_recentfiles tests/test_recentfiles.cpp)
+target_include_directories(test_recentfiles PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_link_libraries(test_recentfiles PRIVATE Qt6::Core)
+
 add_executable(test_headermenu tests/test_headermenu.cpp src/view/HeaderMenu.cpp)
 target_include_directories(test_headermenu PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(test_headermenu PRIVATE Qt6::Core)
@@ -271,6 +275,7 @@ add_test(NAME tellme COMMAND test_tellme)
 add_test(NAME accessibility COMMAND test_accessibility)
 add_test(NAME quickanalysis COMMAND test_quickanalysis)
 add_test(NAME formcontrol COMMAND test_formcontrol)
+add_test(NAME recentfiles COMMAND test_recentfiles)
 
 # --- Sort (sắp xếp vùng dữ liệu) — module logic thuần (Qt Core) -> static lib + test.
 add_library(ezcel_sort STATIC src/model/Sort.cpp src/model/Sort.h)

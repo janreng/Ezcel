@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v2.12.0 — Trang Tệp (Spec 51)
+
+- Thêm **nút "Trang Tệp"** (đầu thẻ Trang đầu) mở trang lớn gọn gàng: **Mới / Mở / Lưu / Lưu thành / In / Thoát** + danh sách **Tệp gần đây** (mở lại bằng nháy đúp) + dòng giới thiệu phiên bản.
+- **Ghi nhớ tệp gần đây** giữa các lần mở ứng dụng.
+
 ## v2.11.0 — Chụp vùng chọn thành ảnh (Spec 47)
 
 - Thêm **Chèn → "Chụp vùng chọn"** (và menu Xem): chụp các ô đang chọn thành **ảnh** đưa vào clipboard — dán thẳng (Ctrl+V) vào tài liệu, chat, slide.
