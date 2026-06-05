@@ -151,6 +151,7 @@ private:
     // --- định dạng (MainWindowFormat.cpp) ---
     void applyFormatAttr(const QString &key, const QVariant &value); // áp 1 thuộc tính cho vùng chọn
     void applyBorder(const QString &mode);      // kẻ viền vùng chọn (Spec 06)
+    void updateFormulaRefHighlight(const QString &text); // viền nét đứt ô tham chiếu (point mode)
     void toggleFormatAttr(const QString &key);  // bật/tắt bool theo ô hiện hành
     void pickColor(const QString &key);         // "color" (chữ) hoặc "bg" (nền)
 

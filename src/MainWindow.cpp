@@ -33,6 +33,7 @@
 #include "model/FormControl.h"
 #include "model/Chart.h"
 #include "model/Pivot.h"
+#include "model/FormulaRefs.h"
 #include "view/ChartWidget.h"
 #include "ui/RecentFiles.h"
 #include <functional>
@@ -139,6 +140,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_cellDelegate = new CellBorderDelegate(m_view, m_view); // viền xanh ô đang chọn
     m_cellDelegate->setFunctionNames(formula::functionNames());     // popup gợi ý hàm khi gõ '='
     m_cellDelegate->setFunctionSignatures(formula::functionTooltips()); // tooltip mô tả + tham số (HTML)
+    m_cellDelegate->setEditTextCallback([this](const QString &t) { updateFormulaRefHighlight(t); }); // viền nét đứt khi gõ trong ô
     m_view->setItemDelegate(m_cellDelegate);
     // Gõ phím là vào chế độ sửa ngay (giống Excel); Enter sau đó tự nhảy xuống ô dưới.
     m_view->setEditTriggers(QAbstractItemView::DoubleClicked | QAbstractItemView::EditKeyPressed
@@ -515,6 +517,21 @@ void MainWindow::buildFormulaBar()
     connect(m_nameBox, &QLineEdit::returnPressed, this, &MainWindow::onNameBoxCommitted);
     // Chế độ ô: gõ vào thanh công thức -> "Nhập"; xong/đổi ô -> "Sẵn sàng".
     connect(m_formulaBar, &QLineEdit::textEdited, this, [this] { setCellMode(int(cellmode::Mode::Enter)); });
+    // Tô viền nét đứt cho các ô được tham chiếu khi đang gõ công thức ở thanh công thức.
+    connect(m_formulaBar, &QLineEdit::textChanged, this, [this](const QString &t) {
+        if (m_formulaBar->hasFocus()) updateFormulaRefHighlight(t);
+    });
+}
+
+// Cập nhật viền nét đứt cho các vùng tham chiếu của công thức đang nhập (point mode, Spec 12).
+void MainWindow::updateFormulaRefHighlight(const QString &text)
+{
+    if (!m_cellDelegate) return;
+    QVector<MergeRange> ranges;
+    if (text.startsWith(QLatin1Char('=')))
+        ranges = formularefs::extract(text, m_model->rowCount(), m_model->columnCount());
+    m_cellDelegate->setReferenceRanges(ranges);
+    m_view->viewport()->update();
 }
 
 void MainWindow::setCellMode(int mode)
@@ -532,6 +549,7 @@ void MainWindow::onCurrentCellChanged(const QModelIndex &cur, const QModelIndex 
         m_formulaBar->setText(m_model->data(cur, Qt::EditRole).toString());
     else
         m_formulaBar->clear();
+    updateFormulaRefHighlight(QString()); // rời ô -> bỏ viền nét đứt tham chiếu
     positionFillHandle();
 }
 
@@ -3398,9 +3416,24 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *ev)
                 if (idx.isValid() && idx != m_view->currentIndex()) {
                     le->insert(SpreadsheetModel::columnLabel(idx.column()) + QString::number(idx.row() + 1));
                     le->setFocus();
+                    updateFormulaRefHighlight(le->text()); // tô lại viền nét đứt
                     return true; // giữ editor mở, không chọn ô khác
                 }
             }
+        }
+    }
+    // Point mode từ THANH CÔNG THỨC: đang gõ "=..." mà bấm ô trên lưới -> chèn địa chỉ ô đó.
+    if (obj == m_view->viewport() && ev->type() == QEvent::MouseButtonPress
+        && m_formulaBar && m_formulaBar->hasFocus()
+        && m_formulaBar->text().startsWith(QLatin1Char('='))) {
+        auto *me = static_cast<QMouseEvent *>(ev);
+        const QModelIndex idx = m_view->indexAt(me->pos());
+        if (idx.isValid()) {
+            m_formulaBar->insert(SpreadsheetModel::columnLabel(idx.column())
+                                 + QString::number(idx.row() + 1));
+            m_formulaBar->setFocus();
+            updateFormulaRefHighlight(m_formulaBar->text());
+            return true; // không di chuyển ô, giữ con trỏ trong công thức
         }
     }
     // Hộp kiểm (Spec 37): bấm vào ô vuông trong ô TRUE/FALSE -> đảo giá trị.

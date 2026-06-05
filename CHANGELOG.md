@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v2.23.0 — Chọn ô khi nhập công thức (Spec 12)
+
+- Khi đang gõ công thức (bắt đầu bằng `=`) ở **thanh công thức** hoặc **trong ô**, **bấm vào ô khác để chèn địa chỉ ô** đó vào công thức (point mode) — giống Excel.
+- Các ô/vùng được tham chiếu hiển thị **viền nét đứt nhiều màu** ngay khi gõ, giúp dễ kiểm tra công thức.
+
 ## v2.22.0 — Thống kê 1 ô & kéo điền 4 hướng
 
 - Thanh trạng thái hiển thị **Tổng/Trung bình/Đếm/Nhỏ nhất/Lớn nhất ngay cả khi chỉ chọn 1 ô** (trước phải chọn từ 2 ô).

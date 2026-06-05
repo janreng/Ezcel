@@ -2,6 +2,9 @@
 #include <QStyledItemDelegate>
 #include <QStringList>
 #include <QHash>
+#include <QVector>
+#include <functional>
+#include "model/SpreadsheetModel.h" // MergeRange
 
 class QAbstractItemView;
 
@@ -25,10 +28,16 @@ public:
     void setFunctionSignatures(const QHash<QString, QString> &sigs) { m_fnSigs = sigs; }
     // Editor (QLineEdit) đang mở, để "point mode" chèn địa chỉ ô vào công thức. null nếu không.
     QWidget *activeEditor() const { return m_activeEditor; }
+    // Các vùng tham chiếu của công thức đang nhập -> vẽ viền nét đứt nhiều màu (point mode).
+    void setReferenceRanges(const QVector<MergeRange> &ranges) { m_refRanges = ranges; }
+    // Callback khi chữ trong editor ô đổi (để tô viền nét đứt tham chiếu lúc gõ trong ô).
+    void setEditTextCallback(std::function<void(const QString &)> cb) { m_onEditText = std::move(cb); }
 
 private:
     QAbstractItemView *m_view;
     QStringList m_fnNames;
     QHash<QString, QString> m_fnSigs;
     mutable QWidget *m_activeEditor = nullptr;
+    QVector<MergeRange> m_refRanges;
+    std::function<void(const QString &)> m_onEditText;
 };

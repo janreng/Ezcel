@@ -26,8 +26,16 @@ QWidget *CellBorderDelegate::createEditor(QWidget *parent, const QStyleOptionVie
             formulahint::install(le, m_fnNames, m_fnSigs); // popup gợi ý hàm + tooltip tham số
     // Theo dõi editor đang mở để hỗ trợ "point mode" (click ô chèn địa chỉ vào công thức).
     m_activeEditor = editor;
+    // Tô viền nét đứt tham chiếu ngay khi gõ công thức trong ô.
+    if (auto *le = qobject_cast<QLineEdit *>(editor))
+        QObject::connect(le, &QLineEdit::textChanged, this, [this](const QString &t) {
+            if (m_onEditText) m_onEditText(t);
+        });
     QObject::connect(editor, &QObject::destroyed, this, [this](QObject *o) {
-        if (m_activeEditor == o) m_activeEditor = nullptr;
+        if (m_activeEditor == o) {
+            m_activeEditor = nullptr;
+            if (m_onEditText) m_onEditText(QString()); // đóng editor -> bỏ viền
+        }
     });
     return editor;
 }
@@ -211,6 +219,29 @@ void CellBorderDelegate::paint(QPainter *painter, const QStyleOptionViewItem &op
         if (cellBorder & 4) painter->drawLine(rc.bottomLeft(), rc.bottomRight()); // dưới
         if (cellBorder & 8) painter->drawLine(rc.topRight(), rc.bottomRight());   // phải
         painter->restore();
+    }
+
+    // Viền nét đứt "kiến bò" quanh các vùng tham chiếu của công thức đang nhập (point mode).
+    if (!m_refRanges.isEmpty()) {
+        static const QColor refPalette[] = {
+            QColor("#2563EB"), QColor("#16A34A"), QColor("#DC2626"),
+            QColor("#9333EA"), QColor("#D97706"), QColor("#0891B2") };
+        const int row = index.row(), col = index.column();
+        for (int i = 0; i < m_refRanges.size(); ++i) {
+            const MergeRange &mr = m_refRanges[i];
+            if (!mr.contains(row, col)) continue;
+            painter->save();
+            QPen dash(refPalette[i % 6]);
+            dash.setStyle(Qt::DashLine);
+            dash.setWidth(2);
+            painter->setPen(dash);
+            const QRect rc = option.rect.adjusted(1, 1, -1, -1);
+            if (row == mr.top)    painter->drawLine(rc.topLeft(), rc.topRight());
+            if (row == mr.bottom) painter->drawLine(rc.bottomLeft(), rc.bottomRight());
+            if (col == mr.left)   painter->drawLine(rc.topLeft(), rc.bottomLeft());
+            if (col == mr.right)  painter->drawLine(rc.topRight(), rc.bottomRight());
+            painter->restore();
+        }
     }
 
     // Nút lọc ▼ ở mép phải ô tiêu đề bảng (chữ trắng trên nền đậm -> dùng mũi tên trắng).
