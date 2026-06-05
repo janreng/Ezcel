@@ -9,6 +9,16 @@
 #include <QTableView>
 #include <QColorDialog>
 #include <QColor>
+#include <QDialog>
+#include <QTabWidget>
+#include <QFormLayout>
+#include <QVBoxLayout>
+#include <QFontComboBox>
+#include <QComboBox>
+#include <QCheckBox>
+#include <QPushButton>
+#include <QDialogButtonBox>
+#include <QSharedPointer>
 
 using Format = SpreadsheetModel::Format;
 
@@ -20,6 +30,129 @@ void MainWindow::applyFormatAttr(const QString &key, const QVariant &value)
     Format attrs;
     attrs.insert(key, value); // value null -> model xóa key
     m_model->setFormat(t, l, b, r, attrs);
+}
+
+// Hộp thoại Định dạng ô (Format Cells) — gộp phông/căn lề/số/viền vào 1 nơi (như Excel, Ctrl+1).
+void MainWindow::formatCellsDialog()
+{
+    int t, l, b, r;
+    if (!selectionBox(t, l, b, r)) return;
+    const Format cur = m_model->formatAt(t, l);
+
+    QDialog dlg(this);
+    dlg.setWindowTitle(QStringLiteral("Định dạng ô"));
+    dlg.resize(420, 360);
+    auto *lay = new QVBoxLayout(&dlg);
+    auto *tabs = new QTabWidget(&dlg);
+    lay->addWidget(tabs, 1);
+
+    // ---- Tab Phông ----
+    auto *fontTab = new QWidget(&dlg);
+    auto *ff = new QFormLayout(fontTab);
+    auto *fontBox = new QFontComboBox(fontTab);
+    if (cur.contains(QStringLiteral("font"))) fontBox->setCurrentFont(QFont(cur.value(QStringLiteral("font")).toString()));
+    auto *sizeBox = new QComboBox(fontTab); sizeBox->setEditable(true);
+    for (int s : {8,9,10,11,12,14,16,18,20,24,28,36,48}) sizeBox->addItem(QString::number(s));
+    sizeBox->setCurrentText(cur.contains(QStringLiteral("size")) ? cur.value(QStringLiteral("size")).toString() : QStringLiteral("11"));
+    auto *bold = new QCheckBox(QStringLiteral("Đậm"), fontTab); bold->setChecked(cur.value(QStringLiteral("bold")).toBool());
+    auto *italic = new QCheckBox(QStringLiteral("Nghiêng"), fontTab); italic->setChecked(cur.value(QStringLiteral("italic")).toBool());
+    auto *underline = new QCheckBox(QStringLiteral("Gạch chân"), fontTab); underline->setChecked(cur.value(QStringLiteral("underline")).toBool());
+    auto fg = QSharedPointer<QString>::create(cur.value(QStringLiteral("color")).toString());
+    auto bg = QSharedPointer<QString>::create(cur.value(QStringLiteral("bg")).toString());
+    auto *fgBtn = new QPushButton(QStringLiteral("Màu chữ..."), fontTab);
+    auto *bgBtn = new QPushButton(QStringLiteral("Màu nền..."), fontTab);
+    auto tint = [](QPushButton *btn, const QString &c) {
+        if (!c.isEmpty()) btn->setStyleSheet(QStringLiteral("background:%1;").arg(c));
+    };
+    tint(fgBtn, *fg); tint(bgBtn, *bg);
+    connect(fgBtn, &QPushButton::clicked, &dlg, [&dlg, fg, fgBtn, tint] {
+        QColor c = QColorDialog::getColor(fg->isEmpty() ? QColor("#000000") : QColor(*fg), &dlg, QStringLiteral("Màu chữ"));
+        if (c.isValid()) { *fg = c.name(); tint(fgBtn, *fg); }
+    });
+    connect(bgBtn, &QPushButton::clicked, &dlg, [&dlg, bg, bgBtn, tint] {
+        QColor c = QColorDialog::getColor(bg->isEmpty() ? QColor("#ffffff") : QColor(*bg), &dlg, QStringLiteral("Màu nền"));
+        if (c.isValid()) { *bg = c.name(); tint(bgBtn, *bg); }
+    });
+    ff->addRow(QStringLiteral("Phông chữ:"), fontBox);
+    ff->addRow(QStringLiteral("Cỡ chữ:"), sizeBox);
+    ff->addRow(bold); ff->addRow(italic); ff->addRow(underline);
+    ff->addRow(fgBtn); ff->addRow(bgBtn);
+    tabs->addTab(fontTab, QStringLiteral("Phông"));
+
+    // ---- Tab Căn lề ----
+    auto *alignTab = new QWidget(&dlg);
+    auto *af = new QFormLayout(alignTab);
+    auto *hAlign = new QComboBox(alignTab);
+    hAlign->addItem(QStringLiteral("Mặc định"), QString());
+    hAlign->addItem(QStringLiteral("Trái"), QStringLiteral("left"));
+    hAlign->addItem(QStringLiteral("Giữa"), QStringLiteral("center"));
+    hAlign->addItem(QStringLiteral("Phải"), QStringLiteral("right"));
+    hAlign->setCurrentIndex(qMax(0, hAlign->findData(cur.value(QStringLiteral("halign")).toString())));
+    auto *vAlign = new QComboBox(alignTab);
+    vAlign->addItem(QStringLiteral("Mặc định"), QString());
+    vAlign->addItem(QStringLiteral("Trên"), QStringLiteral("top"));
+    vAlign->addItem(QStringLiteral("Giữa"), QStringLiteral("middle"));
+    vAlign->addItem(QStringLiteral("Dưới"), QStringLiteral("bottom"));
+    vAlign->setCurrentIndex(qMax(0, vAlign->findData(cur.value(QStringLiteral("valign")).toString())));
+    auto *wrap = new QCheckBox(QStringLiteral("Tự xuống dòng"), alignTab); wrap->setChecked(cur.value(QStringLiteral("wrap")).toBool());
+    af->addRow(QStringLiteral("Căn ngang:"), hAlign);
+    af->addRow(QStringLiteral("Căn dọc:"), vAlign);
+    af->addRow(wrap);
+    tabs->addTab(alignTab, QStringLiteral("Căn lề"));
+
+    // ---- Tab Số ----
+    auto *numTab = new QWidget(&dlg);
+    auto *nf = new QFormLayout(numTab);
+    auto *numBox = new QComboBox(numTab);
+    numBox->addItem(QStringLiteral("Chung"), QString());
+    numBox->addItem(QStringLiteral("Số 1,234.00"), QStringLiteral("#,##0.00"));
+    numBox->addItem(QStringLiteral("Phần trăm %"), QStringLiteral("0.00%"));
+    numBox->addItem(QStringLiteral("Ngày dd/mm/yyyy"), QStringLiteral("dd/mm/yyyy"));
+    numBox->addItem(QStringLiteral("Tiền tệ $1,234.00"), QStringLiteral("$#,##0.00"));
+    numBox->addItem(QStringLiteral("Khoa học 0.00E+00"), QStringLiteral("0.00E+00"));
+    numBox->setCurrentIndex(qMax(0, numBox->findData(cur.value(QStringLiteral("number_format")).toString())));
+    nf->addRow(QStringLiteral("Kiểu số:"), numBox);
+    tabs->addTab(numTab, QStringLiteral("Số"));
+
+    // ---- Tab Viền ----
+    auto *bdTab = new QWidget(&dlg);
+    auto *bf = new QFormLayout(bdTab);
+    auto *bdBox = new QComboBox(bdTab);
+    bdBox->addItem(QStringLiteral("(giữ nguyên)"), QString());
+    bdBox->addItem(QStringLiteral("Viền tất cả"), QStringLiteral("all"));
+    bdBox->addItem(QStringLiteral("Viền ngoài"), QStringLiteral("outline"));
+    bdBox->addItem(QStringLiteral("Bỏ viền"), QStringLiteral("none"));
+    bf->addRow(QStringLiteral("Kiểu viền:"), bdBox);
+    tabs->addTab(bdTab, QStringLiteral("Viền"));
+
+    auto *box = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dlg);
+    box->button(QDialogButtonBox::Ok)->setText(QStringLiteral("Áp dụng"));
+    box->button(QDialogButtonBox::Cancel)->setText(QStringLiteral("Hủy"));
+    connect(box, &QDialogButtonBox::accepted, &dlg, &QDialog::accept);
+    connect(box, &QDialogButtonBox::rejected, &dlg, &QDialog::reject);
+    lay->addWidget(box);
+    if (dlg.exec() != QDialog::Accepted) return;
+
+    // Gom thuộc tính rồi áp cho vùng chọn.
+    Format attrs;
+    attrs.insert(QStringLiteral("font"), fontBox->currentFont().family());
+    bool okSz = false; int sz = sizeBox->currentText().toInt(&okSz);
+    if (okSz && sz > 0) attrs.insert(QStringLiteral("size"), sz);
+    attrs.insert(QStringLiteral("bold"), bold->isChecked() ? QVariant(true) : QVariant());
+    attrs.insert(QStringLiteral("italic"), italic->isChecked() ? QVariant(true) : QVariant());
+    attrs.insert(QStringLiteral("underline"), underline->isChecked() ? QVariant(true) : QVariant());
+    if (!fg->isEmpty()) attrs.insert(QStringLiteral("color"), *fg);
+    if (!bg->isEmpty()) attrs.insert(QStringLiteral("bg"), *bg);
+    attrs.insert(QStringLiteral("halign"), hAlign->currentData().toString().isEmpty() ? QVariant() : hAlign->currentData());
+    attrs.insert(QStringLiteral("valign"), vAlign->currentData().toString().isEmpty() ? QVariant() : vAlign->currentData());
+    attrs.insert(QStringLiteral("wrap"), wrap->isChecked() ? QVariant(true) : QVariant());
+    const QString nfCode = numBox->currentData().toString();
+    attrs.insert(QStringLiteral("number_format"), nfCode.isEmpty() ? QVariant() : nfCode);
+    m_model->setFormat(t, l, b, r, attrs);
+
+    const QString bd = bdBox->currentData().toString();
+    if (!bd.isEmpty()) applyBorder(bd); // viền áp riêng (đặt theo từng ô)
+    m_view->viewport()->update();
 }
 
 // Kẻ viền cho vùng chọn (Spec 06). mode: all/outline/top/bottom/left/right/none.

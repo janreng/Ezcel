@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v2.26.0 — Hộp thoại Định dạng ô
+
+- Thêm **hộp thoại Định dạng ô** gộp đủ trong 4 thẻ: **Phông** (kiểu/cỡ chữ, đậm/nghiêng/gạch chân, màu chữ & nền), **Căn lề** (ngang/dọc, tự xuống dòng), **Số** (chọn kiểu hiển thị), **Viền**.
+- Mở bằng **chuột phải → Định dạng ô**, nút trên thẻ Trang đầu, hoặc phím **Ctrl+1** — áp dụng cho cả vùng đang chọn.
+
 ## v2.25.0 — Mở rộng thanh công thức
 
 - Thêm nút **mở rộng** ở cuối thanh công thức: mở cửa sổ soạn công thức **nhiều dòng** cho dễ đọc các công thức dài, bấm **Áp dụng** để ghi vào ô.

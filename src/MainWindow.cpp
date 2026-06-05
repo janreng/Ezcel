@@ -207,6 +207,9 @@ MainWindow::MainWindow(QWidget *parent)
     // Alt+Down: chọn từ danh sách giá trị trong cột (Spec 05).
     auto *pickSh = new QShortcut(QKeySequence(Qt::ALT | Qt::Key_Down), this);
     connect(pickSh, &QShortcut::activated, this, [this] { pickFromList(); });
+    // Ctrl+1: mở hộp thoại Định dạng ô (như Excel).
+    auto *fmtSh = new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_1), this);
+    connect(fmtSh, &QShortcut::activated, this, [this] { formatCellsDialog(); });
 
     auto *central = new QWidget(this);
     auto *lay = new QVBoxLayout(central);
@@ -411,6 +414,8 @@ void MainWindow::buildContextMenus()
             int t, l, b, r; if (selectionBox(t, l, b, r)) m_model->removeColumns(l, r - l + 1);
         });
         menu.addAction(i18n::tr("ctx_clear"), this, &MainWindow::clearSelection);
+        menu.addSeparator();
+        menu.addAction(QStringLiteral("Định dạng ô..."), this, &MainWindow::formatCellsDialog);
         menu.addSeparator();
         menu.addAction(i18n::tr("data_filter_values"), this, &MainWindow::filterByValues);
         menu.addAction(i18n::tr("data_sort_asc"), this, [this] {
@@ -1947,6 +1952,7 @@ void MainWindow::buildRibbon()
     borderMenu->addSeparator();
     borderMenu->addAction(QStringLiteral("Bỏ viền"), this, [this] { applyBorder(QStringLiteral("none")); });
     m_ribbon->addMenuButton(QStringLiteral("borders"), QStringLiteral("Viền"), borderMenu);
+    m_ribbon->addSmallButton(QStringLiteral("settings"), QStringLiteral("Định dạng ô (Ctrl+1)"), [this] { formatCellsDialog(); });
 
     m_ribbon->beginGroup(QStringLiteral("Căn lề"));
     m_ribbon->addSmallButton(QStringLiteral("valign_top"), QStringLiteral("Căn trên"), [this] { applyFormatAttr(QStringLiteral("valign"), QStringLiteral("top")); });
