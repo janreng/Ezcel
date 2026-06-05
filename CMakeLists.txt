@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
-project(Ezcel VERSION 2.28.0 LANGUAGES CXX)
+project(Ezcel VERSION 2.29.0 LANGUAGES CXX)
 
 # Bản port C++ của Ezcel (gốc Python/PySide6). Dùng Qt6 Widgets + MinGW.
 set(CMAKE_CXX_STANDARD 20)
@@ -217,6 +217,10 @@ add_executable(test_formularefs tests/test_formularefs.cpp)
 target_include_directories(test_formularefs PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(test_formularefs PRIVATE Qt6::Core Qt6::Gui)
 
+add_executable(test_solver tests/test_solver.cpp)
+target_include_directories(test_solver PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_link_libraries(test_solver PRIVATE Qt6::Core)
+
 add_executable(test_formcontrol tests/test_formcontrol.cpp)
 target_include_directories(test_formcontrol PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(test_formcontrol PRIVATE Qt6::Core)
@@ -299,6 +303,7 @@ add_test(NAME pivot COMMAND test_pivot)
 add_test(NAME dataquery COMMAND test_dataquery)
 add_test(NAME borderops COMMAND test_borderops)
 add_test(NAME formularefs COMMAND test_formularefs)
+add_test(NAME solver COMMAND test_solver)
 add_test(NAME formcontrol COMMAND test_formcontrol)
 add_test(NAME recentfiles COMMAND test_recentfiles)
 add_test(NAME chart COMMAND test_chart)

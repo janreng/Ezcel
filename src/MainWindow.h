@@ -155,6 +155,7 @@ private:
     void updateFormulaRefHighlight(const QString &text); // viền nét đứt ô tham chiếu (point mode)
     void openFormulaEditor();                   // mở rộng thanh công thức (soạn nhiều dòng)
     void dataQueryImport();                     // Lấy & Biến đổi dữ liệu CSV (Power Query, Spec 20)
+    void solverDialog();                        // Bộ giải tối ưu (Solver, Spec 50)
     void toggleFormatAttr(const QString &key);  // bật/tắt bool theo ô hiện hành
     void pickColor(const QString &key);         // "color" (chữ) hoặc "bg" (nền)
 

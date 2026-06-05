@@ -35,8 +35,11 @@
 #include "model/Pivot.h"
 #include "model/FormulaRefs.h"
 #include "model/DataQuery.h"
+#include "model/Solver.h"
 #include "view/ChartWidget.h"
 #include <QPlainTextEdit>
+#include <QDoubleSpinBox>
+#include <QFormLayout>
 #include "ui/RecentFiles.h"
 #include <functional>
 #include <QCursor>
@@ -1971,6 +1974,70 @@ void MainWindow::dataQueryImport()
     statusBar()->showMessage(QStringLiteral("Đã nạp %1 dòng × %2 cột").arg(out.size()).arg(outCols), 3500);
 }
 
+// Solver — Bộ giải tối ưu (Spec 50), bản 1: dò 1 ô biến để ô mục tiêu đạt Max/Min/Bằng giá trị.
+void MainWindow::solverDialog()
+{
+    QDialog dlg(this);
+    dlg.setWindowTitle(QStringLiteral("Bộ giải (Solver)"));
+    auto *form = new QFormLayout(&dlg);
+
+    const QModelIndex cur = m_view->currentIndex();
+    const QString curAddr = cur.isValid()
+        ? SpreadsheetModel::columnLabel(cur.column()) + QString::number(cur.row() + 1) : QStringLiteral("A1");
+    auto *objEdit = new QLineEdit(curAddr, &dlg);
+    auto *varEdit = new QLineEdit(&dlg);
+    varEdit->setPlaceholderText(QStringLiteral("vd B1"));
+    auto *goalBox = new QComboBox(&dlg);
+    goalBox->addItem(QStringLiteral("Lớn nhất"), int(solver::Goal::Max));
+    goalBox->addItem(QStringLiteral("Nhỏ nhất"), int(solver::Goal::Min));
+    goalBox->addItem(QStringLiteral("Bằng giá trị"), int(solver::Goal::Target));
+    auto *targetSpin = new QDoubleSpinBox(&dlg);
+    targetSpin->setRange(-1e12, 1e12); targetSpin->setDecimals(4); targetSpin->setEnabled(false);
+    connect(goalBox, QOverload<int>::of(&QComboBox::currentIndexChanged), &dlg, [goalBox, targetSpin](int){
+        targetSpin->setEnabled(solver::Goal(goalBox->currentData().toInt()) == solver::Goal::Target);
+    });
+    auto *loSpin = new QDoubleSpinBox(&dlg); loSpin->setRange(-1e12, 1e12); loSpin->setDecimals(4); loSpin->setValue(0);
+    auto *hiSpin = new QDoubleSpinBox(&dlg); hiSpin->setRange(-1e12, 1e12); hiSpin->setDecimals(4); hiSpin->setValue(100);
+
+    form->addRow(QStringLiteral("Ô mục tiêu:"), objEdit);
+    form->addRow(QStringLiteral("Mục tiêu:"), goalBox);
+    form->addRow(QStringLiteral("Giá trị (nếu Bằng):"), targetSpin);
+    form->addRow(QStringLiteral("Ô biến đổi:"), varEdit);
+    form->addRow(QStringLiteral("Cận dưới:"), loSpin);
+    form->addRow(QStringLiteral("Cận trên:"), hiSpin);
+    auto *box = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dlg);
+    box->button(QDialogButtonBox::Ok)->setText(QStringLiteral("Giải"));
+    box->button(QDialogButtonBox::Cancel)->setText(QStringLiteral("Hủy"));
+    connect(box, &QDialogButtonBox::accepted, &dlg, &QDialog::accept);
+    connect(box, &QDialogButtonBox::rejected, &dlg, &QDialog::reject);
+    form->addRow(box);
+    if (dlg.exec() != QDialog::Accepted) return;
+
+    int oRow, oCol, vRow, vCol;
+    if (!formularefs::parseCell(objEdit->text(), oRow, oCol)
+        || !formularefs::parseCell(varEdit->text(), vRow, vCol)) {
+        statusBar()->showMessage(QStringLiteral("Địa chỉ ô mục tiêu/biến không hợp lệ"), 3500);
+        return;
+    }
+    const auto goal = solver::Goal(goalBox->currentData().toInt());
+    const QString savedVar = m_model->data(m_model->index(vRow, vCol), Qt::EditRole).toString();
+    auto objAt = [this](int r, int c) {
+        bool okv = false; double v = m_model->cellValue(r, c).toDouble(&okv);
+        return okv ? v : 0.0;
+    };
+    auto f = [&](double x) {
+        m_model->setData(m_model->index(vRow, vCol), QString::number(x, 'g', 12), Qt::EditRole);
+        return objAt(oRow, oCol);
+    };
+    const double best = solver::optimize1D(f, loSpin->value(), hiSpin->value(), goal, targetSpin->value());
+    m_model->setData(m_model->index(vRow, vCol), QString::number(best, 'g', 12), Qt::EditRole);
+    const double objVal = objAt(oRow, oCol);
+    Q_UNUSED(savedVar);
+    statusBar()->showMessage(
+        QStringLiteral("Solver: %1 = %2 → ô mục tiêu = %3")
+            .arg(varEdit->text().toUpper()).arg(best, 0, 'g', 6).arg(objVal, 0, 'g', 6), 6000);
+}
+
 // ---------------------------------------------------------------- dải lệnh (Ribbon)
 // Giao diện kiểu Excel: tab Trang đầu / Chèn / Công thức / Dữ liệu / Xem; mỗi tab
 // gom lệnh thành nhóm có tiêu đề. Thay cho dãy thanh công cụ phẳng cũ.
@@ -2154,6 +2221,7 @@ void MainWindow::buildRibbon()
     m_ribbon->addSmallButton(QStringLiteral("wand"), QStringLiteral("Flash Fill"), [this] { flashFill(); });
     m_ribbon->beginGroup(QStringLiteral("Dự báo"));
     m_ribbon->addSmallButton(QStringLiteral("target"), QStringLiteral("Dò mục tiêu"), [this] { goalSeekDialog(); });
+    m_ribbon->addSmallButton(QStringLiteral("target"), QStringLiteral("Bộ giải (Solver)"), [this] { solverDialog(); });
     m_ribbon->addSmallButton(QStringLiteral("trending_up"), QStringLiteral("Dự báo xu hướng"), [this] { forecastSheet(); });
 
     m_ribbon->beginGroup(QStringLiteral("Bảo vệ & nhóm"));

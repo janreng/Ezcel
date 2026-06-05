@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v2.29.0 — Bộ giải tối ưu (Solver) (Spec 50)
+
+- Thẻ Dữ liệu thêm **Bộ giải (Solver)**: chọn **ô mục tiêu** đạt **Lớn nhất / Nhỏ nhất / Bằng giá trị** bằng cách tự dò **một ô biến** trong khoảng cho trước.
+- Mạnh hơn Dò mục tiêu (Goal Seek) ở chỗ làm được cả tối ưu Lớn nhất/Nhỏ nhất.
+
 ## v2.28.0 — Lấy & Biến đổi dữ liệu (CSV) (Spec 20)
 
 - Thẻ Dữ liệu thêm **Lấy & Biến đổi (CSV)**: chọn tệp CSV → **xem trước** → **chọn cột muốn giữ** và **bỏ dòng trống** → **Nạp** vào bảng từ ô đang chọn.
