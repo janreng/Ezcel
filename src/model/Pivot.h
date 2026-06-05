@@ -125,4 +125,94 @@ inline Result sum(const QVector<QVector<QString>> &grid,
     return aggregate(grid, t, l, b, r, rowCol, valCol, Agg::Sum);
 }
 
+// Nạp 1 bản ghi vào bucket (v = giá trị, ok = có phải số).
+inline void feedBucket(Bucket &g, double v, bool ok) {
+    ++g.rows;
+    if (ok) {
+        if (!g.hasNum) { g.maxV = g.minV = v; g.hasNum = true; }
+        else { g.maxV = qMax(g.maxV, v); g.minV = qMin(g.minV, v); }
+        g.sum += v; ++g.numCount;
+    }
+}
+
+// Sắp xếp danh sách nhãn tăng dần (toàn số -> theo số, còn lại -> theo chuỗi).
+inline void sortLabels(QStringList &labels) {
+    bool allNum = true;
+    for (const QString &k : labels) { bool ok = false; k.toDouble(&ok); if (!ok) { allNum = false; break; } }
+    std::sort(labels.begin(), labels.end(), [allNum](const QString &a, const QString &c) {
+        if (allNum) return a.toDouble() < c.toDouble();
+        return a.compare(c, Qt::CaseInsensitive) < 0;
+    });
+}
+
+// Bảng chéo 2 chiều.
+struct CrossResult {
+    QString rowField, colField, valueField;
+    Agg agg = Agg::Sum;
+    QStringList rowLabels, colLabels;
+    QVector<QVector<double>> values; // [hàng][cột]
+    QVector<double> rowTotals;       // tổng hợp theo từng hàng (qua mọi cột)
+    QVector<double> colTotals;       // tổng hợp theo từng cột (qua mọi hàng)
+    double grandTotal = 0.0;
+    bool valid = false;
+};
+
+// Gom nhóm 2 chiều: rowCol = trường hàng, colCol = trường cột, valCol = trường giá trị.
+// Ô [i][j] = giá trị tổng hợp của các bản ghi có (hàng=i, cột=j). Tổng hàng/cột tính trên
+// bucket của cả hàng/cả cột (đúng ngữ nghĩa TB/Max/Min, không phải cộng dồn các ô).
+inline CrossResult crosstab(const QVector<QVector<QString>> &grid,
+                            int t, int l, int b, int r,
+                            int rowCol, int colCol, int valCol, Agg agg)
+{
+    CrossResult res;
+    res.agg = agg;
+    if (t < 0 || t >= grid.size()) return res;
+    if (rowCol < l || rowCol > r || colCol < l || colCol > r || valCol < l || valCol > r) return res;
+
+    auto cell = [&](int row, int col) -> QString {
+        if (row < 0 || row >= grid.size()) return QString();
+        if (col < 0 || col >= grid[row].size()) return QString();
+        return grid[row][col].trimmed();
+    };
+    res.rowField = cell(t, rowCol);
+    res.colField = cell(t, colCol);
+    res.valueField = cell(t, valCol);
+
+    QHash<QString, QHash<QString, Bucket>> cells; // [rowKey][colKey]
+    QHash<QString, Bucket> rowB, colB;
+    Bucket grand;
+    QStringList rowOrder, colOrder;
+    for (int row = t + 1; row <= b && row < grid.size(); ++row) {
+        QString rk = cell(row, rowCol); if (rk.isEmpty()) rk = QStringLiteral("(trống)");
+        QString ck = cell(row, colCol); if (ck.isEmpty()) ck = QStringLiteral("(trống)");
+        if (!rowB.contains(rk)) rowOrder << rk;
+        if (!colB.contains(ck)) colOrder << ck;
+        bool ok = false; const double v = cell(row, valCol).toDouble(&ok);
+        feedBucket(cells[rk][ck], v, ok);
+        feedBucket(rowB[rk], v, ok);
+        feedBucket(colB[ck], v, ok);
+        feedBucket(grand, v, ok);
+    }
+    if (rowOrder.isEmpty() || colOrder.isEmpty()) return res;
+    sortLabels(rowOrder);
+    sortLabels(colOrder);
+    res.rowLabels = rowOrder;
+    res.colLabels = colOrder;
+
+    for (const QString &rk : rowOrder) {
+        QVector<double> line;
+        for (const QString &ck : colOrder) {
+            const auto &colMap = cells.value(rk);
+            line << (colMap.contains(ck) ? bucketValue(colMap.value(ck), agg) : 0.0);
+        }
+        res.values << line;
+        res.rowTotals << bucketValue(rowB.value(rk), agg);
+    }
+    for (const QString &ck : colOrder)
+        res.colTotals << bucketValue(colB.value(ck), agg);
+    res.grandTotal = bucketValue(grand, agg);
+    res.valid = true;
+    return res;
+}
+
 } // namespace pivot

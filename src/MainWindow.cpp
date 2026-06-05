@@ -1321,7 +1321,9 @@ void MainWindow::pivotTable()
     auto *pick = new QGridLayout();
     auto *cbRow = new QComboBox(&dlg);
     auto *cbVal = new QComboBox(&dlg);
-    for (int c = l; c <= r; ++c) { cbRow->addItem(header(c), c); cbVal->addItem(header(c), c); }
+    auto *cbCol = new QComboBox(&dlg);
+    cbCol->addItem(QStringLiteral("(không)"), -1); // -1 = bảng 1 chiều
+    for (int c = l; c <= r; ++c) { cbRow->addItem(header(c), c); cbVal->addItem(header(c), c); cbCol->addItem(header(c), c); }
     cbRow->setCurrentIndex(0);
     cbVal->setCurrentIndex(cbVal->count() > 1 ? 1 : 0);
     auto *cbAgg = new QComboBox(&dlg);
@@ -1330,10 +1332,12 @@ void MainWindow::pivotTable()
         cbAgg->addItem(pivot::aggName(a), int(a));
     pick->addWidget(new QLabel(QStringLiteral("Trường hàng (gom nhóm):")), 0, 0);
     pick->addWidget(cbRow, 0, 1);
-    pick->addWidget(new QLabel(QStringLiteral("Trường giá trị:")), 1, 0);
-    pick->addWidget(cbVal, 1, 1);
-    pick->addWidget(new QLabel(QStringLiteral("Hàm tổng hợp:")), 2, 0);
-    pick->addWidget(cbAgg, 2, 1);
+    pick->addWidget(new QLabel(QStringLiteral("Trường cột (bảng chéo):")), 1, 0);
+    pick->addWidget(cbCol, 1, 1);
+    pick->addWidget(new QLabel(QStringLiteral("Trường giá trị:")), 2, 0);
+    pick->addWidget(cbVal, 2, 1);
+    pick->addWidget(new QLabel(QStringLiteral("Hàm tổng hợp:")), 3, 0);
+    pick->addWidget(cbAgg, 3, 1);
     lay->addLayout(pick);
 
     auto *table = new QTableWidget(&dlg);
@@ -1342,29 +1346,59 @@ void MainWindow::pivotTable()
     table->horizontalHeader()->setStretchLastSection(true);
     lay->addWidget(table, 1);
 
+    auto numStr = [](double v) { return QString::number(v, 'g', 10); };
+    auto boldItem = [](const QString &s) {
+        auto *it = new QTableWidgetItem(s);
+        QFont f = it->font(); f.setBold(true); it->setFont(f);
+        return it;
+    };
     auto recompute = [=]() {
         const int rowCol = cbRow->currentData().toInt();
+        const int colCol = cbCol->currentData().toInt();
         const int valCol = cbVal->currentData().toInt();
         const auto agg = pivot::Agg(cbAgg->currentData().toInt());
-        const pivot::Result res = pivot::aggregate(grid, t, l, b, r, rowCol, valCol, agg);
-        table->setHorizontalHeaderLabels({ res.rowField.isEmpty() ? QStringLiteral("Nhãn") : res.rowField,
-                                           QStringLiteral("%1 %2").arg(pivot::aggName(agg), res.valueField) });
-        const int n = res.rowLabels.size();
-        table->setRowCount(res.valid ? n + 1 : 0);
-        for (int i = 0; i < n; ++i) {
-            table->setItem(i, 0, new QTableWidgetItem(res.rowLabels[i]));
-            table->setItem(i, 1, new QTableWidgetItem(QString::number(res.values[i], 'g', 10)));
+
+        if (colCol < 0) { // bảng 1 chiều
+            const pivot::Result res = pivot::aggregate(grid, t, l, b, r, rowCol, valCol, agg);
+            table->setColumnCount(2);
+            table->setHorizontalHeaderLabels({ res.rowField.isEmpty() ? QStringLiteral("Nhãn") : res.rowField,
+                                               QStringLiteral("%1 %2").arg(pivot::aggName(agg), res.valueField) });
+            const int n = res.rowLabels.size();
+            table->setRowCount(res.valid ? n + 1 : 0);
+            for (int i = 0; i < n; ++i) {
+                table->setItem(i, 0, new QTableWidgetItem(res.rowLabels[i]));
+                table->setItem(i, 1, new QTableWidgetItem(numStr(res.values[i])));
+            }
+            if (res.valid) {
+                table->setItem(n, 0, boldItem(QStringLiteral("Tổng cộng")));
+                table->setItem(n, 1, boldItem(numStr(res.grandTotal)));
+            }
+            return;
         }
-        if (res.valid) {
-            auto *tl = new QTableWidgetItem(QStringLiteral("Tổng cộng"));
-            QFont f = tl->font(); f.setBold(true); tl->setFont(f);
-            auto *tv = new QTableWidgetItem(QString::number(res.grandTotal, 'g', 10));
-            tv->setFont(f);
-            table->setItem(n, 0, tl);
-            table->setItem(n, 1, tv);
+
+        // bảng chéo 2 chiều
+        const pivot::CrossResult cr = pivot::crosstab(grid, t, l, b, r, rowCol, colCol, valCol, agg);
+        if (!cr.valid) { table->setRowCount(0); table->setColumnCount(2); return; }
+        const int nr = cr.rowLabels.size(), nc = cr.colLabels.size();
+        table->setColumnCount(nc + 2); // nhãn hàng + các cột + Tổng hàng
+        QStringList heads; heads << (cr.rowField.isEmpty() ? QStringLiteral("Nhãn") : cr.rowField);
+        for (const QString &cl : cr.colLabels) heads << cl;
+        heads << QStringLiteral("Tổng");
+        table->setHorizontalHeaderLabels(heads);
+        table->setRowCount(nr + 1);
+        for (int i = 0; i < nr; ++i) {
+            table->setItem(i, 0, new QTableWidgetItem(cr.rowLabels[i]));
+            for (int j = 0; j < nc; ++j)
+                table->setItem(i, j + 1, new QTableWidgetItem(numStr(cr.values[i][j])));
+            table->setItem(i, nc + 1, boldItem(numStr(cr.rowTotals[i])));
         }
+        table->setItem(nr, 0, boldItem(QStringLiteral("Tổng cộng")));
+        for (int j = 0; j < nc; ++j)
+            table->setItem(nr, j + 1, boldItem(numStr(cr.colTotals[j])));
+        table->setItem(nr, nc + 1, boldItem(numStr(cr.grandTotal)));
     };
     connect(cbRow, QOverload<int>::of(&QComboBox::currentIndexChanged), &dlg, [=](int){ recompute(); });
+    connect(cbCol, QOverload<int>::of(&QComboBox::currentIndexChanged), &dlg, [=](int){ recompute(); });
     connect(cbVal, QOverload<int>::of(&QComboBox::currentIndexChanged), &dlg, [=](int){ recompute(); });
     connect(cbAgg, QOverload<int>::of(&QComboBox::currentIndexChanged), &dlg, [=](int){ recompute(); });
     recompute();

@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v2.19.0 — Bảng tổng hợp: bảng chéo 2 chiều (Spec 41)
+
+- Bảng tổng hợp giờ chọn thêm **trường cột** để tạo **bảng chéo** hai chiều (ví dụ hàng = Vùng, cột = Quý, ô = tổng doanh thu).
+- Hiện đủ **tổng theo từng hàng, từng cột và tổng cộng**. Chọn "(không)" ở trường cột để quay lại bảng một chiều.
+
 ## v2.18.0 — Bảng tổng hợp: thêm hàm tổng hợp (Spec 41)
 
 - Bảng tổng hợp giờ chọn được **hàm tổng hợp**: Tổng, **Đếm**, **Trung bình**, **Lớn nhất**, **Nhỏ nhất** (trước chỉ có Tổng).

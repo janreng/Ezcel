@@ -90,6 +90,42 @@ int main() {
 
     ok(pivot::aggName(pivot::Agg::Average) == QStringLiteral("Trung bình"), "ten ham TB");
 
+    // ----- Bảng chéo 2 chiều (bản 3) -----
+    // Vùng/Quý/Doanh thu
+    QVector<QVector<QString>> gx = {
+        row({"Vùng", "Quý", "DT"}),
+        row({"Bắc", "Q1", "100"}),
+        row({"Bắc", "Q2", "40"}),
+        row({"Nam", "Q1", "50"}),
+        row({"Bắc", "Q1", "10"}),   // cộng dồn vào (Bắc,Q1)
+    };
+    pivot::CrossResult cr = pivot::crosstab(gx, 0, 0, 4, 2, 0, 1, 2, pivot::Agg::Sum);
+    ok(cr.valid, "crosstab hop le");
+    ok(cr.rowLabels.size() == 2, "2 hang (Bac,Nam)");
+    ok(cr.colLabels.size() == 2, "2 cot (Q1,Q2)");
+    ok(cr.rowField == QStringLiteral("Vùng") && cr.colField == QStringLiteral("Quý"), "ten truong hang/cot");
+    // rowLabels sắp xếp: Bắc, Nam ; colLabels: Q1, Q2
+    int iBac = cr.rowLabels.indexOf(QStringLiteral("Bắc"));
+    int iNam = cr.rowLabels.indexOf(QStringLiteral("Nam"));
+    int jQ1 = cr.colLabels.indexOf(QStringLiteral("Q1"));
+    int jQ2 = cr.colLabels.indexOf(QStringLiteral("Q2"));
+    ok(eq(cr.values[iBac][jQ1], 110), "(Bac,Q1) = 100+10 = 110");
+    ok(eq(cr.values[iBac][jQ2], 40), "(Bac,Q2) = 40");
+    ok(eq(cr.values[iNam][jQ1], 50), "(Nam,Q1) = 50");
+    ok(eq(cr.values[iNam][jQ2], 0), "(Nam,Q2) khong co = 0");
+    ok(eq(cr.rowTotals[iBac], 150), "tong hang Bac = 150");
+    ok(eq(cr.colTotals[jQ1], 160), "tong cot Q1 = 160");
+    ok(eq(cr.grandTotal, 200), "grand = 200");
+
+    // Crosstab với Max
+    pivot::CrossResult crm = pivot::crosstab(gx, 0, 0, 4, 2, 0, 1, 2, pivot::Agg::Max);
+    ok(eq(crm.values[iBac][jQ1], 100), "Max (Bac,Q1) = 100");
+    ok(eq(crm.rowTotals[iBac], 100), "Max hang Bac = 100");
+
+    // Tham số sai
+    pivot::CrossResult crb = pivot::crosstab(gx, 0, 0, 4, 2, 9, 1, 2, pivot::Agg::Sum);
+    ok(!crb.valid, "crosstab rowCol sai -> invalid");
+
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);
     return g_fail == 0 ? 0 : 1;
 }
