@@ -53,8 +53,8 @@ void ChartWidget::paintEvent(QPaintEvent *)
 
     // ----- Biểu đồ tròn (pie) -----
     if (m_type == Type::Pie) {
-        double sum = 0; for (double v : m_series.values) sum += qMax(0.0, v);
-        if (sum <= 0) return;
+        const QVector<double> angles = chart::pieAngles(m_series.values); // core đã kiểm thử
+        if (angles.isEmpty()) return;
         const int side = qMin(W - 180, H - 60);
         const QRectF pie(20, 36, qMax(80, side), qMax(80, side));
         static const QColor palette[] = {
@@ -63,20 +63,18 @@ void ChartWidget::paintEvent(QPaintEvent *)
         double start = 90.0; // bắt đầu từ trên, quay theo chiều kim đồng hồ
         const int legendX = int(pie.right()) + 24;
         int ly = int(pie.top());
-        for (int i = 0; i < n; ++i) {
-            const double frac = qMax(0.0, m_series.values[i]) / sum;
-            const double span = frac * 360.0;
+        for (int i = 0; i < angles.size(); ++i) {
+            const double span = angles[i];
             const QColor c = palette[i % 8];
             p.setPen(Qt::white); p.setBrush(c);
             p.drawPie(pie, int(start * 16), int(-span * 16));
             start -= span;
-            // chú giải
             p.setBrush(c); p.setPen(Qt::NoPen);
             p.drawRect(legendX, ly + 2, 12, 12);
             p.setPen(QColor(theme::TextPrimary));
             p.drawText(legendX + 18, ly + 12,
                        QStringLiteral("%1 (%2%)").arg(m_series.labels.value(i))
-                           .arg(QString::number(frac * 100, 'f', 1)));
+                           .arg(QString::number(span / 360.0 * 100, 'f', 1)));
             ly += 20;
         }
         return;

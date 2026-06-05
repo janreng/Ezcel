@@ -30,6 +30,15 @@ int main() {
     ok(chart::niceMax(120) == 200.0, "120 -> 200");
     ok(chart::niceMax(1000) == 1000.0, "1000 -> 1000");
 
+    // Góc quạt pie.
+    QVector<double> ang = chart::pieAngles({1, 1, 2}); // tổng 4 -> 90,90,180
+    ok(ang.size() == 3 && std::abs(ang[0] - 90) < 1e-9 && std::abs(ang[2] - 180) < 1e-9, "pie goc dung");
+    double tot = 0; for (double a : ang) tot += a;
+    ok(std::abs(tot - 360) < 1e-9, "pie tong 360");
+    ok(chart::pieAngles({0, 0}).isEmpty(), "tong 0 -> rong");
+    QVector<double> angNeg = chart::pieAngles({-5, 5}); // âm coi như 0 -> 0,360
+    ok(angNeg.size() == 2 && std::abs(angNeg[0]) < 1e-9 && std::abs(angNeg[1] - 360) < 1e-9, "am coi nhu 0");
+
     std::printf("\n%d passed, %d failed\n", g_pass, g_fail);
     return g_fail == 0 ? 0 : 1;
 }

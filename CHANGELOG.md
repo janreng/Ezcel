@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v2.15.0 — Biểu đồ tròn (Spec 19)
+
+- Thêm **Chèn → "Biểu đồ tròn"** (và menu Dữ liệu): vẽ **hình tròn chia múi** theo tỉ lệ, kèm **chú giải nhãn + phần trăm** từng phần — hợp xem cơ cấu/tỉ trọng.
+- Trọn bộ biểu đồ cơ bản: **cột, đường, tròn**.
+
 ## v2.14.0 — Biểu đồ đường (Spec 19)
 
 - Thêm **Chèn → "Biểu đồ đường"** (và menu Dữ liệu): vẽ **đường nối các điểm** kèm chấm tròn, trục và vạch lưới — hợp để xem xu hướng theo thời gian.

@@ -960,6 +960,7 @@ void MainWindow::buildMenus()
     data->addAction(QStringLiteral("Phân tích nhanh..."), this, &MainWindow::quickAnalysis);
     data->addAction(QStringLiteral("Biểu đồ cột..."), this, &MainWindow::insertColumnChart);
     data->addAction(QStringLiteral("Biểu đồ đường..."), this, &MainWindow::insertLineChart);
+    data->addAction(QStringLiteral("Biểu đồ tròn..."), this, &MainWindow::insertPieChart);
     data->addSeparator();
     {
         QAction *aGroup = data->addAction(QStringLiteral("Gom nhóm hàng"), this, &MainWindow::groupRows);
@@ -1261,6 +1262,7 @@ void MainWindow::openChart(int type, const QString &title)
 
 void MainWindow::insertColumnChart() { openChart(int(ChartWidget::Type::Column), QStringLiteral("Biểu đồ cột")); }
 void MainWindow::insertLineChart() { openChart(int(ChartWidget::Type::Line), QStringLiteral("Biểu đồ đường")); }
+void MainWindow::insertPieChart() { openChart(int(ChartWidget::Type::Pie), QStringLiteral("Biểu đồ tròn")); }
 
 // Chụp vùng chọn (Camera, Spec 47): render các ô đang chọn ra ảnh vào clipboard.
 void MainWindow::cameraSnapshot()
@@ -1780,6 +1782,7 @@ void MainWindow::buildRibbon()
     m_ribbon->beginGroup(QStringLiteral("Biểu đồ"));
     m_ribbon->addButton(QStringLiteral("chart_column"), QStringLiteral("Biểu đồ\ncột"), [this] { insertColumnChart(); });
     m_ribbon->addButton(QStringLiteral("chart_line"), QStringLiteral("Biểu đồ\nđường"), [this] { insertLineChart(); });
+    m_ribbon->addButton(QStringLiteral("target"), QStringLiteral("Biểu đồ\ntròn"), [this] { insertPieChart(); });
     m_ribbon->beginGroup(QStringLiteral("Bảng"));
     m_ribbon->addButton(QStringLiteral("table"), QStringLiteral("Tổng hợp\nnhanh"), [this] { quickPivot(); });
     m_ribbon->addButton(QStringLiteral("table"), QStringLiteral("Định dạng\nlà bảng"), [this] { formatAsTable(); });

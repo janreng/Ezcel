@@ -40,6 +40,18 @@ inline Series extractSeries(const QVector<QVector<QString>> &grid, int t, int l,
     return s;
 }
 
+// Góc quạt (độ) cho biểu đồ tròn: value/tổng × 360. Giá trị âm coi như 0.
+// Tổng <= 0 -> vector rỗng. Thuần để kiểm thử.
+inline QVector<double> pieAngles(const QVector<double> &values)
+{
+    double sum = 0;
+    for (double v : values) sum += (v > 0 ? v : 0);
+    QVector<double> out;
+    if (sum <= 0) return out;
+    for (double v : values) out << (v > 0 ? v : 0) / sum * 360.0;
+    return out;
+}
+
 // Cận trên "đẹp" cho trục: làm tròn lên bội của 1/2/5 × lũy thừa 10.
 inline double niceMax(double maxVal)
 {
