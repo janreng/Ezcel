@@ -1,5 +1,11 @@
 # Lịch sử thay đổi
 
+## v2.17.0 — Bảng tổng hợp (Spec 41)
+
+- **Chèn → "Bảng tổng hợp"** (hoặc menu Dữ liệu): chọn vùng có dòng tiêu đề → gom nhóm theo **một trường (hàng)** và tính **tổng** một trường số.
+- Cửa sổ cho chọn trường hàng / trường giá trị bằng danh sách thả xuống, kết quả cập nhật ngay kèm dòng **Tổng cộng**.
+- Nút **Sao chép bảng** để dán kết quả ra nơi khác.
+
 ## v2.16.0 — Biểu đồ: đổi tiêu đề, sao chép & lưu ảnh (Spec 19)
 
 - Cửa sổ biểu đồ thêm 3 nút: **Đổi tiêu đề** (đặt tên cho biểu đồ), **Sao chép ảnh** (vào clipboard, dán Ctrl+V), **Lưu ảnh...** (xuất PNG).

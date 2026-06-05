@@ -113,6 +113,7 @@ private slots:
     void insertColumnChart(); // vẽ biểu đồ cột cho vùng chọn (Spec 19)
     void insertLineChart();   // vẽ biểu đồ đường cho vùng chọn (Spec 19)
     void insertPieChart();    // vẽ biểu đồ tròn cho vùng chọn (Spec 19)
+    void pivotTable();        // bảng tổng hợp / PivotTable cho vùng chọn (Spec 41)
     void showFindReplace();   // định nghĩa ở MainWindowFind.cpp
     void showCondFormat();    // định dạng có điều kiện (MainWindowFind.cpp)
     void showDataValidation();// kiểm tra dữ liệu (MainWindowFind.cpp)

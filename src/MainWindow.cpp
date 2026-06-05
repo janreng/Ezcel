@@ -32,6 +32,7 @@
 #include "model/QuickAnalysis.h"
 #include "model/FormControl.h"
 #include "model/Chart.h"
+#include "model/Pivot.h"
 #include "view/ChartWidget.h"
 #include "ui/RecentFiles.h"
 #include <functional>
@@ -956,6 +957,7 @@ void MainWindow::buildMenus()
             statusBar()->showMessage(QStringLiteral("Đã khóa ô đã chọn"), 2000);
         });
     }
+    data->addAction(QStringLiteral("Bảng tổng hợp..."), this, &MainWindow::pivotTable);
     data->addAction(QStringLiteral("Bảng tổng hợp nhanh..."), this, &MainWindow::quickPivot);
     data->addAction(QStringLiteral("Phân tích nhanh..."), this, &MainWindow::quickAnalysis);
     data->addAction(QStringLiteral("Biểu đồ cột..."), this, &MainWindow::insertColumnChart);
@@ -1292,6 +1294,90 @@ void MainWindow::openChart(int type, const QString &title)
 void MainWindow::insertColumnChart() { openChart(int(ChartWidget::Type::Column), QStringLiteral("Biểu đồ cột")); }
 void MainWindow::insertLineChart() { openChart(int(ChartWidget::Type::Line), QStringLiteral("Biểu đồ đường")); }
 void MainWindow::insertPieChart() { openChart(int(ChartWidget::Type::Pie), QStringLiteral("Biểu đồ tròn")); }
+
+// Bảng tổng hợp / PivotTable (Spec 41), bản 1: gom nhóm 1 trường + tính TỔNG.
+void MainWindow::pivotTable()
+{
+    int t, l, b, r;
+    if (!selectionBox(t, l, b, r)) {
+        statusBar()->showMessage(QStringLiteral("Hãy chọn vùng có tiêu đề (hàng đầu là tên cột)"), 3500);
+        return;
+    }
+    if (b - t < 1 || r - l < 1) {
+        statusBar()->showMessage(QStringLiteral("Cần ít nhất 2 cột (nhãn + số) và 1 dòng dữ liệu dưới tiêu đề"), 4000);
+        return;
+    }
+    const auto &grid = m_model->grid();
+    auto header = [&](int col) -> QString {
+        QString h = (t < grid.size() && col < grid[t].size()) ? grid[t][col].trimmed() : QString();
+        return h.isEmpty() ? QStringLiteral("Cột %1").arg(col + 1) : h;
+    };
+
+    QDialog dlg(this);
+    dlg.setWindowTitle(QStringLiteral("Bảng tổng hợp"));
+    dlg.resize(460, 460);
+    auto *lay = new QVBoxLayout(&dlg);
+
+    auto *pick = new QGridLayout();
+    auto *cbRow = new QComboBox(&dlg);
+    auto *cbVal = new QComboBox(&dlg);
+    for (int c = l; c <= r; ++c) { cbRow->addItem(header(c), c); cbVal->addItem(header(c), c); }
+    cbRow->setCurrentIndex(0);
+    cbVal->setCurrentIndex(cbVal->count() > 1 ? 1 : 0);
+    pick->addWidget(new QLabel(QStringLiteral("Trường hàng (gom nhóm):")), 0, 0);
+    pick->addWidget(cbRow, 0, 1);
+    pick->addWidget(new QLabel(QStringLiteral("Trường giá trị (tính tổng):")), 1, 0);
+    pick->addWidget(cbVal, 1, 1);
+    lay->addLayout(pick);
+
+    auto *table = new QTableWidget(&dlg);
+    table->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    table->setColumnCount(2);
+    table->horizontalHeader()->setStretchLastSection(true);
+    lay->addWidget(table, 1);
+
+    auto recompute = [=]() {
+        const int rowCol = cbRow->currentData().toInt();
+        const int valCol = cbVal->currentData().toInt();
+        const pivot::Result res = pivot::sum(grid, t, l, b, r, rowCol, valCol);
+        table->setHorizontalHeaderLabels({ res.rowField.isEmpty() ? QStringLiteral("Nhãn") : res.rowField,
+                                           QStringLiteral("Tổng %1").arg(res.valueField) });
+        const int n = res.rowLabels.size();
+        table->setRowCount(res.valid ? n + 1 : 0);
+        for (int i = 0; i < n; ++i) {
+            table->setItem(i, 0, new QTableWidgetItem(res.rowLabels[i]));
+            table->setItem(i, 1, new QTableWidgetItem(QString::number(res.values[i], 'g', 10)));
+        }
+        if (res.valid) {
+            auto *tl = new QTableWidgetItem(QStringLiteral("Tổng cộng"));
+            QFont f = tl->font(); f.setBold(true); tl->setFont(f);
+            auto *tv = new QTableWidgetItem(QString::number(res.grandTotal, 'g', 10));
+            tv->setFont(f);
+            table->setItem(n, 0, tl);
+            table->setItem(n, 1, tv);
+        }
+    };
+    connect(cbRow, QOverload<int>::of(&QComboBox::currentIndexChanged), &dlg, [=](int){ recompute(); });
+    connect(cbVal, QOverload<int>::of(&QComboBox::currentIndexChanged), &dlg, [=](int){ recompute(); });
+    recompute();
+
+    auto *box = new QDialogButtonBox(&dlg);
+    auto *btnCopy = box->addButton(QStringLiteral("Sao chép bảng"), QDialogButtonBox::ActionRole);
+    box->addButton(QDialogButtonBox::Close);
+    connect(box, &QDialogButtonBox::rejected, &dlg, &QDialog::reject);
+    connect(btnCopy, &QPushButton::clicked, &dlg, [=] {
+        QString tsv;
+        for (int row = 0; row < table->rowCount(); ++row) {
+            QStringList cols;
+            for (int col = 0; col < table->columnCount(); ++col)
+                cols << (table->item(row, col) ? table->item(row, col)->text() : QString());
+            tsv += cols.join(QLatin1Char('\t')) + QLatin1Char('\n');
+        }
+        QApplication::clipboard()->setText(tsv);
+    });
+    lay->addWidget(box);
+    dlg.exec();
+}
 
 // Chụp vùng chọn (Camera, Spec 47): render các ô đang chọn ra ảnh vào clipboard.
 void MainWindow::cameraSnapshot()
@@ -1813,8 +1899,9 @@ void MainWindow::buildRibbon()
     m_ribbon->addButton(QStringLiteral("chart_line"), QStringLiteral("Biểu đồ\nđường"), [this] { insertLineChart(); });
     m_ribbon->addButton(QStringLiteral("target"), QStringLiteral("Biểu đồ\ntròn"), [this] { insertPieChart(); });
     m_ribbon->beginGroup(QStringLiteral("Bảng"));
-    m_ribbon->addButton(QStringLiteral("table"), QStringLiteral("Tổng hợp\nnhanh"), [this] { quickPivot(); });
+    m_ribbon->addButton(QStringLiteral("table"), QStringLiteral("Bảng\ntổng hợp"), [this] { pivotTable(); });
     m_ribbon->addButton(QStringLiteral("table"), QStringLiteral("Định dạng\nlà bảng"), [this] { formatAsTable(); });
+    m_ribbon->addSmallButton(QStringLiteral("table"), QStringLiteral("Tổng hợp nhanh"), [this] { quickPivot(); });
     m_ribbon->addSmallButton(QStringLiteral("sigma"), QStringLiteral("Hàng tổng"), [this] { addTableTotalRow(); });
     m_ribbon->addSmallButton(QStringLiteral("cell_delete"), QStringLiteral("Bỏ định dạng bảng"), [this] { m_model->clearTables(); });
     m_ribbon->beginGroup(QStringLiteral("Lọc"));
