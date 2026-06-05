@@ -1254,6 +1254,35 @@ void MainWindow::openChart(int type, const QString &title)
     auto *cw = new ChartWidget(&dlg);
     cw->setData(s, title, ChartWidget::Type(type));
     lay->addWidget(cw, 1);
+
+    // Hàng nút phụ trợ: đổi tiêu đề / sao chép ảnh / lưu ảnh.
+    auto *tools = new QHBoxLayout();
+    auto curTitle = QSharedPointer<QString>::create(title);
+    auto *btnTitle = new QPushButton(QStringLiteral("Đổi tiêu đề..."), &dlg);
+    connect(btnTitle, &QPushButton::clicked, &dlg, [this, cw, s, type, curTitle, &dlg] {
+        bool ok = false;
+        const QString nt = QInputDialog::getText(&dlg, QStringLiteral("Tiêu đề biểu đồ"),
+            QStringLiteral("Tiêu đề:"), QLineEdit::Normal, *curTitle, &ok);
+        if (ok && !nt.trimmed().isEmpty()) { *curTitle = nt.trimmed(); cw->setData(s, *curTitle, ChartWidget::Type(type)); }
+    });
+    auto *btnCopy = new QPushButton(QStringLiteral("Sao chép ảnh"), &dlg);
+    connect(btnCopy, &QPushButton::clicked, &dlg, [cw] {
+        QPixmap pm(cw->size()); cw->render(&pm);
+        QApplication::clipboard()->setPixmap(pm);
+    });
+    auto *btnSave = new QPushButton(QStringLiteral("Lưu ảnh..."), &dlg);
+    connect(btnSave, &QPushButton::clicked, &dlg, [cw, &dlg] {
+        const QString p = QFileDialog::getSaveFileName(&dlg, QStringLiteral("Lưu ảnh biểu đồ"),
+            QStringLiteral("bieu_do.png"), QStringLiteral("Ảnh PNG (*.png)"));
+        if (p.isEmpty()) return;
+        QPixmap pm(cw->size()); cw->render(&pm); pm.save(p);
+    });
+    tools->addWidget(btnTitle);
+    tools->addWidget(btnCopy);
+    tools->addWidget(btnSave);
+    tools->addStretch();
+    lay->addLayout(tools);
+
     auto *box = new QDialogButtonBox(QDialogButtonBox::Close, &dlg);
     connect(box, &QDialogButtonBox::rejected, &dlg, &QDialog::reject);
     lay->addWidget(box);

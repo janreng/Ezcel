@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v2.16.0 — Biểu đồ: đổi tiêu đề, sao chép & lưu ảnh (Spec 19)
+
+- Cửa sổ biểu đồ thêm 3 nút: **Đổi tiêu đề** (đặt tên cho biểu đồ), **Sao chép ảnh** (vào clipboard, dán Ctrl+V), **Lưu ảnh...** (xuất PNG).
+- Áp dụng cho cả 3 loại biểu đồ (cột/đường/tròn).
+
 ## v2.15.0 — Biểu đồ tròn (Spec 19)
 
 - Thêm **Chèn → "Biểu đồ tròn"** (và menu Dữ liệu): vẽ **hình tròn chia múi** theo tỉ lệ, kèm **chú giải nhãn + phần trăm** từng phần — hợp xem cơ cấu/tỉ trọng.
