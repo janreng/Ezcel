@@ -2095,6 +2095,30 @@ void MainWindow::buildRibbon()
     m_dbSettings = m_ribbon->addMenuButton(QStringLiteral("settings"), QStringLiteral("Cài đặt ▾"), m_mSettings);
     m_dbHelp = m_ribbon->addMenuButton(QStringLiteral("help"), QStringLiteral("Trợ giúp ▾"), m_mHelp);
 
+    // ============================= BỐ CỤC TRANG =============================
+    m_ribbon->beginTab(QStringLiteral("Bố cục trang"));
+    m_ribbon->beginGroup(QStringLiteral("In"));
+    m_ribbon->addButton(QStringLiteral("printer"), QStringLiteral("In\ntrang"), [this] { printSheet(); });
+    m_ribbon->beginGroup(QStringLiteral("Cố định khung"));
+    m_ribbon->addSmallButton(QStringLiteral("table"), QStringLiteral("Cố định tại ô"), [this] {
+        QModelIndex cur = m_view->currentIndex();
+        m_freeze->apply(cur.isValid() ? cur.row() : 0, cur.isValid() ? cur.column() : 0);
+    });
+    m_ribbon->addSmallButton(QStringLiteral("table"), QStringLiteral("Cố định hàng đầu"), [this] { m_freeze->apply(1, 0); });
+    m_ribbon->addSmallButton(QStringLiteral("table"), QStringLiteral("Cố định cột đầu"), [this] { m_freeze->apply(0, 1); });
+    m_ribbon->addSmallButton(QStringLiteral("cell_delete"), QStringLiteral("Bỏ cố định"), [this] { m_freeze->apply(0, 0); });
+    m_ribbon->beginGroup(QStringLiteral("Tùy chọn trang"));
+    m_ribbon->addSmallButton(QStringLiteral("eye"), QStringLiteral("Ẩn/hiện đường lưới"), [this] { m_view->setShowGrid(!m_view->showGrid()); });
+
+    // ============================= XEM LẠI =============================
+    m_ribbon->beginTab(QStringLiteral("Xem lại"));
+    m_ribbon->beginGroup(QStringLiteral("Kiểm tra"));
+    m_ribbon->addButton(QStringLiteral("shield_check"), QStringLiteral("Kiểm tra\ntrợ năng"), [this] { checkAccessibility(); });
+    m_ribbon->addSmallButton(QStringLiteral("bar_chart"), QStringLiteral("Phân tích nhanh"), [this] { quickAnalysis(); });
+    m_ribbon->beginGroup(QStringLiteral("Sửa"));
+    m_ribbon->addSmallButton(QStringLiteral("find"), QStringLiteral("Tìm & Thay thế"), [this] { showFindReplace(); });
+    m_ribbon->addSmallButton(QStringLiteral("table"), QStringLiteral("Chụp vùng chọn"), [this] { cameraSnapshot(); });
+
     m_ribbon->finish();
 
     if (auto *lay = qobject_cast<QVBoxLayout *>(centralWidget()->layout()))

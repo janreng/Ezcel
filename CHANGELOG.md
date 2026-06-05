@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v2.27.0 — Thêm thẻ Bố cục trang & Xem lại
+
+- Thêm 2 thẻ trên dải lệnh cho giống bố cục quen thuộc: **Bố cục trang** (In, cố định hàng/cột, ẩn/hiện đường lưới) và **Xem lại** (kiểm tra trợ năng, phân tích nhanh, tìm & thay thế, chụp vùng chọn).
+- Các lệnh này đã có sẵn, nay được gom đúng thẻ cho dễ tìm.
+
 ## v2.26.0 — Hộp thoại Định dạng ô
 
 - Thêm **hộp thoại Định dạng ô** gộp đủ trong 4 thẻ: **Phông** (kiểu/cỡ chữ, đậm/nghiêng/gạch chân, màu chữ & nền), **Căn lề** (ngang/dọc, tự xuống dòng), **Số** (chọn kiểu hiển thị), **Viền**.
