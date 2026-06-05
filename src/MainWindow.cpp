@@ -29,7 +29,9 @@
 #include "model/NumberFormat.h"
 #include "ui/TellMe.h"
 #include "model/Accessibility.h"
+#include "model/QuickAnalysis.h"
 #include <functional>
+#include <QCursor>
 #include "model/Stats.h"
 #include "model/AutoSum.h"
 #include "ui/Shortcuts.h"
@@ -942,6 +944,7 @@ void MainWindow::buildMenus()
         });
     }
     data->addAction(QStringLiteral("Bảng tổng hợp nhanh..."), this, &MainWindow::quickPivot);
+    data->addAction(QStringLiteral("Phân tích nhanh..."), this, &MainWindow::quickAnalysis);
     data->addSeparator();
     {
         QAction *aGroup = data->addAction(QStringLiteral("Gom nhóm hàng"), this, &MainWindow::groupRows);
@@ -1155,6 +1158,38 @@ void MainWindow::showShortcuts()
     lay->addWidget(box);
 
     dlg.exec();
+}
+
+// Phân tích nhanh (Spec 40): gợi ý thao tác cho vùng chọn rồi áp khi người dùng chọn.
+void MainWindow::quickAnalysis()
+{
+    int t, l, b, r;
+    if (!selectionBox(t, l, b, r)) {
+        statusBar()->showMessage(QStringLiteral("Hãy chọn vùng để phân tích nhanh"), 2500);
+        return;
+    }
+    const QStringList sugg = quickanalysis::suggest(m_model->grid(), t, l, b, r);
+    QMenu menu(this);
+    for (const QString &s : sugg) {
+        menu.addAction(s, this, [this, s, t, l, b, r] {
+            if (s == QStringLiteral("Tổng cuối vùng")) {
+                const int totalRow = b + 1;
+                if (totalRow >= m_model->rowCount())
+                    m_model->insertRows(m_model->rowCount(), totalRow - m_model->rowCount() + 1);
+                for (int c = l; c <= r; ++c)
+                    m_model->setData(m_model->index(totalRow, c),
+                        tbl::sumFormula(SpreadsheetModel::columnLabel(c), t + 1, b + 1), Qt::EditRole);
+            } else if (s == QStringLiteral("Thanh dữ liệu")) {
+                m_model->addDataBar(cond::DataBar{t, l, b, r, QStringLiteral("#638EC6")});
+            } else if (s == QStringLiteral("Thang màu")) {
+                m_model->addColorScale(cond::ColorScale{t, l, b, r,
+                    QStringLiteral("#63BE7B"), QStringLiteral("#FFEB84"), QStringLiteral("#F8696B")});
+            } else if (s == QStringLiteral("Định dạng là bảng")) {
+                formatAsTable();
+            }
+        });
+    }
+    menu.exec(QCursor::pos());
 }
 
 // Kiểm tra trợ năng (Spec 41): quét lưới + ô gộp, liệt kê vấn đề cho người dùng.
@@ -1603,6 +1638,7 @@ void MainWindow::buildRibbon()
     m_ribbon->beginGroup(QStringLiteral("Chỉnh sửa"));
     m_ribbon->addButton(QStringLiteral("sigma"), QStringLiteral("AutoSum"), [this] { autoSum(); });
     m_ribbon->addSmallButton(QStringLiteral("find"), QStringLiteral("Tìm & Thay thế"), [this] { showFindReplace(); });
+    m_ribbon->addSmallButton(QStringLiteral("bar_chart"), QStringLiteral("Phân tích nhanh"), [this] { quickAnalysis(); });
     m_dbEdit = m_ribbon->addMenuButton(QStringLiteral("pencil"), QStringLiteral("Sửa ▾"), m_mEdit);
     m_dbStruct = m_ribbon->addMenuButton(QStringLiteral("rows"), QStringLiteral("Hàng/Cột ▾"), m_mStruct);
 

@@ -106,6 +106,7 @@ private slots:
     void showShortcuts();     // hộp thoại bảng phím tắt (Spec 23)
     void showWorkbookStats(); // hộp thoại thống kê bảng tính (Spec 57)
     void checkAccessibility();// kiểm tra trợ năng: quét vấn đề trình đọc màn hình (Spec 41)
+    void quickAnalysis();     // phân tích nhanh: gợi ý thao tác cho vùng chọn (Spec 40)
     void showFindReplace();   // định nghĩa ở MainWindowFind.cpp
     void showCondFormat();    // định dạng có điều kiện (MainWindowFind.cpp)
     void showDataValidation();// kiểm tra dữ liệu (MainWindowFind.cpp)

@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v2.9.0 — Phân tích nhanh (Spec 40)
+
+- Thêm **Phân tích nhanh** (nút ở thẻ Trang đầu + menu Dữ liệu): chọn vùng rồi bấm, hiện menu gợi ý áp ngay — **Tổng cuối vùng**, **Thanh dữ liệu**, **Thang màu**, **Định dạng là bảng**.
+- Gợi ý theo dữ liệu: vùng có số mới hiện các lựa chọn tính toán/tô màu; vùng chữ chỉ gợi ý định dạng bảng.
+
 ## v2.8.0 — Kiểm tra trợ năng (Spec 41)
 
 - Thêm **Trợ giúp → "Kiểm tra trợ năng"** (và nút ở thẻ Xem): quét bảng tính và liệt kê các vấn đề gây khó cho người khiếm thị / trình đọc màn hình.
