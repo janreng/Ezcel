@@ -31,6 +31,8 @@
 #include "model/Accessibility.h"
 #include "model/QuickAnalysis.h"
 #include "model/FormControl.h"
+#include "model/Chart.h"
+#include "view/ChartWidget.h"
 #include "ui/RecentFiles.h"
 #include <functional>
 #include <QCursor>
@@ -956,6 +958,7 @@ void MainWindow::buildMenus()
     }
     data->addAction(QStringLiteral("Bảng tổng hợp nhanh..."), this, &MainWindow::quickPivot);
     data->addAction(QStringLiteral("Phân tích nhanh..."), this, &MainWindow::quickAnalysis);
+    data->addAction(QStringLiteral("Biểu đồ cột..."), this, &MainWindow::insertColumnChart);
     data->addSeparator();
     {
         QAction *aGroup = data->addAction(QStringLiteral("Gom nhóm hàng"), this, &MainWindow::groupRows);
@@ -1228,6 +1231,30 @@ void MainWindow::showBackstage()
     right->addWidget(new QLabel(QStringLiteral("Ezcel %1 — bảng tính gọn nhẹ C++/Qt6").arg(ver), rightW));
     h->addWidget(rightW, 1);
 
+    dlg.exec();
+}
+
+// Biểu đồ cột (Spec 19): rút chuỗi từ vùng chọn rồi vẽ trong cửa sổ (tự vẽ QPainter).
+void MainWindow::insertColumnChart()
+{
+    int t, l, b, r;
+    if (!selectionBox(t, l, b, r)) {
+        statusBar()->showMessage(QStringLiteral("Hãy chọn vùng dữ liệu (cột nhãn + cột số) để vẽ biểu đồ"), 3000);
+        return;
+    }
+    const chart::Series s = chart::extractSeries(m_model->grid(), t, l, b, r);
+    if (s.values.isEmpty()) { statusBar()->showMessage(QStringLiteral("Vùng chọn rỗng"), 2000); return; }
+
+    QDialog dlg(this);
+    dlg.setWindowTitle(QStringLiteral("Biểu đồ cột"));
+    dlg.resize(580, 430);
+    auto *lay = new QVBoxLayout(&dlg);
+    auto *cw = new ChartWidget(&dlg);
+    cw->setData(s, QStringLiteral("Biểu đồ cột"));
+    lay->addWidget(cw, 1);
+    auto *box = new QDialogButtonBox(QDialogButtonBox::Close, &dlg);
+    connect(box, &QDialogButtonBox::rejected, &dlg, &QDialog::reject);
+    lay->addWidget(box);
     dlg.exec();
 }
 
@@ -1746,6 +1773,8 @@ void MainWindow::buildRibbon()
 
     // ============================= CHÈN =============================
     m_ribbon->beginTab(QStringLiteral("Chèn"));
+    m_ribbon->beginGroup(QStringLiteral("Biểu đồ"));
+    m_ribbon->addButton(QStringLiteral("chart_column"), QStringLiteral("Biểu đồ\ncột"), [this] { insertColumnChart(); });
     m_ribbon->beginGroup(QStringLiteral("Bảng"));
     m_ribbon->addButton(QStringLiteral("table"), QStringLiteral("Tổng hợp\nnhanh"), [this] { quickPivot(); });
     m_ribbon->addButton(QStringLiteral("table"), QStringLiteral("Định dạng\nlà bảng"), [this] { formatAsTable(); });

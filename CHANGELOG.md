@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v2.13.0 — Biểu đồ cột (Spec 19)
+
+- Thêm **Chèn → "Biểu đồ cột"** (và menu Dữ liệu): chọn vùng (cột nhãn + cột số) rồi vẽ ra **biểu đồ cột** có trục, vạch lưới, giá trị trên đầu cột và nhãn dưới.
+- Vùng 1 cột số thì dùng số thứ tự làm nhãn; ô không phải số tính bằng 0. Trục tự chọn mốc tròn đẹp.
+
 ## v2.12.0 — Trang Tệp (Spec 51)
 
 - Thêm **nút "Trang Tệp"** (đầu thẻ Trang đầu) mở trang lớn gọn gàng: **Mới / Mở / Lưu / Lưu thành / In / Thoát** + danh sách **Tệp gần đây** (mở lại bằng nháy đúp) + dòng giới thiệu phiên bản.

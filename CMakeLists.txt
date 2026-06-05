@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
-project(Ezcel VERSION 2.12.0 LANGUAGES CXX)
+project(Ezcel VERSION 2.13.0 LANGUAGES CXX)
 
 # Bản port C++ của Ezcel (gốc Python/PySide6). Dùng Qt6 Widgets + MinGW.
 set(CMAKE_CXX_STANDARD 20)
@@ -79,6 +79,7 @@ add_library(ezcel_view STATIC src/view/MergeSpans.cpp src/view/MergeSpans.h
     src/view/CopyVisible.cpp src/view/CopyVisible.h
     src/view/FreezePanes.cpp src/view/FreezePanes.h
     src/view/FormulaHint.cpp src/view/FormulaHint.h
+    src/view/ChartWidget.cpp src/view/ChartWidget.h
     src/ui/RibbonBar.cpp src/ui/RibbonBar.h)
 target_include_directories(ezcel_view PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 # Delegate dùng hằng role + hàm thuần của model (sparkline...) -> phụ thuộc ezcel_model.
@@ -208,6 +209,10 @@ add_executable(test_recentfiles tests/test_recentfiles.cpp)
 target_include_directories(test_recentfiles PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(test_recentfiles PRIVATE Qt6::Core)
 
+add_executable(test_chart tests/test_chart.cpp)
+target_include_directories(test_chart PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_link_libraries(test_chart PRIVATE Qt6::Core)
+
 add_executable(test_headermenu tests/test_headermenu.cpp src/view/HeaderMenu.cpp)
 target_include_directories(test_headermenu PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(test_headermenu PRIVATE Qt6::Core)
@@ -276,6 +281,7 @@ add_test(NAME accessibility COMMAND test_accessibility)
 add_test(NAME quickanalysis COMMAND test_quickanalysis)
 add_test(NAME formcontrol COMMAND test_formcontrol)
 add_test(NAME recentfiles COMMAND test_recentfiles)
+add_test(NAME chart COMMAND test_chart)
 
 # --- Sort (sắp xếp vùng dữ liệu) — module logic thuần (Qt Core) -> static lib + test.
 add_library(ezcel_sort STATIC src/model/Sort.cpp src/model/Sort.h)
