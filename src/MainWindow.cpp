@@ -1986,7 +1986,10 @@ void MainWindow::solverDialog()
         ? SpreadsheetModel::columnLabel(cur.column()) + QString::number(cur.row() + 1) : QStringLiteral("A1");
     auto *objEdit = new QLineEdit(curAddr, &dlg);
     auto *varEdit = new QLineEdit(&dlg);
-    varEdit->setPlaceholderText(QStringLiteral("vd B1"));
+    varEdit->setPlaceholderText(QStringLiteral("vd B1, B2, B3 (cách nhau dấu phẩy)"));
+    auto *consEdit = new QPlainTextEdit(&dlg);
+    consEdit->setPlaceholderText(QStringLiteral("Ràng buộc, mỗi dòng 1: C1 <= 10   |   C2 >= 0   |   C3 = 5"));
+    consEdit->setMaximumHeight(90);
     auto *goalBox = new QComboBox(&dlg);
     goalBox->addItem(QStringLiteral("Lớn nhất"), int(solver::Goal::Max));
     goalBox->addItem(QStringLiteral("Nhỏ nhất"), int(solver::Goal::Min));
@@ -2002,9 +2005,10 @@ void MainWindow::solverDialog()
     form->addRow(QStringLiteral("Ô mục tiêu:"), objEdit);
     form->addRow(QStringLiteral("Mục tiêu:"), goalBox);
     form->addRow(QStringLiteral("Giá trị (nếu Bằng):"), targetSpin);
-    form->addRow(QStringLiteral("Ô biến đổi:"), varEdit);
-    form->addRow(QStringLiteral("Cận dưới:"), loSpin);
-    form->addRow(QStringLiteral("Cận trên:"), hiSpin);
+    form->addRow(QStringLiteral("Các ô biến đổi:"), varEdit);
+    form->addRow(QStringLiteral("Cận dưới (chung):"), loSpin);
+    form->addRow(QStringLiteral("Cận trên (chung):"), hiSpin);
+    form->addRow(QStringLiteral("Ràng buộc:"), consEdit);
     auto *box = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dlg);
     box->button(QDialogButtonBox::Ok)->setText(QStringLiteral("Giải"));
     box->button(QDialogButtonBox::Cancel)->setText(QStringLiteral("Hủy"));
@@ -2013,29 +2017,70 @@ void MainWindow::solverDialog()
     form->addRow(box);
     if (dlg.exec() != QDialog::Accepted) return;
 
-    int oRow, oCol, vRow, vCol;
-    if (!formularefs::parseCell(objEdit->text(), oRow, oCol)
-        || !formularefs::parseCell(varEdit->text(), vRow, vCol)) {
-        statusBar()->showMessage(QStringLiteral("Địa chỉ ô mục tiêu/biến không hợp lệ"), 3500);
+    int oRow, oCol;
+    if (!formularefs::parseCell(objEdit->text(), oRow, oCol)) {
+        statusBar()->showMessage(QStringLiteral("Địa chỉ ô mục tiêu không hợp lệ"), 3500);
         return;
     }
+    // Phân tích danh sách ô biến.
+    QVector<QPair<int,int>> vars;
+    for (const QString &tok : varEdit->text().split(QLatin1Char(','), Qt::SkipEmptyParts)) {
+        int vr, vc;
+        if (formularefs::parseCell(tok, vr, vc)) vars << qMakePair(vr, vc);
+    }
+    if (vars.isEmpty()) { statusBar()->showMessage(QStringLiteral("Chưa nhập ô biến hợp lệ"), 3500); return; }
+
+    // Phân tích ràng buộc: "ô op giá_trị" (op ∈ <=, >=, =).
+    struct Cons { int row, col; int op; double val; }; // op: 0 = <=, 1 = >=, 2 = =
+    QVector<Cons> cons;
+    for (QString line : consEdit->toPlainText().split(QLatin1Char('\n'), Qt::SkipEmptyParts)) {
+        line = line.trimmed(); if (line.isEmpty()) continue;
+        int op = -1, opLen = 0, pos = -1;
+        if ((pos = line.indexOf(QStringLiteral("<="))) >= 0) { op = 0; opLen = 2; }
+        else if ((pos = line.indexOf(QStringLiteral(">="))) >= 0) { op = 1; opLen = 2; }
+        else if ((pos = line.indexOf(QLatin1Char('='))) >= 0) { op = 2; opLen = 1; }
+        if (op < 0) continue;
+        int cr, cc; bool okv = false;
+        const double cv = line.mid(pos + opLen).trimmed().toDouble(&okv);
+        if (okv && formularefs::parseCell(line.left(pos), cr, cc)) cons << Cons{cr, cc, op, cv};
+    }
+
     const auto goal = solver::Goal(goalBox->currentData().toInt());
-    const QString savedVar = m_model->data(m_model->index(vRow, vCol), Qt::EditRole).toString();
-    auto objAt = [this](int r, int c) {
+    const double tgt = targetSpin->value();
+    auto cellVal = [this](int r, int c) {
         bool okv = false; double v = m_model->cellValue(r, c).toDouble(&okv);
         return okv ? v : 0.0;
     };
-    auto f = [&](double x) {
-        m_model->setData(m_model->index(vRow, vCol), QString::number(x, 'g', 12), Qt::EditRole);
-        return objAt(oRow, oCol);
+    const int n = vars.size();
+    std::vector<double> lo(n, loSpin->value()), hi(n, hiSpin->value()), x0(n, 0.0);
+    for (int i = 0; i < n; ++i) x0[i] = cellVal(vars[i].first, vars[i].second);
+
+    auto f = [&](const std::vector<double> &xs) {
+        for (int i = 0; i < n; ++i)
+            m_model->setData(m_model->index(vars[i].first, vars[i].second),
+                             QString::number(xs[i], 'g', 12), Qt::EditRole);
+        const double obj = cellVal(oRow, oCol);
+        double viol = 0.0;
+        for (const Cons &c : cons) {
+            const double cv = cellVal(c.row, c.col);
+            if (c.op == 0) viol += qMax(0.0, cv - c.val);       // <=
+            else if (c.op == 1) viol += qMax(0.0, c.val - cv);  // >=
+            else viol += qAbs(cv - c.val);                      // =
+        }
+        if (viol <= 0.0) return obj;
+        const double pen = 1e6 * (1.0 + viol);
+        if (goal == solver::Goal::Max) return obj - pen;
+        if (goal == solver::Goal::Min) return obj + pen;
+        return tgt + pen; // Target: đẩy xa giá trị đích để bị phạt
     };
-    const double best = solver::optimize1D(f, loSpin->value(), hiSpin->value(), goal, targetSpin->value());
-    m_model->setData(m_model->index(vRow, vCol), QString::number(best, 'g', 12), Qt::EditRole);
-    const double objVal = objAt(oRow, oCol);
-    Q_UNUSED(savedVar);
+
+    const std::vector<double> best = solver::optimizeND(f, lo, hi, goal, tgt, x0);
+    for (int i = 0; i < n; ++i)
+        m_model->setData(m_model->index(vars[i].first, vars[i].second),
+                         QString::number(best[i], 'g', 12), Qt::EditRole);
     statusBar()->showMessage(
-        QStringLiteral("Solver: %1 = %2 → ô mục tiêu = %3")
-            .arg(varEdit->text().toUpper()).arg(best, 0, 'g', 6).arg(objVal, 0, 'g', 6), 6000);
+        QStringLiteral("Solver xong: ô mục tiêu = %1 (%2 biến, %3 ràng buộc)")
+            .arg(cellVal(oRow, oCol), 0, 'g', 6).arg(n).arg(cons.size()), 6000);
 }
 
 // ---------------------------------------------------------------- dải lệnh (Ribbon)

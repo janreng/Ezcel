@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v2.30.0 — Solver: nhiều ô biến & ràng buộc (Spec 50)
+
+- Bộ giải nay dò được **nhiều ô biến cùng lúc** và nhận **ràng buộc** dạng `ô <= / >= / = giá trị` (mỗi dòng một ràng buộc).
+- Nghiệm tìm được tôn trọng ràng buộc; nhập danh sách ô biến cách nhau dấu phẩy, đặt cận chung.
+
 ## v2.29.0 — Bộ giải tối ưu (Solver) (Spec 50)
 
 - Thẻ Dữ liệu thêm **Bộ giải (Solver)**: chọn **ô mục tiêu** đạt **Lớn nhất / Nhỏ nhất / Bằng giá trị** bằng cách tự dò **một ô biến** trong khoảng cho trước.

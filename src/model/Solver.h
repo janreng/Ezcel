@@ -1,6 +1,7 @@
 #pragma once
 #include <functional>
 #include <cmath>
+#include <vector>
 
 // Solver — Bộ giải tối ưu (Spec 50), bản 1: tối ưu hàm 1 biến trên một khoảng.
 // Logic thuần để kiểm thử (không phụ thuộc model/Qt). UI nối f(x) = giá trị ô mục tiêu
@@ -47,6 +48,42 @@ inline double optimize1D(const std::function<double(double)> &f, double lo, doub
     }
     const double x = (a + b) / 2.0;
     return score(f(x), goal, target) >= bestS ? x : bestX;
+}
+
+// Tối ưu NHIỀU biến bằng coordinate descent: lặp nhiều vòng, mỗi vòng tối ưu lần lượt
+// TỪNG biến (giữ các biến khác cố định) qua optimize1D. Hàm `f` nhận vector biến và đã
+// gộp sẵn phần PHẠT ràng buộc (vi phạm -> trả giá trị rất xấu theo goal) — xem makePenalty.
+// `x0` là điểm khởi đầu (kẹp vào [lo,hi]); trả nghiệm tốt nhất tìm được.
+inline std::vector<double> optimizeND(
+    const std::function<double(const std::vector<double> &)> &f,
+    const std::vector<double> &lo, const std::vector<double> &hi,
+    Goal goal, double target = 0.0, std::vector<double> x0 = {}, int rounds = 12)
+{
+    const int n = int(lo.size());
+    std::vector<double> x = x0.size() == size_t(n) ? x0 : std::vector<double>(n, 0.0);
+    for (int i = 0; i < n; ++i) {
+        if (x[i] < lo[i]) x[i] = lo[i];
+        if (x[i] > hi[i]) x[i] = hi[i];
+    }
+    if (n == 0) return x;
+
+    double prev = score(f(x), goal, target);
+    for (int round = 0; round < rounds; ++round) {
+        for (int i = 0; i < n; ++i) {
+            auto g1 = [&](double v) {
+                const double keep = x[i];
+                x[i] = v;
+                const double r = f(x);
+                x[i] = keep;
+                return r;
+            };
+            x[i] = optimize1D(g1, lo[i], hi[i], goal, target);
+        }
+        const double now = score(f(x), goal, target);
+        if (std::fabs(now - prev) < 1e-9) break; // hội tụ
+        prev = now;
+    }
+    return x;
 }
 
 } // namespace solver
