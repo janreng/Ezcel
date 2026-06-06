@@ -152,6 +152,7 @@ private:
     void applyFormatAttr(const QString &key, const QVariant &value); // áp 1 thuộc tính cho vùng chọn
     void applyBorder(const QString &mode);      // kẻ viền vùng chọn (Spec 06)
     void formatCellsDialog();                   // hộp thoại Định dạng ô (Format Cells, Ctrl+1)
+    void highlightCellsDialog();                // tô nổi bật ô theo quy tắc (Spec 13)
     void updateFormulaRefHighlight(const QString &text); // viền nét đứt ô tham chiếu (point mode)
     void openFormulaEditor();                   // mở rộng thanh công thức (soạn nhiều dòng)
     void dataQueryImport();                     // Lấy & Biến đổi dữ liệu CSV (Power Query, Spec 20)

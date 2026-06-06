@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v2.31.0 — Tô nổi bật ô theo điều kiện (Spec 13)
+
+- Định dạng có điều kiện thêm **Tô theo điều kiện**: chọn vùng → điều kiện **Lớn hơn / Nhỏ hơn / Bằng / Nằm giữa / Chứa chữ** + giá trị → tô nền màu cho các ô thỏa.
+- Tự chọn màu nền (mặc định vàng nhạt như Excel).
+
 ## v2.30.0 — Solver: nhiều ô biến & ràng buộc (Spec 50)
 
 - Bộ giải nay dò được **nhiều ô biến cùng lúc** và nhận **ràng buộc** dạng `ô <= / >= / = giá trị` (mỗi dòng một ràng buộc).

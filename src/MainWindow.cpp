@@ -2233,6 +2233,7 @@ void MainWindow::buildRibbon()
     m_ribbon->addSmallButton(QStringLiteral("chart_line"), QStringLiteral("Đường"), [this] { insertSparkline(int(sparkline::Type::Line)); });
     m_ribbon->addSmallButton(QStringLiteral("chart_column"), QStringLiteral("Cột"), [this] { insertSparkline(int(sparkline::Type::Column)); });
     m_ribbon->beginGroup(QStringLiteral("Định dạng có điều kiện"));
+    m_ribbon->addSmallButton(QStringLiteral("cond_format"), QStringLiteral("Tô theo điều kiện"), [this] { highlightCellsDialog(); });
     m_ribbon->addSmallButton(QStringLiteral("cond_format"), QStringLiteral("Thanh dữ liệu"), [this] { addDataBarDialog(); });
     m_ribbon->addSmallButton(QStringLiteral("cond_format"), QStringLiteral("Thang màu"), [this] { addColorScaleDialog(); });
     m_ribbon->beginGroup(QStringLiteral("Văn bản"));

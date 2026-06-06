@@ -4,6 +4,7 @@
 #include "MainWindow.h"
 #include "model/SpreadsheetModel.h"
 #include "model/BorderOps.h"
+#include "model/HighlightRule.h"
 #include "ui/Theme.h"
 
 #include <QTableView>
@@ -19,6 +20,9 @@
 #include <QPushButton>
 #include <QDialogButtonBox>
 #include <QSharedPointer>
+#include <QLineEdit>
+#include <QLabel>
+#include <QStatusBar>
 
 using Format = SpreadsheetModel::Format;
 
@@ -153,6 +157,70 @@ void MainWindow::formatCellsDialog()
     const QString bd = bdBox->currentData().toString();
     if (!bd.isEmpty()) applyBorder(bd); // viền áp riêng (đặt theo từng ô)
     m_view->viewport()->update();
+}
+
+// Tô nổi bật ô theo quy tắc (Highlight Cells Rules, Spec 13): tô nền các ô trong vùng chọn
+// thỏa điều kiện (>, <, =, nằm giữa, chứa chữ).
+void MainWindow::highlightCellsDialog()
+{
+    int t, l, b, r;
+    if (!selectionBox(t, l, b, r)) return;
+
+    QDialog dlg(this);
+    dlg.setWindowTitle(QStringLiteral("Tô nổi bật ô theo điều kiện"));
+    auto *form = new QFormLayout(&dlg);
+    auto *opBox = new QComboBox(&dlg);
+    opBox->addItem(QStringLiteral("Lớn hơn"), int(hlrule::Op::Greater));
+    opBox->addItem(QStringLiteral("Nhỏ hơn"), int(hlrule::Op::Less));
+    opBox->addItem(QStringLiteral("Bằng"), int(hlrule::Op::Equal));
+    opBox->addItem(QStringLiteral("Nằm giữa"), int(hlrule::Op::Between));
+    opBox->addItem(QStringLiteral("Chứa chữ"), int(hlrule::Op::Contains));
+    auto *v1 = new QLineEdit(&dlg);
+    auto *v2 = new QLineEdit(&dlg); v2->setEnabled(false);
+    auto *lblV1 = new QLabel(QStringLiteral("Giá trị:"), &dlg);
+    auto *lblV2 = new QLabel(QStringLiteral("Đến:"), &dlg);
+    auto refresh = [opBox, v2, lblV1, v1](int){
+        const auto op = hlrule::Op(opBox->currentData().toInt());
+        v2->setEnabled(op == hlrule::Op::Between);
+        v1->setPlaceholderText(op == hlrule::Op::Contains ? QStringLiteral("chuỗi cần tìm")
+                                                          : QStringLiteral("số"));
+    };
+    connect(opBox, QOverload<int>::of(&QComboBox::currentIndexChanged), &dlg, refresh);
+    refresh(0);
+    auto bg = QSharedPointer<QString>::create(QStringLiteral("#FFEB9C")); // vàng nhạt như Excel
+    auto *colorBtn = new QPushButton(QStringLiteral("Màu nền..."), &dlg);
+    colorBtn->setStyleSheet(QStringLiteral("background:%1;").arg(*bg));
+    connect(colorBtn, &QPushButton::clicked, &dlg, [&dlg, bg, colorBtn]{
+        QColor c = QColorDialog::getColor(QColor(*bg), &dlg, QStringLiteral("Màu nền tô"));
+        if (c.isValid()) { *bg = c.name(); colorBtn->setStyleSheet(QStringLiteral("background:%1;").arg(*bg)); }
+    });
+    form->addRow(QStringLiteral("Điều kiện:"), opBox);
+    form->addRow(lblV1, v1);
+    form->addRow(lblV2, v2);
+    form->addRow(colorBtn);
+    auto *box = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dlg);
+    box->button(QDialogButtonBox::Ok)->setText(QStringLiteral("Áp dụng"));
+    box->button(QDialogButtonBox::Cancel)->setText(QStringLiteral("Hủy"));
+    connect(box, &QDialogButtonBox::accepted, &dlg, &QDialog::accept);
+    connect(box, &QDialogButtonBox::rejected, &dlg, &QDialog::reject);
+    form->addRow(box);
+    if (dlg.exec() != QDialog::Accepted) return;
+
+    const auto op = hlrule::Op(opBox->currentData().toInt());
+    const double a = v1->text().trimmed().toDouble();
+    const double bb = v2->text().trimmed().toDouble();
+    const QString text = v1->text();
+    int hit = 0;
+    for (int row = t; row <= b; ++row)
+        for (int col = l; col <= r; ++col) {
+            const QString cellTxt = m_model->data(m_model->index(row, col), Qt::DisplayRole).toString();
+            if (hlrule::matches(cellTxt, op, a, bb, text)) {
+                Format f; f.insert(QStringLiteral("bg"), *bg);
+                m_model->setFormat(row, col, row, col, f);
+                ++hit;
+            }
+        }
+    statusBar()->showMessage(QStringLiteral("Đã tô %1 ô thỏa điều kiện").arg(hit), 4000);
 }
 
 // Kẻ viền cho vùng chọn (Spec 06). mode: all/outline/top/bottom/left/right/none.
