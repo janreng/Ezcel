@@ -23,6 +23,7 @@
 #include <QLineEdit>
 #include <QLabel>
 #include <QStatusBar>
+#include <QSpinBox>
 
 using Format = SpreadsheetModel::Format;
 
@@ -221,6 +222,73 @@ void MainWindow::highlightCellsDialog()
             }
         }
     statusBar()->showMessage(QStringLiteral("Đã tô %1 ô thỏa điều kiện").arg(hit), 4000);
+}
+
+// Tô N ô số lớn/nhỏ nhất trong vùng chọn (Top/Bottom N, Spec 13).
+void MainWindow::highlightTopBottom()
+{
+    int t, l, b, r;
+    if (!selectionBox(t, l, b, r)) return;
+    QStringList cells; QVector<QPair<int,int>> pos;
+    for (int row = t; row <= b; ++row)
+        for (int col = l; col <= r; ++col) {
+            cells << m_model->data(m_model->index(row, col), Qt::DisplayRole).toString();
+            pos << qMakePair(row, col);
+        }
+
+    QDialog dlg(this);
+    dlg.setWindowTitle(QStringLiteral("Tô Top/Bottom N"));
+    auto *form = new QFormLayout(&dlg);
+    auto *nSpin = new QSpinBox(&dlg); nSpin->setRange(1, 9999); nSpin->setValue(10);
+    auto *modeBox = new QComboBox(&dlg);
+    modeBox->addItem(QStringLiteral("Lớn nhất (Top)"), true);
+    modeBox->addItem(QStringLiteral("Nhỏ nhất (Bottom)"), false);
+    auto bg = QSharedPointer<QString>::create(QStringLiteral("#C6EFCE")); // xanh lá nhạt như Excel
+    auto *colorBtn = new QPushButton(QStringLiteral("Màu nền..."), &dlg);
+    colorBtn->setStyleSheet(QStringLiteral("background:%1;").arg(*bg));
+    connect(colorBtn, &QPushButton::clicked, &dlg, [&dlg, bg, colorBtn]{
+        QColor c = QColorDialog::getColor(QColor(*bg), &dlg, QStringLiteral("Màu nền"));
+        if (c.isValid()) { *bg = c.name(); colorBtn->setStyleSheet(QStringLiteral("background:%1;").arg(*bg)); }
+    });
+    form->addRow(QStringLiteral("Số ô N:"), nSpin);
+    form->addRow(QStringLiteral("Kiểu:"), modeBox);
+    form->addRow(colorBtn);
+    auto *box = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dlg);
+    box->button(QDialogButtonBox::Ok)->setText(QStringLiteral("Áp dụng"));
+    box->button(QDialogButtonBox::Cancel)->setText(QStringLiteral("Hủy"));
+    connect(box, &QDialogButtonBox::accepted, &dlg, &QDialog::accept);
+    connect(box, &QDialogButtonBox::rejected, &dlg, &QDialog::reject);
+    form->addRow(box);
+    if (dlg.exec() != QDialog::Accepted) return;
+
+    const QSet<int> sel = hlrule::topN(cells, nSpin->value(), modeBox->currentData().toBool());
+    for (int i : sel) {
+        Format f; f.insert(QStringLiteral("bg"), *bg);
+        m_model->setFormat(pos[i].first, pos[i].second, pos[i].first, pos[i].second, f);
+    }
+    statusBar()->showMessage(QStringLiteral("Đã tô %1 ô").arg(sel.size()), 4000);
+}
+
+// Tô các ô có giá trị TRÙNG LẶP trong vùng chọn (Spec 13).
+void MainWindow::highlightDuplicates()
+{
+    int t, l, b, r;
+    if (!selectionBox(t, l, b, r)) return;
+    QStringList cells; QVector<QPair<int,int>> pos;
+    for (int row = t; row <= b; ++row)
+        for (int col = l; col <= r; ++col) {
+            cells << m_model->data(m_model->index(row, col), Qt::DisplayRole).toString();
+            pos << qMakePair(row, col);
+        }
+    const QColor c = QColorDialog::getColor(QColor(QStringLiteral("#FFC7CE")), this,
+        QStringLiteral("Màu nền cho ô trùng lặp")); // đỏ nhạt như Excel
+    if (!c.isValid()) return;
+    const QSet<int> sel = hlrule::duplicates(cells);
+    for (int i : sel) {
+        Format f; f.insert(QStringLiteral("bg"), c.name());
+        m_model->setFormat(pos[i].first, pos[i].second, pos[i].first, pos[i].second, f);
+    }
+    statusBar()->showMessage(QStringLiteral("Đã tô %1 ô trùng lặp").arg(sel.size()), 4000);
 }
 
 // Kẻ viền cho vùng chọn (Spec 06). mode: all/outline/top/bottom/left/right/none.

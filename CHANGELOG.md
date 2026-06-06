@@ -1,5 +1,10 @@
 # Lịch sử thay đổi
 
+## v2.32.0 — Tô Top/Bottom N & giá trị trùng lặp (Spec 13)
+
+- Định dạng có điều kiện thêm **Top/Bottom N**: tô **N ô lớn nhất hoặc nhỏ nhất** trong vùng chọn.
+- Thêm **Giá trị trùng lặp**: tô các ô có giá trị lặp lại (không phân biệt hoa thường).
+
 ## v2.31.0 — Tô nổi bật ô theo điều kiện (Spec 13)
 
 - Định dạng có điều kiện thêm **Tô theo điều kiện**: chọn vùng → điều kiện **Lớn hơn / Nhỏ hơn / Bằng / Nằm giữa / Chứa chữ** + giá trị → tô nền màu cho các ô thỏa.
