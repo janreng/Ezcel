@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v2.32.1 — Sửa lỗi kéo thu nhỏ cửa sổ
+
+- Sửa lỗi **không kéo thu nhỏ cửa sổ lại được**: trước đây dải lệnh dài chặn không cho thu hẹp cửa sổ. Nay khi cửa sổ hẹp hơn dải lệnh, dải lệnh tự hiện **thanh cuộn ngang** thay vì chặn — kéo cạnh/góc thu nhỏ cửa sổ thoải mái.
+
 ## v2.32.0 — Tô Top/Bottom N & giá trị trùng lặp (Spec 13)
 
 - Định dạng có điều kiện thêm **Top/Bottom N**: tô **N ô lớn nhất hoặc nhỏ nhất** trong vùng chọn.

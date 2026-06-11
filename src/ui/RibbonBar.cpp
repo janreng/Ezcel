@@ -11,6 +11,7 @@
 #include <QMenu>
 #include <QIcon>
 #include <QSize>
+#include <QScrollArea>
 
 RibbonBar::RibbonBar(QWidget *parent) : QTabWidget(parent)
 {
@@ -41,12 +42,24 @@ void RibbonBar::closeCurrentTab()
 void RibbonBar::beginTab(const QString &title)
 {
     closeCurrentTab();
-    m_tabContent = new QWidget(this);
+    m_tabContent = new QWidget;
     m_tabContent->setStyleSheet(QStringLiteral("background: %1;").arg(theme::RibbonBg));
     m_tabLay = new QHBoxLayout(m_tabContent);
     m_tabLay->setContentsMargins(6, 4, 6, 2);
     m_tabLay->setSpacing(0);
-    m_tabIndex = addTab(m_tabContent, title);
+
+    // Bọc nội dung tab trong vùng cuộn ngang: khi kéo cửa sổ hẹp hơn dải lệnh,
+    // hiện thanh cuộn ngang thay vì ép bề rộng tối thiểu của cả ứng dụng — nếu
+    // không, dải lệnh dài sẽ chặn không cho thu nhỏ cửa sổ lại.
+    auto *scroll = new QScrollArea(this);
+    scroll->setWidget(m_tabContent);
+    scroll->setWidgetResizable(true);
+    scroll->setFrameShape(QFrame::NoFrame);
+    scroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    scroll->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    scroll->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
+    scroll->viewport()->setStyleSheet(QStringLiteral("background: %1;").arg(theme::RibbonBg));
+    m_tabIndex = addTab(scroll, title);
     m_groupOpen = false;
     m_groupGrid = nullptr;
     m_col = 0;
