@@ -214,6 +214,9 @@ MainWindow::MainWindow(QWidget *parent)
     // Ctrl+1: mở hộp thoại Định dạng ô (như Excel).
     auto *fmtSh = new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_1), this);
     connect(fmtSh, &QShortcut::activated, this, [this] { formatCellsDialog(); });
+    // Ctrl+Shift+V: mở hộp thoại Dán đặc biệt (bổ sung cho Ctrl+Alt+V trên menu).
+    auto *pasteSpSh = new QShortcut(QKeySequence(QStringLiteral("Ctrl+Shift+V")), this);
+    connect(pasteSpSh, &QShortcut::activated, this, [this] { pasteSpecial(); });
 
     auto *central = new QWidget(this);
     auto *lay = new QVBoxLayout(central);

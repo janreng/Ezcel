@@ -1,5 +1,9 @@
 # Lịch sử thay đổi
 
+## v2.32.2 — Phím tắt Ctrl+Shift+V cho Dán đặc biệt
+
+- Thêm phím tắt **Ctrl+Shift+V** để mở nhanh **Dán đặc biệt** (phép tính cộng/trừ/nhân/chia, bỏ qua ô trống, chuyển vị hàng ↔ cột). Vẫn dùng được Ctrl+Alt+V như cũ.
+
 ## v2.32.1 — Sửa lỗi kéo thu nhỏ cửa sổ
 
 - Sửa lỗi **không kéo thu nhỏ cửa sổ lại được**: trước đây dải lệnh dài chặn không cho thu hẹp cửa sổ. Nay khi cửa sổ hẹp hơn dải lệnh, dải lệnh tự hiện **thanh cuộn ngang** thay vì chặn — kéo cạnh/góc thu nhỏ cửa sổ thoải mái.
